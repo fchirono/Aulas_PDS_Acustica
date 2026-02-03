@@ -1,0 +1,39 @@
+\section{Escrevendo Sinais em Arquivos {\tt .WAV}}
+
+No Processamento Digital de Sinais, tratamos sinais de áudio manipulando suas representações numéricas em um computador digital, que normalmente armazena os dados como vetores de números de ponto flutuante. No entanto, muitas vezes é muito ilustrativo ouvir esses sinais, e portanto é necessário gerar um sinal acústico real.
+
+Uma maneira de gerar sinais de áudio é salvá-los como arquivos Wave, compatível com diversos programas e aparelhos de som. Este é um padrão de formato de arquivo de áudio usado para armazenar um fluxo de bits de áudio, normalmente áudio não comprimido codificado em formato de modulação por código de pulso linear (\emph{Linear Pulse Code Modulation}, ou LPCM), similarmente ao método usado para armazenar música em CDs. Tais arquivos são geralmente reconhecidos por sua extensão {\tt .wav}. Uma versão muito popular para arquivos Wave armazena cada amostra como um valor inteiro de {\tt N\_bits} com sinal (positivo/negativo) -- o primeiro bit contém o sinal e não é usado para armazenar dados de amplitude. Desta forma, as amplitudes máxima e mínima que uma amostra Wave pode assumir são dadas por $\pm (2^{(N\_bits-1)}-1)$; por exemplo, áudio de CD utiliza 16 bits por amostra.
+
+No entanto, dados de áudio são frequentemente manipulados usando representação de ponto flutuante (como arrays Numpy), e geralmente são normalizados para ter suas amplitudes máxima e mínima permitidas iguais a $\pm 1.0$: valores acima de $+1.0$ e abaixo de $-1.0$ são armazenados como $\pm 1.0$, e o sinal torna-se ``clipado'' (limitado). Portanto, para converter um array Numpy em um arquivo Wave com qualidade de CD é necessário mudar seu tipo de dado de {\tt float} para {\tt int16} e renormalizar seus valores de amplitude de $\pm 1.0$ (ponto flutuante) para $\pm (2^{(N\_bits-1)}-1)$ (inteiro).
+
+O módulo {\tt scipy.io.wavfile} permite ler e escrever arquivos Wave, uma vez que os dados foram convertidos para o tipo correto. Vamos agora escrever um arquivo contendo a onda senoidal que geramos antes como um Wave codificado em 16 bits.
+
+\textbf{IMPORTANTE}: Note que esta onda senoidal possui a amplitude máxima permitida para um sinal Wave, e portanto o som reproduzido será \textbf{MUITO ALTO!} Lembre-se de diminuir o volume do seu sistema de reprodução de som (fones de ouvido ou alto-falantes do computador) antes de reproduzir este arquivo, e depois aumente o volume até atingir um nível confortável.
+
+\begin{lstlisting}[frame=single]
+N_bits = 16         # Numero de bits
+
+wav_pico = 2**(N_bits-1) - 1    # Amplitude de pico da amostra wav
+
+# converte o tipo da variavel para int de 16 bits e normaliza as amplitudes para 'wav_peak'
+wav_amostras = np.int16(x_seno * wav_pico)
+
+# Escreve um arquivo chamado 'seno.wav', na frequencia de amostragem 'fs', 
+# contendo os dados dentro de 'wav_amostras'
+wavfile.write('seno.wav', fs, wav_amostras)
+\end{lstlisting}
+
+O mesmo arquivo pode ser lido de volta, convertido de volta para um array Numpy de 64 bits (normalizado para $\pm1$), e reproduzido usando {\tt sounddevice}.
+
+Tente reproduzir a onda senoidal e veja se ela soa como você esperaria. Tente também gerar um arquivo Wave com o ruído branco Gaussiano (lembre-se de limitar sua amplitude a $\pm 1$!) e ouça-o também.
+
+\begin{lstlisting}[frame=single]
+# Le o arquivo 'seno.wav'
+fs_2, wav_amostras_2 = wavfile.read('seno.wav')
+
+# Normaliza a amplitude para +/- 1 e muda o tipo de dado para float 64 bits
+x_seno_2 = np.float64(wav_amostras_2 / wav_pico)
+
+# Reproduz valores lidos de 'seno.wav', CUIDADO - Verifique o volume!!!
+sd.play(x_seno_2, fs_2)
+\end{lstlisting}

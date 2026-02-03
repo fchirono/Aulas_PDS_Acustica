@@ -1,0 +1,141 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+\usepackage{graphicx}
+%\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage[caption=false]{subfig}  % pacote para subfloats
+
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use the 'listings' package to add code and the 'color' package to generate the highlights
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% set it to Python language highlighting
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% set size of fonts
+	breaklines=true,				% set automatic line breaking
+	linewidth=\textwidth,			% set size of code box
+	showstringspaces=false}			% show spaces as underscores only inside strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais e Aplicações em Acústica\\ Soluções para Tutorial 2 - Sinais e Sistemas}
+\author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	%\setcounter{section}{1}
+	\section{Preliminares de Python}
+	\setcounter{subsection}{2}
+	\subsection{Operações com Sinais}
+	
+	A onda senoidal pode ser gerada usando o mesmo código mostrado no Tutorial 1. Qualquer frequência abaixo de $f_s/2$ deve estar correta, mas lembre-se de ajustar a escala de tempo dos seus gráficos para que os períodos da onda senoidal sejam claramente visíveis. Para gerar o sinal de ruído branco, use a função {\tt numpy.random.randn}.
+	
+	Como exemplo, a Figura \ref{fig:sinais1} mostra uma onda senoidal de 200 Hz com amplitude unitária e um sinal de ruído branco; a Figura \ref{fig:signals2} mostra a soma, multiplicação, raiz quadrada e quadrado desses mesmos sinais.
+	
+	\begin{figure}
+		\centering
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{onda_senoidal.png}
+			\label{fig:onda_senoidal}
+			}
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{ruido_branco.png}
+			\label{fig:ruido_branco}
+			}
+		\caption{\protect\subref{fig:onda_senoidal} Sinal tipo onda senoidal e \protect\subref{fig:ruido_branco} sinal ruído branco.}
+		\label{fig:sinais1}
+	\end{figure}
+	
+	\begin{figure}
+		\centering
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{sinais_soma.png}
+			\label{fig:sinais_soma}
+			}
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{sinais_mult.png}
+			\label{fig:sinais_mult}
+			} \\
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{sinais_raiz.png}
+			\label{fig:sinais_raiz}
+			}
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{sinais_ao_quadrado.png}
+			\label{fig:sinais_ao_quadrado}
+			}
+		\caption{\protect\subref{fig:sinais_soma} Soma, \protect\subref{fig:sinais_mult} multiplicação, \protect\subref{fig:sinais_raiz} raiz quadrada e \protect\subref{fig:sinais_ao_quadrado} quadrado dos sinais mostrados na Figura \ref{fig:sinais1}.}
+		\label{fig:signals2}
+	\end{figure}
+	
+	
+	\section{Sistemas}
+	\subsection{Sistemas Variantes/Invariantes no Tempo}
+	Os impulsos podem ser gerados criando um vetor de zeros e atribuindo o valor 1 à $n$-ésima amostra; veja a função {\tt numpy.zeros}. Este não é o único método disponível, mas é provavelmente o mais simples.
+	
+	A Figura \ref{fig:teste_tempo} exibe os impulsos e as saídas do sistema quando esses sinais são aplicados a\\ {\tt Tutorial2.sistema1}. Como uma entrada $x[n]$ gera uma saída $y[n]$, mas uma entrada deslocada no tempo $x[n-K]$ \textbf{não} gera uma saída deslocada no tempo $y[n-K]$ (já que ambos os sinais de saída são diferentes), o sistema é portanto \textbf{variante no tempo}.
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{teste_tempo.png}
+		\caption{Teste de (in)variância no tempo para a função {\tt Tutorial2.sistema1}.}
+		\label{fig:teste_tempo}
+	\end{figure}
+	
+	\subsection{Sistemas Não Lineares}
+	
+	Vamos usar a onda senoidal e os sinais de ruído branco como sinais de teste para {\tt Tutorial2.sistema2}. Testaremos o princípio da superposição, que afirma que para um sistema linear, $f(x+y) = f(x) + f(y)$. Podemos obter as respostas do sistema com o seguinte código:
+	
+	A Figura \ref{fig:linearidade} mostra os dois sinais de saída obtidos a partir deste código; como os sinais de saída não correspondem exatamente (e portanto $f(x+y) \neq f(x) + f(y)$), o sistema é \textbf{não linear}.
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{linearidade.png}
+		\caption{Teste de linearidade para a função {\tt Tutorial2.sistema2}.}
+		\label{fig:linearidade}
+	\end{figure}
+	
+	
+	\section{Energia e Potência de Sinais}
+	\begin{enumerate}
+		\item[1.] Calcule a energia total e a potência média de $x(t)=A\cdot sin(2\pi\cdot53\cdot t)$.\\
+		Energia: Como $x(t)$ é periódico, segue que $E\rightarrow\infty$.\\
+		Potência: \\
+		\begin{equation}
+			P=\lim_{T\rightarrow\infty}\frac{1}{2T}\int_{-T}^{T}|A\cdot\sin(2\pi\cdot53\cdot t)|^{2}dt=A^{2}\cdot\lim_{T\rightarrow\infty}\frac{1}{2T}\int_{-T}^{T}\frac{1}{2}(1-\cos(4\pi\cdot53\cdot t))dt=\frac{A^2}{2} \nonumber
+		\end{equation}
+	
+		\item[2.] {\tt energia\_x1 = 9224.691695} e {\tt potencia\_x1 = 0.184494}.
+		\item[3.] Como o sinal é supostamente periódico, sua energia deve ser infinita! A potência será {\tt potencia\_x2 = 0.75}.
+	\end{enumerate}
+
+\end{document}

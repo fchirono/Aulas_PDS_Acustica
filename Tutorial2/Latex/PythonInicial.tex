@@ -1,0 +1,87 @@
+\section{Preliminares em Python}
+
+Em Python, é muito comum usar módulos externos contendo funções especiais para aplicações específicas. Usaremos inicialmente  os módulos {\tt numpy} para computação numérica e {\tt matplotlib.pyplot} para plotagem. Outros módulos, como o {\tt scipy}, também serão usados eventualmente. Esses módulos são importados no início do código, como mostrado abaixo; note que estamos importando o módulo {\tt numpy} usando o identificador {\tt 'np'} por conveniência, e que {\tt pyplot} é um submódulo que pertence ao módulo {\tt matplotlib}.
+
+Lembre-se de baixar o arquivo {\tt tutorial1\_funcoes.py} do Github e adicioná-lo ao seu diretório de trabalho atual.
+
+\begin{lstlisting}[frame=single]
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Importando explicitamente os modulos 'signal', 'wavfile' e 'loadmat'
+import scipy.signal as sss
+from scipy.io import wavfile, loadmat
+
+import tutorial1_funcoes as tutorial1
+\end{lstlisting}
+
+Durante o trabalho interativo no console IPython, você pode verificar qual é o diretório de trabalho atual com o comando ``mágico'' do IPython {\tt \%pwd} (acrônimo para \emph{print working directory}), e você pode mudar para um outro diretório de trabalho usando o comando {\tt cd C:\textbackslash diretorio\textbackslash desejado} (no Windows). O mesmo princípio se aplica para usuários de Linux e Mac usando a estrutura de pastas apropriada desses sistemas operacionais.
+
+\subsection{Gerando Sinais}
+
+Gerar um sinal em Python significa criar um vetor (ou, na terminologia Python, um \emph{array Numpy}) de valores. Um exemplo de código para gerar uma onda senoidal com frequência $f_0$ Hertz, amostrada a cada $\Delta T = 1/fs$ segundo (onde $fs$ é a frequência de amostragem em Hertz) com duração $T_{max}$ segundos é dado abaixo:
+
+\begin{lstlisting}[frame=single]
+fs = 44100          # define a frequencia de amostragem (em Hz)
+dt = 1./fs     # define o periodo de amostragem (em segundos)
+T_max = 1.          # define a duracao do sinal (em segundos)
+
+# cria um array Numpy para as amostras de tempo
+t = np.arange(0, T_max, dt)
+
+A = 1.                      # define a amplitude (de pico)
+freq = 200.                 # define a frequencia (em Hz)
+x_seno = A*np.sin(2*np.pi*freq*t)    # calcula as amostras da onda senoidal
+\end{lstlisting}
+
+(Note o uso da função {\tt np.arange} com um tamanho de passo fracionário, o que não é recomendado por questões de precisão numérica. Como você poderia usar a função {\tt np.linspace} para gerar o mesmo vetor de tempo? Existem pelo menos duas maneiras de fazer isso; você consegue encontrar as duas?)
+
+Outras funções para gerar sinais comumente usados estão incluídas nos módulos {\tt numpy} e {\tt scipy.signal}; algumas sugestões são:
+\begin{itemize}
+	\item {\tt np.sin()},
+	\item {\tt np.cos()},
+	\item {\tt ss.square()},
+	\item {\tt ss.sawtooth()} e
+	\item {\tt np.random.randn()} (para gerar ruído branco aleatório).
+\end{itemize}
+Leia suas documentações e tente se familiarizar com elas.
+
+
+\subsection{Plotando Sinais}
+
+Para plotar os sinais gerados acima, usaremos o módulo {\tt matplotlib.pyplot}. Este módulo fornece uma interface semelhante ao MATLAB capaz de gerar figuras simples, enquanto ao mesmo tempo permite um estilo de plotagem orientado a objetos mais poderoso, se desejado. Focaremos na interface mais simples por enquanto.
+
+Como exemplo, o código abaixo continua a seção anterior e plota a onda senoidal que geramos. Este código primeiro plota o sinal {\tt sine\_wave} em sua totalidade (ou seja, de $0$ a $T_{max}$), e depois restringe a janela de visualização aos primeiros 10\% do seu comprimento, para que possamos observar os detalhes da onda senoidal.
+
+(Note que isso não é muito eficiente computacionalmente; tente modificar o código para que ele plote apenas um número limitado de amostras desde o início!)
+
+\begin{lstlisting}[frame=single]
+plt.figure()              	# abre uma nova figura usando Pyplot
+plt.plot(t, x_seno)    		# plota a onda senoidal (eixo y) vs tempo (eixo x)
+plt.xlabel('Tempo [s]')       # adiciona um rotulo no eixo 'x'
+plt.ylabel('Amplitude')
+plt.xlim([0, t.max()*0.1])    # ajusta os valores min e max do eixo 'x'
+plt.ylim([-A*1.1, A*1.1])     # ajusta os valores min e max do eixo 'y'
+
+# adiciona um titulo mostrando a frequencia da onda
+plt.title("Onda senoidal, {:.2f} Hz".format(freq))
+\end{lstlisting}
+
+\subsection{Operações com Sinais}
+
+Sinais podem ser combinados realizando operações como soma ou subtração. Em Python, isso significa realizar operações em arrays {\tt Numpy}, que gerealmente são operações elemento a elemento.
+
+\paragraph{Tarefas}
+
+\begin{itemize}
+	\item Sinal 1: Gere uma onda senoidal em uma frequência fundamental de sua escolha, de duração $T_{max}$ segundos, amostrada a $fs = 44100$ Hz, com uma amplitude arbitrária $A$;
+	\item Sinal 2: Gere um sinal de ruído branco com a mesma duração e frequência de amostragem do Sinal 1;
+	\item Realize as seguintes operações nos sinais gerados anteriormente:
+	\begin{itemize}
+		\item Soma dos dois sinais (e.g. $x[n]+y[n]$);
+		\item Multiplicação dos dois sinais (e.g. $x[n] \times y[n]$);
+		\item Raiz quadrada de cada sinal (e.g. $\sqrt{x[n]}$);
+		\item Elevar as amostras de cada sinal ao quadrado (e.g. $(x[n])^2$).
+	\end{itemize}
+	\item Plote os sinais resultantes e verifique se eles concordam com o que você esperaria.
+\end{itemize}

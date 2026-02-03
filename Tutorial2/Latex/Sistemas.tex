@@ -1,0 +1,36 @@
+\section{Sistemas}
+
+\subsection{Sistemas Variantes/Invariantes no Tempo}
+O objetivo deste exercício é verificar se o sistema dado na função {\tt sistema1} (fornecida no módulo {\tt tutorial1\_funcoes.py} no Github) é invariante no tempo ou não. A sintaxe para a função é:
+
+\begin{lstlisting}[frame=single]
+y = Tutorial1.sistema1(x)
+\end{lstlisting}
+
+onde {\tt x} é o sinal de entrada do sistema, e {\tt y} é o sinal de saída do sistema.
+
+\paragraph{Tarefas}
+
+\begin{enumerate}
+	\item Crie um sinal de impulso de amplitude unitária {\tt x\_1} com comprimento total de {\tt N = 100} amostras, e uma segunda versão atrasada no tempo {\tt x\_2} com o mesmo comprimento da primeira, mas atrasada em {\tt N\_0 = 50} amostras;
+	\item Use os impulsos unitários e analise seus respectivos sinais de saída para determinar se o sistema {\tt Tutorial1.system1(x)} é invariante ou variante no tempo.
+\end{enumerate}
+
+\subsection{Sistemas Não Lineares}
+\subsubsection{Revisão}
+Um sistema $H$ é dito linear se ele satisfaz o princípio da superposição  -- ou seja, satisfaz aditividade e homogeneidade:
+
+\begin{equation*}
+	H(a_1 x_1[n] + a_2 x_2[n]) = a_1 H(x_1[n]) + a_2 H(x_2[n]).
+\end{equation*}
+
+Diagrama de blocos:\\
+
+\begin{center}
+	\includegraphics[width = 0.6\textwidth]{SistemaLinear.png}
+\end{center}
+
+\paragraph{Tarefas}
+\begin{enumerate}
+	\item Use um conjunto de sinais para descobrir se o sistema {\tt Tutorial1.sistema(x)} é linear ou não.
+\end{enumerate}

@@ -1,0 +1,42 @@
+\section{Energia e Potência de Sinais}
+\subsection{Revisão}
+
+Para sinais de tempo contínuo, a energia total $E$ e a potência média $P$ de um sinal são definidas da seguinte forma:
+
+\begin{eqnarray*}
+	E & = & \lim_{T\rightarrow \infty}\int_{-T}^{T}|x(t)|^2dt \leq \infty \\
+	P & = & \lim_{T\rightarrow \infty}\frac{1}{2T}\int_{-T}^{T}|x(t)|^2dt
+\end{eqnarray*}
+
+Como em Python estamos limitados a sinais de tempo discreto, as definições precisam ser ajustadas adequadamente:
+
+\begin{eqnarray*}
+	E = \lim_{N\rightarrow \infty}\sum_{-N}^{N}|x[n]|^2 \leq \infty \\
+	P = \lim_{N\rightarrow \infty}\frac{1}{2N+1}\sum_{-N}^{N}|x[n]|^2
+\end{eqnarray*}
+
+\subsection{Tarefas}
+
+\begin{enumerate}
+	\item[1] Calcule a energia total e a potência média do seguinte sinal analiticamente:\\
+	\begin{equation*}
+		x(t) = A\sin(2\pi\cdot 53 \cdot t)
+	\end{equation*}
+	Dica: $\sin^2(x) = \frac{1}{2}(1-\cos(2x))$
+\end{enumerate}
+
+Carregue os dados contidos no arquivo {\tt EnergiaPotencia.mat} no seu diretório de trabalho. Você precisará ler o arquivo \emph{.mat} usando a função {\tt scipy.io.loadmat}, que retorna um dicionário, e ler as entradas do dicionário {\tt 'x1'} e {\tt 'x2'} para acessar os dois vetores de dados contidos nele:
+
+\begin{lstlisting}[frame=single]
+# Use o modulo 'loadmat' para carregar o arquivo MAT como um dicionario
+matfile = loadmat('EnergiaPotencia')
+
+# leia as chaves no dicionario para obter os dados
+mat_signal1 = matfile['x1']
+mat_signal2 = matfile['x2']
+\end{lstlisting}
+
+\begin{enumerate}
+	\item[2] Determine a energia total e a potência média do sinal dado em {\tt mat\_signal1}.
+	\item[3] Determine a energia total e a potência média do sinal em {\tt mat\_signal2}, assumindo que o vetor contém apenas um período de um sinal periódico. \\ CUIDADO: Atenção ao limite!
+\end{enumerate}

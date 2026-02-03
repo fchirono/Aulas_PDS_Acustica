@@ -1,0 +1,85 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use the 'listings' package to add code and the 'color' package to generate the highlights
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% set it to Python language highlighting
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% set size of fonts
+	breaklines=true,				% set automatic line breaking
+	linewidth=\textwidth,			% set size of code box
+	showstringspaces=false}			% show spaces as underscores only inside strings
+
+\title{\vspace{-2cm} Processamento Digital de Sinais e Aplicações em Acústica\\ Tutorial 2 - Sinais e Sistemas}
+\author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	\section*{Objetivos do Tutorial}
+	
+		Ao final desta sessão, você será capaz de:
+	
+		\begin{itemize}
+			\item Gerar, plotar e realizar operações simples em sinais usando Python.
+			\item Verificar o comportamento de um sistema quanto à sua variância ou invariância temporal.
+			\item Verificar o comportamento não linear de um sistema.
+			\item Calcular a energia total e a potência média de sinais.
+		\end{itemize}
+
+	
+	\section*{Antes de começar}
+		\begin{enumerate}
+			\item Faça o download dos arquivos para este tutorial
+			\item Inicie a IDE Spyder
+			\item Copie os arquivos para uma pasta dedicada no seu computador, e selecione esta pasta como o diretório de trabalho do Spyder (aba ``Files'' no canto superior direito)
+		\end{enumerate}
+	
+	\begingroup
+	\let\clearpage\relax
+	\tableofcontents
+	\endgroup
+	
+	\input{PythonInicial.tex}
+	
+	\input{Sistemas.tex}
+	
+	\input{EnergiaEPotenciaDeSinais.tex}
+	
+	\input{CriarArquivosWav.tex}
+	
+\end{document}
