@@ -1,0 +1,54 @@
+\section{Transformada de Fourier de Tempo Discreto (DTFT)}
+
+\subsection{Revisão}
+
+A Transformada de Fourier de Tempo Discreto (DTFT) é definida da seguinte forma:
+
+\begin{equation}\label{eq:DTFT}
+	X(\Omega) = \sum_{n=-\infty}^{\infty}x[n]\cdot e^{-jn\Omega}, \qquad \Omega = 2\pi\frac{f}{f_s}\in[-\pi,\pi].
+\end{equation}
+
+Note que $X(\Omega)$ é uma função periódica, com período $2\pi$.
+
+\subsection{DTFT de Sinais Não-Periódicos}
+
+Leia os arquivos {\tt A1.wav} e {\tt A2.wav} usando o módulo {\tt scipy.io.wavfile}. Para incluir este módulo, use o comando:
+
+\begin{lstlisting}[frame=single]
+from scipy.io import wavfile
+\end{lstlisting}
+
+A função {\tt wavfile.read} pode ser usada para ler um arquivo .WAV de 16 bits por amostra no ambiente de trabalho da seguinte forma:
+
+\begin{lstlisting}[frame=single]
+# le a frequencia de amostragem e valores das amostras do arquivo .WAV
+fs_wav, sinal_int16 = wavfile.read("Exemplo.wav")
+
+# confirma o tipo de dados obtidos do arquivo wav
+sinal_int16.dtype
+
+# normalizacao dos dados de audio de int16 para ponto flutuante
+N_bits = 16 
+sinal_float = sinal_int16/(2.**(N_bits - 1)-1)
+\end{lstlisting}
+
+\paragraph{Tarefas}
+
+\begin{enumerate}
+	
+	\item Mostre analiticamente que a DTFT é periódica, com período $2\pi$. \textbf{DICA}: Calcule $X(\Omega+2\pi)$ usando a equação (\ref{eq:DTFT}).
+	
+	\item Ouça ambos os sinais {\tt A1} e {\tt A2} usando seu reprodutor de mídia local. Eles têm a mesma frequência fundamental?
+	
+	\item Escreva uma função {\tt DTFT(x, Omega)} que implemente a equação (\ref{eq:DTFT}). O vetor de entrada {\tt Omega} da função contém as frequências angulares normalizadas em radianos/amostra a ser usadas na análise. Note que, embora a DTFT teoricamente tenha uma resolução de frequência infinita, em uma implementação computacional só podemos especificar uma quantidade limitada de frequências discretas.
+	
+	\item Crie um vetor {\tt Omega} contendo 4096 pontos igualmente espaçados no intervalo $[-\pi, \pi]$ definindo um conjunto de frequências angulares normalizadas em radianos/amostra, e use a função recém-implementada para calcular os espectros de Fourier de ambos os arquivos {\tt .wav}. Plote o valor absoluto de ambos os resultados em cores diferentes. 
+	
+	\item Qual é a resolução de frequência resultante em Hz da análise de Fourier realizada no item anterior?
+	
+	\item Que aspectos visíveis nos dois espectros de amplitude podem confirmar a sua observação na Tarefa 2?
+	
+	\item Defina um novo vetor {\tt f} (baseado em {\tt Omega}) que contenha as frequências correspondentes em Hertz. Plote o espectro de amplitude de {\tt A1.wav} e use {\tt f} para o eixo ``x''.
+	
+	\item Agora redefina {\tt Omega} para 4096 frequências angulares normalizadas uniformemente espaçadas no intervalo $[-3\pi,3\pi]$, calcule e plote a (magnitude da) DTFT para esta nova faixa de frequências normalizadas. Quais efeitos podem ser observados nos novos espectros de amplitude, e por que isso ocorre?
+\end{enumerate}

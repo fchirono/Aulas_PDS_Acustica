@@ -1,0 +1,60 @@
+\section{DTFT vs. DFT}
+
+\subsection{Revisão}
+
+De acordo com a definição da DFT, as amostras da DFT
+
+\begin{equation*}
+	\mathbf{X} = \left[X[0],\ldots,X[N-1]\right]
+\end{equation*}
+
+\noindent correspondem à frequências discretas da seguinte forma:
+
+\begin{equation*}
+	X[k] = X\left(k\frac{f_S}{N}\right),
+\end{equation*}
+
+\noindent onde $k=[0\ldots N-1]$. A resolução em frequência é dada por $df = fs/N$, e a DFT estará centrada na frequência de Nyquist $f_s/2$.
+
+\par No entanto, devido à sua simetria, o vetor da DFT é frequentemente rearranjado para ser consistente com o resultado da Transformada de Fourier - isto é, iniciando nas frequências \emph{negativas}, centrado na frequência $0$, e exibindo simetria conjugada complexa. Para fazer isso corretamente, é importante distinguir entre dois casos:
+
+\begin{itemize}
+	\item $N$ par:\\
+	Quando $N$ é um número par, a $(\frac{N}{2})$-ésima amostra ($k=N/2$) corresponderá \textbf{exatamente} à frequência de Nyquist.
+	\item $N$ ímpar:\\
+	Quando $N$ é um número ímpar, a frequência de Nyquist corresponde ao ponto entre as amostras $(N-1)/2$ e $(N+1)/2$, e nenhuma amostra da DFT corresponderá exatamente à frequência de Nyquist.
+\end{itemize}
+
+\par O vetor de frequência correto para cada caso é definido da seguinte forma:
+
+\begin{itemize}
+	\item N par:\\
+	\begin{eqnarray*}
+		% f = [0, 1, ...,   n/2-1,     -n/2, ..., -1] * fs/N
+		\mathbf{X} & = & \left[  X\left[-\frac{N}{2}\right] \;,\; X\left[-\frac{N}{2}+1\right] , \ldots, X\left[-1\right] \;,\; X\left[0\right], X\left[1\right] , \ldots , X\left[\frac{N}{2}-1\right] \right]
+	\end{eqnarray*}
+
+	Note que neste caso, a amostra correspondente à frequência de Nyquist é o \textbf{primeiro} elemento do vetor, o que é consistente com o resultado da função {\tt numpy.fft.fftshift}.
+
+	\item N ímpar:\\
+	\begin{eqnarray*}
+		% f = [0, 1, ..., (n-1)/2, -(n-1)/2, ..., -1] * fs/N
+		\mathbf{X} & = & \left[X\left[ -\frac{(N-1)}{2} \right] \; ,\; X\left[-\frac{(N-1)}{2} + 1\right] , \ldots , X\left[-1\right], X\left[0\right], X\left[1\right] , \ldots , X\left[\frac{(N-1)}{2} \right] \right]
+	\end{eqnarray*}
+	Note que neste caso, a frequência de Nyquist não estará contida no resultado da DFT.
+
+\end{itemize}
+
+É \textbf{IMPORTANTE} que você compreenda bem as duas definições acima, pois \textbf{esta é uma causa frequente de erros e confusão!}
+
+\subsection{Resolução de Frequência Limitada}
+
+\paragraph{Tarefas}
+
+\begin{enumerate}
+	\item Pegue um trecho do arquivo de áudio ``A1.wav'' da amostra 5100 até 6400 e salve-o em um vetor separado {\tt d}.
+	\item Usando a função que você criou, calcule a DTFT usando o vetor de frequência angular normalizada {\tt Omega} criado na Tarefa 1.3 e plote o espectro de amplitude sobre o vetor de frequência correspondente \textbf{em Hz} na ordenada.
+	\item Calcule a DFT de {\tt d} com comprimento correspondente ao comprimento de {\tt d}. Rearranje o vetor de saída para que você obtenha um vetor com simetria conjugada complexa, e então gere um segundo vetor com a frequência correspondente em Hz para cada amostra da DFT (verifique a subseção anterior!).
+	\item Plote o espectro de amplitude obtido através da DFT sobre o gráfico da DTFT existente, usando o comando {\tt plt.stem} e use uma cor diferente.
+	\item O que pode ser observado na figura resultante?
+\end{enumerate}

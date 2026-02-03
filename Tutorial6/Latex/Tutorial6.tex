@@ -1,0 +1,75 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use the 'listings' package to add code and the 'color' package to generate the highlights
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% set it to Python language highlighting
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% set size of fonts
+	breaklines=true,				% set automatic line breaking
+	linewidth=\textwidth,			% set size of code box
+	showstringspaces=false}			% show spaces as underscores only inside strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais e Aplicações em Acústica\\ Tutorial 6 - Transformada de Fourier de Tempo Discreto (DTFT) e Transformada Discreta de Fourier (DFT)}
+\author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	\section*{Objetivos do Tutorial}
+	Ao final desta sessão, você será capaz de:
+	\begin{itemize}
+		\item aplicar a Transformada de Fourier de Tempo Discreto (DTFT) a um sinal de tempo discreto finito,
+		\item compreender as implicações do teorema da amostragem na DTFT,
+		\item aplicar a Transformada Discreta de Fourier (DFT) e a Transformada Discreta de Fourier Inversa (IDFT) a uma sequência,
+		\item comparar espectros calculados usando a DTFT e a DFT, e
+		\item atribuir uma frequência correspondente a cada amostra da DFT.
+	\end{itemize}
+	
+	\begingroup
+	\let\clearpage\relax
+	\tableofcontents
+	\endgroup
+	
+	\input{DTFT.tex}
+
+	\input{DFT.tex}
+	
+	\input{DTFTvsDFT.tex}
+	
+\end{document}

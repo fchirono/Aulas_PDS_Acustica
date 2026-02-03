@@ -1,0 +1,227 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+\usepackage[makeroom]{cancel}
+
+% Use the 'listings' package to add code and the 'color' package to generate the highlights
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% set it to Python language highlighting
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% set size of fonts
+	breaklines=true,				% set automatic line breaking
+	linewidth=\textwidth,			% set size of code box
+	showstringspaces=false}			% show spaces as underscores only inside strings
+
+\title{\vspace{-2cm} Processamento Digital de Sinais e Aplicações em Acústica\\ Soluções para Tutorial 6 - Transformada de Fourier de Tempo Discreto (DTFT) e Transformada Discreta de Fourier (DFT)}
+\author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
+
+\begin{document}
+	\date{}
+	\maketitle
+
+%\setcounter{section}{1}
+\section{DTFT}
+\setcounter{subsection}{1}
+
+\subsection*{Tarefa 1}
+Mostre que a DTFT é periódica:
+\begin{align*}
+	X(\Omega+2\pi) & =\sum_{n=-\infty}^{n=\infty}x[n] \cdot e^{-jn(\Omega+2\pi)} \\
+	& = \sum_{n=-\infty}^{n=\infty}x[n] \cdot e^{-jn\Omega} \cdot e^{-jn2\pi} \\
+%	& e^{-jn2\pi} = (e^{-j2\pi})^n = 1^n = 1 \\ \\
+	& = \sum_{n=-\infty}^{n=\infty}x[n] \cdot e^{-jn\Omega} \cdot \cancelto{1}{e^{-jn2\pi}} \\
+	& = \sum_{n=-\infty}^{n=\infty}x[n] \cdot e^{-jn\Omega} = X(\Omega)
+\end{align*}
+
+\subsection*{Tarefa 2}
+Não, o segundo arquivo possui uma freqência fundamental mais alta.
+
+\subsection*{Tarefa 3}
+-
+
+\subsection*{Tarefa 4}
+Ver Figura \ref{fig:DTFTA1A2}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = \textwidth]{DTFTA1A2.png}
+	\caption{DTFT dos sinais {\tt A1.wav} e {\tt A2.wav}.}
+	\label{fig:DTFTA1A2}
+\end{figure}
+
+\subsection*{Tarefa 5}
+$\Delta f = \frac{f_S}{4096 - 1} = 5.38$ Hz $=0.00153$ rad/amostra.
+
+\subsection*{Tarefa 6}
+Sim, o espectro harmônico de {\tt A2.wav} está mais espalhado, comparado ao espectro de {\tt A1.wav}. Uma outra pista é que a frequência fundamental é mais alta.
+
+\subsection*{Tarefa 7}
+
+Ver Figura \ref{fig:DTFTA1Hz}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = \textwidth]{DTFTA1_Hz.png}
+	\caption{DTFT do sinal {\tt A1.wav} plotado em função da frequência temporal (em Hz).}
+	\label{fig:DTFTA1Hz}
+\end{figure}
+
+\subsection*{Tarefa 8}
+Devido à periodicidade da DTFT, o espectro de amplitude se repete nos intervalos $[-3\pi, -\pi]$ e $[\pi,3\pi]$, conforme visto na Figura \ref{fig:PeriodicDTFT}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = \textwidth,clip = true, trim = 0.5cm 0.2cm 0.5cm 0.2cm]{Periodic_DTFT.png}
+	\vskip-14pt
+	\caption{DTFT do sinal {\tt A1.wav} plotado no intervalo $[-3\pi,3\pi]$ rad/amostra.}
+	\label{fig:PeriodicDTFT}
+\end{figure}
+
+Como o número de elementos em {\tt Omega} é o mesmo mas a faixa de frequência triplicou, a resolução em frequência é apenas um terço da resolução anterior, resultando em $\Delta f=\frac{3f_S}{4096 - 1}=16.15$ Hz $= 0.0046$ rad/amostra.
+
+\section{DFT e IDFT}
+
+\subsection*{Tarefa 1}
+
+Mostre que a DFT é periódica
+
+\begin{align*}
+	X[k+N] & = \sum_{n=0}^{N-1} x[n] \cdot e^{-j\frac{2\pi}{N}(k+N)n}  \\
+	& = \sum_{n=0}^{N-1} x[n] \cdot e^{-j\frac{2\pi}{N}kn} \cdot e^{-j 2\pi n} \\
+	& = \sum_{n=0}^{N-1} x[n] \cdot e^{-j\frac{2\pi}{N}kn} \cdot \cancelto{1}{e^{-j 2\pi n}} \\
+	& = \sum_{n=0}^{N-1} x[n] \cdot e^{-j\frac{2\pi}{N}kn} = X[k]
+\end{align*}
+
+Mostre que a DFT assume que $x[n]$ é periódica:
+
+\begin{align*}
+	x[n+N] & = \frac{1}{N}  \sum_{n=0}^{N-1} X[k] \cdot e^{j\frac{2\pi}{N}k(n+N)} \\
+	& = \frac{1}{N}  \sum_{n=0}^{N-1} X[k] \cdot e^{j\frac{2\pi}{N}kn} \cdot e^{j2\pi k} \\
+	& = \frac{1}{N}  \sum_{n=0}^{N-1} X[k] \cdot e^{j\frac{2\pi}{N}kn} \cdot \cancelto{1}{e^{j2\pi k}} \\
+	& = \frac{1}{N}  \sum_{n=0}^{N-1} X[k] \cdot e^{j\frac{2\pi}{N}kn} = x[n]
+\end{align*}
+
+\subsection*{Tarefa 2}
+-
+
+\subsection*{Tarefa 3}
+Vamos criar uma sequência de valores aleatória (com distribuição Gaussiana) e calcular a DFT para os três casos:
+
+\begin{lstlisting}[frame=single]
+# Gerar sequencia aleatoria
+L = 20
+ruido = np.random.randn(L)
+
+# Usar DFTs de comprimento diferentes
+DFT_Ruido1 = DFT(ruido, L)
+DFT_Ruido2 = DFT(ruido, L-1)
+DFT_Ruido3 = DFT(ruido, L+1)
+\end{lstlisting}
+
+\subsection*{Tarefa 4}
+As três subfiguras na Figura \ref{fig:DFT} mostram o resultado para a magnitude e fase da DFT da sequência aleatória {\tt ruido} para os três valores de {\tt N\_DFT}:
+
+\begin{figure}[h!]
+	\centering
+	\subfloat[$N_\textrm{DFT}=L$]{\label{subfig:DFT_L}
+		%\includegraphics[width = 0.33\textwidth,clip = true,trim = 1cm 0cm 1cm 0cm]{DFT_L.png}
+		\includegraphics[width = 0.33\textwidth]{DFT_L.png}
+	}
+	~
+	\subfloat[$N_\textrm{DFT}=L-1$]{
+		%\includegraphics[width = 0.33\textwidth,clip = true,trim = 1cm 0cm 1cm 0cm]{DFT_Lminus1.png}
+		\includegraphics[width = 0.33\textwidth]{DFT_Lminus1.png}
+	}
+	~
+	\subfloat[$N_\textrm{DFT}=L+1$]{
+		%\includegraphics[width = 0.33\textwidth,clip = true,trim = 1cm 0cm 1cm 0cm]{DFT_Lplus1.png}
+		\includegraphics[width = 0.33\textwidth]{DFT_Lplus1.png}
+	}
+	\caption{DFT da sequência aleatória {\tt ruido} para os três valores de  {\tt N\_DFT}.}
+	\label{fig:DFT}
+\end{figure}
+
+Pode-se observar que a alteração do comprimento da DFT também altera o resultado da DFT, embora características claramente proeminentes possam permanecer muito semelhantes entre os dois resultados.
+
+\subsection*{Tarefa 5}
+%Como pode ser visto no gráfico de fase da Figura \ref{subfig:DFT_L}, o valor da fase para $\Omega = 0$ rad/amostra e $\Omega = \pi$ rad/amostra é zero. Pela definição da DFT, é evidente que, para sinais de valor real, a fase é $0$ ou $\pi$ para um $L$ par (Certifique-se de compreender o porquê!).
+Pela definição, a DFT de uma sequência {\tt x} real, com L par, resultará em valores reais para $\Omega = 0$ rad/amostra e $\Omega = \pi$ rad/amostra. Portanto, a fase para estas amostras deve ser $0$ ou $\pm\pi$ radianos, como pode ser visto no gráfico da fase na Figura \ref{subfig:DFT_L}. Certifique-se de entender porquê isto acontece!
+
+\subsection*{Tarefa 6}
+A comparação entre as Figuras \ref{fig:DFT} e \ref{fig:FFT} mostra que o resultado da DFT para $N_\textrm{DFT}=L$ é o mesmo que o da FFT correspondente, como era esperado.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.85\textwidth]{FFT_L.png}
+	\caption{Resultado da FFT da sequência aleatória para $N_\textrm{DFT}=L$.}
+	\label{fig:FFT}
+\end{figure}
+
+\subsection*{Tarefa 7}
+-
+
+\subsection*{Tarefa 8}
+
+Como pode ser visto na Figura \ref{fig:IDFT}, as sequências obtidas pela operação IDFT são todas iguais até $n=18$. O resultado da IDFT para o espectro calculado com $N_\textrm{DFT}=L-1$ termina na 19ª amostra, devido à limitação de dados previamente imposta. O resultado da IDFT para o comprimento de dados $L$ produz exatamente o mesmo resultado que a sequência original, e o resultado para o comprimento de dados $L=1$ adiciona um único zero à sequência original, visto que esse zero foi adicionado anteriormente durante a operação DFT com $N_\textrm{DFT}=L+1$.
+
+\begin{figure}[h!]	
+	\centering
+	\includegraphics[width = 0.85\textwidth]{IDFT.png}
+	\caption{Resultados da IDFT aplicada aos três espectros DFT diferentes.}
+	\label{fig:IDFT}
+\end{figure}
+
+\section{DTFT vs. DFT}
+
+\subsection*{Tarefa 1}
+
+\begin{lstlisting}[frame = single]	
+# Ler o sinal 'A1' entre 5100 e 6400 amostras
+d = a1[5099:6400]
+\end{lstlisting}
+
+\subsection*{Tarefas 2-5}
+Pode-se observar no trecho da Figura \ref{fig:DTFT_DFT} que os intervalos da DFT são ``amostras'' do resultado da DTFT, que é contínua em relação à frequência. A resolução de frequência da DFT depende claramente do número de amostras, enquanto a DTFT pode, em teoria, ter uma resolução de frequência infinita.
+
+No entanto, também se observa que as 4096 amostras usadas para criar {\tt Omega} não fornecem resolução suficiente para que ambas as representações sejam visualmente alinhadas; um resultado muito melhor pode ser obtido recriando o vetor {\tt Omega} com cerca de 10000 pontos ou mais, embora isso não seja estritamente necessário.
+
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.85\textwidth]{DTFT_DFT.png}
+	\caption{DTFT (azul) e DFT (hastes vermelhas) de {\tt d} para as frequências no intervalo $[-200,200]$ Hz.}
+	\label{fig:DTFT_DFT}
+\end{figure}
+
+\end{document}

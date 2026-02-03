@@ -1,0 +1,67 @@
+\section{Transformada Discreta de Fourier (DFT) e Transformada Discreta de Fourier Inversa (IDFT)}
+
+\subsection{Revisão}
+
+Dada uma sequência $x[n]$ de comprimento $N$, a DFT de $x[n]$ pode ser definida da forma
+
+\begin{equation}\label{eq:DFT}
+	X[k] = \sum_{n=0}^{N-1} x[n] \cdot W_N^{kn}, \qquad k=0,1,2,\ldots,N-1
+\end{equation}
+
+\noindent onde, por definição,
+
+\begin{equation}
+	W_N = e^{-\frac{j2\pi}{N}}.
+\end{equation}
+
+A Transformada Discreta de Fourier Inversa (IDFT) é definida como
+
+\begin{equation}\label{eq:IDFT_classic}
+	x[n] = \frac{1}{N}\sum_{k=0}^{N-1} X[k] \cdot W_N^{-kn},\qquad n=0,1,2,\ldots,N-1.
+\end{equation}
+
+A DFT e a IDFT também podem ser definidas como transformações lineares que operam sobre sequências $\mathbf{x}_N$ e $\mathbf{X}_N$, respectivamente. Seja $\mathbf{x}_N = \left[x[0],\ldots,x[N-1]\right]^T$ e $\mathbf{X}_N=\left[X[0],\ldots,X[N-1]\right]^T$ o vetor da amostras do sinal no tempo e o vetor de amostras na frequência, respectivamente. Seja a matriz $\mathbf{W}_N$, com elementos $W_{N}^{kn}$, definida como
+
+\begin{equation}
+	\mathbf{W}_N = 
+	\begin{bmatrix}
+		1 & 1 & 1 & \cdots & 1 \\
+		1 & W_N & W_N^2 & \cdots & W_N^{N-1} \\
+		\vdots & W_N^2 & W_N^4 & \cdots & W_N^{2(N-1)} \\
+		\vdots & \vdots & \vdots & \ddots& \vdots \\
+		1 & W_N^{N-1} & W_N^{2(N-1)} & \cdots & W_N^{(N-1)(N-1)}
+	\end{bmatrix}.
+\end{equation}
+
+Usando as definições acima, a DFT pode ser expressa em forma matricial como
+
+\begin{equation}\label{eq:DFTMatrix}
+	\mathbf{X}_N=\mathbf{W}_N \cdot \mathbf{x}_N.
+\end{equation}
+
+O mesmo se aplica à IDFT, ou seja,
+
+\begin{equation}\label{eq:IDFT}
+	\mathbf{x}_N = \frac{1}{N}\mathbf{W}_N^* \cdot \mathbf{X}_N,
+\end{equation}
+
+onde $\mathbf{W}_N^*$ é o conjugado complexo da matriz $\mathbf{W}_N$.
+
+\subsection{Tarefas}
+
+\begin{enumerate}
+	\item Mostre analiticamente que a DFT é periódica, com período $N$. \textbf{DICA}: Avalie $X[k+N]$ usando a equação (\ref{eq:DFT}). \\Mostre analiticamente que a DFT assume que $x[n]$ é periódico, com período $N$. \textbf{DICA}: Avalie $x[n+N]$ usando a equação (\ref{eq:IDFT_classic}).
+	\item Escreva uma função {\tt DFT(x, N\_DFT)} que implemente a equação (\ref{eq:DFTMatrix}), onde {\tt x} é a sequência de dados e {\tt N\_DFT} é o número de pontos sobre os quais a DFT é calculada.
+	\par Note que se o comprimento de {\tt x} for menor que {\tt N\_DFT}, é prática comum preencher o sinal com zeros no final do vetor (\emph{zero-padding}); similarmente, se o comprimento de {\tt x} for maior que {\tt N\_DFT}, as amostras excedentes devem ser ignoradas.
+	\item Gere uma sequência aleatória {\tt x} de comprimento $L\leq20$ com a função {\tt numpy.random.randn}. Calcule a DFT de {\tt x} para os casos:
+	\begin{enumerate}
+		\item {\tt N\_DFT = L}
+		\item {\tt N\_DFT > L}
+		\item {\tt N\_DFT < L}
+	\end{enumerate}
+	\item Para os três casos acima, plote a magnitude e a fase da DFT calculada no ponto 2 usando a função {\tt matplotlib.pyplot.stem}. Qual é o efeito da escolha de {\tt N\_DFT}?
+	\item Verifique o valor da fase em $\Omega = 0$ rad/amostra e $\Omega = \pi$ rad/amostra para a DFT calculada com {\tt N\_DFT = L}.
+	\item Calcule a DFT da sequência {\tt x} usando a função {\tt numpy.fft.fft} (leia a documentação do módulo {\tt numpy.fft} para mais informações). Escolha {\tt N\_dft = L} e plote a magnitude e a fase. Como eles se comparam aos gráficos gerados na Tarefa 4?
+	\item Implemente uma função em Python para a IDFT definida na Equação (\ref{eq:IDFT}).
+	\item Usando a função {\tt IDFT} implementada na tarefa anterior, calcule a IDFT do sinal {\tt X} para os três casos da Tarefa 3 e plote os resultados. Como os sinais resultantes se comparam ao sinal original no domínio do tempo?
+\end{enumerate}
