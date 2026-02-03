@@ -1,0 +1,64 @@
+\section{Síntese de Fourier}
+
+\subsection{Revisão}
+
+Sob certas condições, um sinal $y(t)$ pode ser decompostos em uma série de Fourier. Para este exercício, o sinal $y(t)$ será expresso como uma combinação linear de cossenos:
+
+\begin{equation}\label{eq:CosSynth}
+	y(t) = \sum_{k=1}^{K}a_{k}\cos(2\pi f_{0}kt),
+\end{equation}
+
+\noindent onde $f_{0}$ é a frequência fundamental em Hertz, $t$ é o tempo em segundos, $k=1,\ldots,K$ é o índice do $k$-ésimo harmônico (em relação à frequência fundamental $f_{0}$), e $a_{k}$ é um coeficiente de valor real.
+
+\subsection{Tarefas}
+
+\begin{enumerate}
+\item Crie uma função Python que implemente a Equação (\ref{eq:CosSynth})\\
+
+\begin{lstlisting}[frame=single]
+y = sintetizar(f0, fs, T_max, A_k)
+\end{lstlisting}
+
+onde {\tt f0} é a frequência fundamental, {\tt fs} é a frequência de amostragem em Hertz, {\tt T\_max} é a duração do sinal em segundos e {\tt A\_k} é o vetor $[a_{1},\cdots,a_{K}]$ que contém os coeficientes da série de Fourier (o primeiro elemento refere-se à amplitude da frequência fundamental). Por exemplo, para gerar um sinal amostrado a 44100 Hz, frequência fundamental A4 (440 Hz), duração 1 s, com três harmônicos de amplitude $[1, 0.4, 0.2]$, a chamada da função será:
+
+\begin{lstlisting}[frame=single]
+import numpy as np
+y = sintetizar(440, 44100, 1, np.array([1, 0.4, 0.2]))
+\end{lstlisting}
+	
+Ouça o sinal de saída usando {\tt sounddevice} ou salvando os dados em um arquivo {\tt .wav}.
+
+\item A tabela abaixo fornece as frequências fundamentais de várias notas musicais:\\
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+	\hline Nota & Freq. & Nota & Freq. & Nota & Freq. & Nota & Freq. & Nota & Freq. & Nota & Freq. \\ \hline 
+	\hline $C_{1}$ & 32.70 & $C_{2}$ & 65.41 & $C_{3}$ & 130.81 & $C_{4}$ & 261.63 & $C_{5}$ & 523.25 & $C_{6}$ & 1046.50 \\ 
+	\hline $C_{1}^{\#}$ & 34.65 & $C_{2}^{\#}$ & 69.30 & $C_{3}^{\#}$ & 138.59 & $C_{4}^{\#}$ & 277.18 & $C_{5}^{\#}$ & 554.37 & $C_{6}^{\#}$ & 1108.73 \\ 
+	\hline $D_{1}$ & 36.71 & $D_{2}$ & 73.42 & $D_{3}$ & 146.83 & $D_{4}$ & 293.66 & $D_{5}$ & 587.33 & $D_{6}$ &  1174.66 \\ 
+	\hline $D_{1}^{\#}$ & 38.89 & $D_{2}^{\#}$ & 77.78 & $D_{3}^{\#}$ & 155.56 & $D_{4}^{\#}$ & 311.13 & $D_{5}^{\#}$ & 622.25 & $D_{6}^{\#}$ & 1244.51 \\ 
+	\hline $E_{1}$ & 41.20 & $E_{2}$ & 82.41 & $E_{3}$ & 164.81 & $E_{4}$ & 329.63 & $E_{5}$ & 659.25 & $E_{6}$ & 1318.51 \\ 
+	\hline $F_{1}$ & 43.65 & $F_{2}$ & 87.31 & $F_{3}$ & 174.61 & $F_{4}$ & 349.23 & $F_{5}$ & 698.46 & $F_{6}$ & 1396.91 \\ 
+	\hline $F_{1}^{\#}$ & 46.25 & $F_{2}^{\#}$ & 92.50 & $F_{3}^{\#}$ & 185.00 & $F_{4}^{\#}$ & 369.99 & $F_{5}^{\#}$ & 739.99 & $F_{6}^{\#}$ & 1479.98 \\ 
+	\hline $G_{1}$ & 49.00 & $G_{2}$ & 98.00 & $G_{3}$ &  196.00 & $G_{4}$ & 392.00 & $G_{5}$ & 783.99 & $G_{6}$ & 1567.98 \\ 
+	\hline $G_{1}^{\#}$ & 51.91 & $G_{2}^{\#}$ & 103.83 & $G_{3}^{\#}$ & 207.65 & $G_{4}^{\#}$ & 415.30 & $G_{5}^{\#}$ & 830.61 & $G_{6}^{\#}$ & 1661.22 \\ 
+	\hline $A_{1}$ & 55.00 & $A_{2}$ & 110.00 & $A_{3}$ & 220.00 & $A_{4}$ & 440.00 & $A_{5}$ & 880.00 & $A_{6}$ & 1760.00 \\ 
+	\hline $A_{1}^{\#}$ & 58.27 & $A_{2}^{\#}$ & 116.54 & $A_{3}^{\#}$ & 233.08 & $A_{4}^{\#}$ & 466.16 & $A_{5}^{\#}$ & 923.33 & $A_{6}^{\#}$ & 1864.66 \\ 
+	\hline $B_{1}$ & 61.74 & $B_{2}$ & 123.47 & $B_{3}$ & 246.94 & $B_{4}$ & 493.88 & $B_{5}$ & 987.77 & $B_{6}$ & 1975.53 \\ 
+	\hline 
+\end{tabular} \\ \vskip0.1cm
+
+Gere os tons dados na tabela a seguir, concatene-os juntos e ouça a melodia resultante. Sugerimos usar a função {\tt numpy.concatenate}; leia a documentação da função para se familiarizar com sua operação. \textbf{Cuidado com o volume de reprodução!}\\ \vskip0.05cm
+\begin{center}
+	\begin{tabular}{|c||c|c|c|c|c|c|c|c|}
+		\hline No. & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ 
+		\hline Nota & $E_{4}$ & $D_{4}^{\#}$ & $E_{4}$ & $F_{4}$ & $E_{4}$ & - & $A_{4}$ & - \\ 
+		\hline Duração em s & 0.15 & 0.15 & 0.15 & 0.15 & 0.15 & 0.15 & 0.15 & 0.15 \\ 
+		\hline
+		\hline No. & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 \\ 
+		\hline Nota & $E_{4}$ & $D_{4}^{\#}$ & $E_{4}$ & $F_{4}$ & $E_{4}$ & - & $G_{4}^{\#}$ & - \\ 
+		\hline Duração em s & 0.15 & 0.15 & 0.15 & 0.15 & 0.15 & 0.15 & 0.15 & 0.15 \\ 
+		\hline 
+	\end{tabular} 
+\end{center}
+
+\item Ouça a melodia geradas na tarefa anterior usando diferentes coeficientes (por exemplo, $\mathbf{a} = [1, 1, 1, 1]$ ou $\mathbf{a} = [0.8, 0.1, 0.2, 0.6]$). Qual é o efeito da variação dos coeficientes de Fourier?
+\end{enumerate}

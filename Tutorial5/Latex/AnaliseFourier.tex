@@ -1,0 +1,71 @@
+\section{Análise de Fourier}
+
+\subsection{Revisão}
+Os coeficientes de Fourier $c_k$ de um sinal periódico, de valor complexo e tempo contínuo $x(t)$ são dados através da integral
+
+\begin{equation*}
+	c_k=\frac{1}{T}\int_{t_0}^{t_0+T} x(t) \ e^{-jkt\frac{2\pi}{T}}dt
+\end{equation*}
+
+\noindent onde $T$ é o período.\\
+Para um sinal de tempo discreto, os coeficientes de Fourier são definidos da seguinte forma:
+\begin{equation*}
+c_k=\frac{1}{N}\sum_{n=n_0}^{n_0+N-1} x[n] \ e^{-jk\frac{2\pi}{N}n},
+\end{equation*}
+\noindent onde $n$ representa o índice da amostra.
+
+\subsection{Tarefas: Analisando Padrões de Radiação}
+
+O padrão de radiação de uma fonte sonora descreve o campo ac\'ustico gerado por esta fonte em função da direção do observador, e geralmente possui magnitude e fase (isto é, assume valores complexos). Para um alto-falante tipo dipolo ideal, por exemplo, este padrão pode ser considerado uma função do ângulo polar $\phi$
+
+\begin{equation*}
+	R(\phi)=|\sin(\phi)|.
+\end{equation*}
+
+Como tal, também pode ser considerado periódico em $2\pi$ e a visualização pode ser vista na figura a seguir.
+
+\begin{center}
+	\includegraphics[width = 0.6\textwidth]{DipolePattern.png}
+\end{center}
+
+
+\paragraph{Tarefas}
+\begin{enumerate}
+	\item Gere um vetor {\tt phi} contendo ângulos $\phi$ no intervalo $[0, 2\pi)$. Note que para evitar erros numéricos, é importante usar uma distribuição uniforme de pontos sobre todo o espaço angular.
+	
+	\item As funções {\tt PadraoRadiacao1} e {\tt PadraoRadiacao2} implementam cada uma um padrão de radiação complexo. A sintaxe para obtê-los é\\
+
+\begin{lstlisting}[frame=single]
+import tutorial2_funcoes as Tutorial2
+
+rad1 = Tutorial2.PadraoRadiacao1(phi)
+rad2 = Tutorial2.PadraoRadiacao1(phi)
+\end{lstlisting}
+	
+	%Note que o procedimento mostrado acima reservará algum espaço na memória do computador do tamanho correto e tipo de dado usando o comando {\tt np.zeros}, que então sobrescrevemos com os dados de nosso interesse. Esta é geralmente uma boa prática de programação, mas é especialmente importante ao lidar com números complexos, já que tentar escrever dados de valor complexo em um array de {\tt float}s (como os arrays Numpy são criados por padrão) manterá apenas a parte real e descartará a parte imaginária, quase inevitavelmente levando a um erro mais tarde no código.
+	
+	\item Plote ambos os padrões de radiação usando o seguinte código:\\
+	
+\begin{lstlisting}[frame=single]
+# Cria um objeto figura com tamanho especificado
+FigPolar1 = plt.figure(figsize = (7, 7))
+
+# Cria um objeto "subplot"/eixos com uma grade polar
+EixoPolar1 = FigPolar1.add_subplot(111, polar=True)
+
+# Especifica a direcao 'Norte' como a direcao '0'
+EixoPolar1.set_theta_zero_location("N")  
+
+# Cria um grafico polar nos eixos especificados
+EixoPolar1.plot(phi, rad1)
+
+# Adiciona um titulo ao eixo
+EixoPolar1.set_title("Padrao de Radiacao", size=18)  
+\end{lstlisting}
+	
+	NOTA: Devido aos valores complexos retornados pelas funções, você terá que aplicar a função {\tt np.abs()} aos dados antes de plotá-los.
+	
+	\item Escreva sua própria função para determinar os coeficientes da série de Fourier para ambos os padrões de radiação. Lembre-se de que os coeficientes de Fourier podem ser complexos!	
+	\\ Plote a amplitude e fase dos coeficientes de Fourier obtidos. Considere usar {\tt plt.stem} para plotar valores discretos. Qual é a consequência da simetria em relação a $0^\circ$ do primeiro padrão de radiação?
+	\item Re-sintetize os dois padrões de radiação a partir dos coeficientes de Fourier obtidos e compare os resultados com os originais.
+\end{enumerate}

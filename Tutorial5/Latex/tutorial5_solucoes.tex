@@ -1,0 +1,224 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use the 'listings' package to add code and the 'color' package to generate the highlights
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% set it to Python language highlighting
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% set size of fonts
+	breaklines=true,				% set automatic line breaking
+	linewidth=\textwidth,			% set size of code box
+	showstringspaces=false}			% show spaces as underscores only inside strings
+
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais e Aplicações em Acústica\\ Soluções para Tutorial 5 - Série de Fourier}
+\author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	%\setcounter{section}{1}
+	\section{Síntese de Fourier}
+	\setcounter{subsection}{1}
+	\subsection{Tarefas}
+	1. A Figura \ref{fig:A4} mostra como a nota A4 deve parecer quando sintetizada usando três harmônicos de amplitudes [1, 0.4, 0.2].
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.75\textwidth]{A4.png}
+		\caption{Nota A4 sintetizada usando três harmônicos de amplitudes [1, 0.4, 0.2].}
+		\label{fig:A4}
+	\end{figure}
+	
+	3. O vetor {\tt HarmAmpVect} contém os coeficientes da série de Fourier para a síntese de tom, e ao mudar seu conteúdo estamos mudando o número de harmônicos no tom e suas amplitudes relativas. Poderíamos usar o termo \emph{conteúdo harmônico} para nos referir a essas mudanças também. De uma perspectiva musical, o conteúdo harmônico é parte do que define o \emph{timbre} de uma nota; espera-se que você note os diferentes harmônicos mudando o timbre da melodia.
+	
+	Este tipo de síntese, onde adicionamos harmônicos para mudar um som, é chamado de \emph{síntese aditiva}; este tipo de síntese é usado no órgão eletrônico \emph{Hammond}, por exemplo, onde o artista usa as barras deslizantes para controlar a proporção dos diferentes harmônicos.
+	
+	
+	%\setcounter{section}{1}
+	\section{Análise de Fourier}
+	\setcounter{subsection}{2}
+	\subsection{Tarefas}
+	
+	3. A Figura \ref{fig:rad_patterns} mostra o valor absoluto dos padrões de radiação obtidos das funções.
+	
+	\begin{figure}[h]
+		\centering
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{PadraoRad1.png}
+			\label{fig:rad_pattern1}
+		}
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{PadraoRad2.png}
+			\label{fig:rad_pattern2}
+		}
+		\caption{\protect\subref{fig:rad_pattern1} Padrão de radiação obtido da função {\tt PadraoRadiacao1}, e \protect\subref{fig:rad_pattern2} padrão de radiação obtido da função {\tt PadraoRadiacao2}.}
+		\label{fig:rad_patterns}
+	\end{figure}
+	
+	4. Note que a função para determinar os coeficientes de Fourier do padrão de radiação deve receber como entrada a ordem $N$ da série a ser calculada. Ambas essas funções de radiação foram sintetizadas usando uma série de Fourier de 3a ordem, então espera-se que sua função retorne zero para coeficientes de 4a ordem ou superiores.
+	
+	A Figura \ref{fig:FourierCoeffs} mostra os coeficientes de Fourier obtidos dos padrões de radiação. Note que modificamos os limites dos eixos $x$ e $y$ das figuras para torná-las mais claras.
+	
+	Os coeficientes que obtivemos ao calcular a série de Fourier usando 360 pontos sobre o domínio $(0, 2\pi]$ são:
+	
+	\begin{center}
+		\begin{tabular}{c||c|c}
+			\hline
+			$c_k$ & padrão de radiação 1 & padrão de radiação 2 \\
+			\hline
+			$c_{-3}$ & 0.40 -1.31561428e-16j & -1.00000000e-01 -5.06886200e-17j \\
+			$c_{-2}$ & 0.15 -1.08801856e-16j & 2.12132034e-01 +2.12132034e-01j \\
+			$c_{-1}$ & 0.25 -5.88418203e-17j & 8.74300632e-17 +2.00000000e-01j \\
+			$c_{0}$ & 0.50 -6.24500451e-19j & 3.44169138e-17 -2.80641525e-18j \\
+			$c_{1}$ & 0.25 +5.88418203e-17j & 8.79851747e-17 -2.00000000e-01j \\
+			$c_{2}$ & 0.15 +1.08801856e-16j & 2.12132034e-01 -2.12132034e-01j \\
+			$c_{3}$ & 0.40 +1.31561428e-16j & -1.00000000e-01 +4.95090080e-17j \\
+			\hline
+		\end{tabular}
+	\end{center}
+	
+	Note que números de ponto flutuante de 64 bits (como o Numpy usa para armazenar as partes real e imaginária de um número complexo) têm uma precisão de cerca de $2^{-53} \approx 1.11 \cdot 10^{-16}$; portanto, números de ponto flutuante cuja magnitude está próxima ou menor que $10^{-16}$ estão abaixo da precisão numérica da representação de ponto flutuante e devem ser considerados zero.
+	
+	A consequência de ter um padrão de radiação simétrico em relação a $0^\circ$ é que os coeficientes de Fourier são reais (até a precisão numérica - note a parte imaginária menor que a precisão numérica para os coeficientes do primeiro padrão de radiação na tabela acima).
+	
+	\begin{figure}[h]
+		\centering
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{CoefFourier1.png}
+			\label{fig:FourierCoeff1}
+		}
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{CoefFourier2.png}
+			\label{fig:FourierCoeff2}
+		}
+		\caption{\protect\subref{fig:FourierCoeff1} Coeficientes de Fourier obtidos da função {\tt PadraoRadiacao1}, e \protect\subref{fig:FourierCoeff2} coeficientes de Fourier obtidos da função {\tt PadraoRadiacao2}.}
+		\label{fig:FourierCoeffs}
+	\end{figure}
+	
+	\newpage
+	
+	\section{Apêndice: Gráficos Polares Avançados em Matplotlib/Pyplot}
+	Como apêndice, vamos agora mostrar um trecho de código para demonstrar o método orientado a objetos para plotar figuras polares em Matplotlib/Pyplot; embora mais complicado, este método permite um grau muito maior de controle sobre os parâmetros do gráfico. A Figura \ref{fig:rad_pattern2_edit} mostra o gráfico resultante para o padrão de radiação 2.
+	
+	Leia o código, brinque com os parâmetros e tente entender o que cada comando faz. Comandos orientados a objetos similares também estão disponíveis para os gráficos cartesianos (isto é, não polares), então sinta-se à vontade para procurá-los e usá-los em suas figuras.
+	
+	Este nivel de detalhe \emph{não} é exigido para estes tutoriais, estamos apenas demonstrando o grau de controle que o Matplotlib lhe permite ter sobre as figuras.
+	
+\begin{lstlisting}[frame=single]
+import matplotlib.pyplot as plt
+
+# Cria uma nova figura com um tamanho predefinido
+fig_polar1 = plt.figure(figsize=(7, 7))
+
+# Adiciona um unico "subplot" a figura, usando eixos polares
+ax_polar1 = fig_polar1.add_subplot(111, polar=True)
+
+# Plota os dados no eixo polar
+plot_polar1 = ax_polar1.plot(phi, np.abs(padrao_rad1))
+
+# Adiciona um titulo ao subplot e muda o tamanho da fonte do titulo
+titulo_polar1 = ax_polar1.set_title('Padrao de Radiacao 1', size=18)
+
+# Move o titulo ligeiramente para cima, para que nao se sobreponha ao
+# indicador de 90 graus
+titulo_polar1.set_y(1.09)
+
+# Ativa o 'layout apertado' para remover alguns espacos vazios fora do
+# subplot (tente desativa-lo para observar a diferenca)
+fig_polar1.tight_layout()
+
+
+# Igual a figura anterior - veja acima para detalhes
+fig_polar2 = plt.figure(figsize=(7, 7))
+ax_polar2 = fig_polar2.add_subplot(111, polar=True)
+plot_polar2 = ax_polar2.plot(phi, np.abs(padrao_rad2))
+titulo_polar2 = ax_polar2.set_title('Padrao de Radiacao 2', size=18)
+
+# Define o raio maximo para o grafico polar
+ax_polar2.set_rmax(1)
+
+# Define a posicao 'zero graus' como 'Norte' (ou seja, apontando para cima)
+ax_polar2.set_theta_zero_location('N')
+
+# Define o angulo ('theta') para incrementar na direcao horaria
+ax_polar2.set_theta_direction('clockwise')
+
+# Define as localizacoes das marcacoes de grade na direcao radial e adiciona
+# rotulos a elas. Note que os pontos de grade devem ser estritamente
+# positivos, e eh necessario adicionar um pequeno raio positivo se voce
+# quiser visualizar o marcador zero.
+ax_polar2.set_rgrids([0.0001, 0.2, 0.4, 0.6, 0.8, 1.0],
+                     labels=['0', '0.2', '0.4', '0.6', '0.8', '1.0'],
+                     angle=-88)
+
+# Define as localizacoes das marcacoes de grade na direcao 'theta' e adiciona
+# rotulos em radianos. Esta notacao usa sintaxe LaTeX para exibir
+# simbolos matematicos nas marcacoes de grade; nao se preocupe caso voce nao
+# conheca LaTeX, o resultado eh puramente estetico.
+#
+# O comando 'frac=1.1' diz para adicionar os rotulos um pouco mais longe dos
+# eixos do que o padrao, para fins de legibilidade (o padrao eh 'frac=1').
+ax_polar2.set_thetagrids([0, 45, 90, 135, 180, 225, 270, 315],
+                         labels=[r'$\theta = 0$', r'$+\frac{\pi}{4}$',
+                                 r'$+\frac{\pi}{2}$', r'$+\frac{3\pi}{4}$',
+                                 r'$\pm \pi$', r'$-\frac{3\pi}{4}$',
+                                 r'$-\frac{\pi}{2}$', r'$-\frac{\pi}{4}$'],
+                         size=18)
+
+# Escreve uma linha de texto no grafico; os primeiros dois parametros sao as
+# coordenadas (x, y) [ou, neste caso, as coordenadas (r, theta)] para o
+# inicio da primeira letra do texto, o terceiro parametro eh a string de
+# texto em si, e o quarto parametro controla o tamanho da fonte.
+ax_polar2.text(-1.1*np.pi/2, 0.7, 'Magnitude', size=18)
+
+# Move o titulo ligeiramente para cima, para que nao se sobreponha ao
+# indicador 'theta = 0'
+titulo_polar2.set_y(1.09)
+
+
+\end{lstlisting}
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.75\textwidth]{PadraoRad2_edit.png}
+		\caption{Gráfico alternativo do padrão de radiação 2.}
+		\label{fig:rad_pattern2_edit}
+	\end{figure}
+	
+\end{document}
