@@ -33,7 +33,7 @@ https://github.com/fchirono/Aulas_PDS_Acustica
 
 Autor:
     Fabio Casagrande Hirono
-    Fev 2025
+    Fev 2026
 """
 
 import time
