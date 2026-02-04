@@ -1,6 +1,7 @@
 # Processamento Digital de Sinais e Aplicações em Acústica - Teoria e Exemplos Computacionais
 
 https://github.com/fchirono/Aulas_PDS_Acustica
+
 **Autor**: Fabio Casagrande Hirono, 2026
 
 Material de ensino aberto e gratuito, voltado para cursos de graduação e pós-graduação em Engenharias. O objetivo deste material é apresentar princípios básicos de Processamento Digital de Sinais, com ênfase em aplicações em acústica e áudio, para o público brasileiro.
