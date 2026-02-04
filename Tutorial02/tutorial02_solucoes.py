@@ -1,5 +1,5 @@
 """
-Exemplo de solucoes para o Tutorial 2 de Processamento Digital de Sinais e Aplicações em Acústica
+Exemplo de solucoes para o Tutorial 02 de Processamento Digital de Sinais e Aplicações em Acústica
 
 https://github.com/fchirono/Aulas_PDS_Acustica
 
@@ -18,8 +18,8 @@ import tutorial2_funcoes as Tutorial2
 plt.close('all')  # fecha todas as figuras abertas
 
 # define se devemos salvar as figuras e arquivos WAV
-salvar_figuras = True
-salvar_wav = True
+salvar_figuras = False
+salvar_wav = False
 
 
 # %% Tutorial 1.1 - 1.3 - Gerando e plotando sinais

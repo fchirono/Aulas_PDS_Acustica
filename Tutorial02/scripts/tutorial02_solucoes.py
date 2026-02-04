@@ -1,5 +1,5 @@
 """
-Exemplo de solucoes para o Tutorial 2 de Processamento Digital de Sinais e Aplicações em Acústica
+Exemplo de solucoes para o Tutorial 02 de Processamento Digital de Sinais e Aplicações em Acústica
 
 https://github.com/fchirono/Aulas_PDS_Acustica
 

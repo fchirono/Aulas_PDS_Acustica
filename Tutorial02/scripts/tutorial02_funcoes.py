@@ -1,5 +1,5 @@
 """
-Funcoes usadas no Tutorial 2 de Processamento Digital de Sinais e Aplicações em Acústica
+Funcoes usadas no Tutorial 02 de Processamento Digital de Sinais e Aplicações em Acústica
 
 https://github.com/fchirono/Aulas_PDS_Acustica
 
