@@ -1,0 +1,33 @@
+\section{OPCIONAL: Convolução Overlap-Add}
+A convolução tipo sobreposição-e-soma (\emph{Overlap-Add}) é uma implementação da convolução adequada para aplicações em tempo real porque divide o sinal de entrada em quadros relativamente pequenos e, em seguida, executa uma convolução para cada quadro para adicioná-los posteriormente.
+
+\subsection{Revisão}
+Para aplicar o método Overlap-Add, a sequência $x[n]$ definida na Seção \ref{sec:SignalDefs} precisa ser subdividida em quadros com o comprimento escolhido $N$:
+\begin{equation*}
+	x_k[n] =
+	\begin{cases}
+		x[n+k\cdot N], &  n=0\ldots N-1 \\
+		0, & \textrm{caso contrário},
+	\end{cases}
+\end{equation*}
+onde $k$ denota o índice do quadro. O número total $K$ de quadros é $K=\lceil \frac{L}{N}\rceil$, onde $\lceil\cdot\rceil$ denota o primeiro inteiro maior que o argumento.
+
+\par Isso então leva a
+\begin{equation*}
+	x[n] = \sum_{k=0}^{K-1}x_k[n-k\cdot N].
+\end{equation*}
+
+Esta subdivisão de $x[n]$ permite realizar a convolução para cada quadro individualmente para depois recombiná-los, em vez de executar uma única convolução longa. O resultado da convolução é então dado por
+\begin{equation*}
+	y[n] = \left(\sum_{k=0}^{K-1}x_k[n-k\cdot N]\right)\ast h[n] = \sum_{k=0}^{K-1}\sum_{m=0}^{M-1}h[m]\cdot x_k[n-k\cdot N-m]=\sum_{k=0}^{K-1}y_k[n-k\cdot N].
+\end{equation*}
+
+\subsection{Tarefas}
+\begin{enumerate}
+	\item Gere um vetor {\tt x} de comprimento {\tt L = 100}, contendo apenas o valor $1$ em todos os elementos. Em seguida, gere um vetor {\tt h=[1, 1, 1, 1]}, representando a resposta ao impulso de um sistema.
+	\item Divida {\tt x} em quadros de comprimento {\tt N=10} e salve-os em uma matriz {\tt X}.
+	\item Faça a convolução de cada vetor linha de {\tt X} com a resposta ao impulso {\tt h}, usando sua função {\tt convdft}, e salve os resultados em uma segunda matriz {\tt Y}. Certifique-se de que {\tt Y} tem as dimensões apropriadas.
+	\item Finalmente, componha o sinal {\tt y} a partir da matriz {\tt Y}, usando o método Overlap-Add. Você pode verificar seus resultados de sua convolução Overlap-Add comparando-a com uma convolução de bloco único usando {\tt numpy.convolve()}.
+	\item Refaça as tarefas 2-4 usando {\tt N = 52}. Observe as implicações disso, já que o último quadro do sinal será mais curto que {\tt N}.
+	\item Escreva uma função {\tt y = OverlapAdd(x, h, N\_DFT)} executando a convolução de {\tt x} e {\tt h} com o método Overlap-Add. Certifique-se de que ela pode lidar com sinais que não podem ser divididos exatamente em quadros de comprimento {\tt N}. Note que {\tt N} é definido de forma única como $N = N_\textrm{DFT} - M + 1$.
+\end{enumerate}

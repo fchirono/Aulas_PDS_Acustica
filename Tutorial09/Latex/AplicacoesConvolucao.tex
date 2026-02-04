@@ -1,0 +1,9 @@
+\section{Aplicações de Convolução}
+A convolução pode ser usada para implementar reverberação artificial de um sinal gravado em condições \emph{anecóicas} usando uma resposta ao impulso medida em um espaço acústico.
+
+\subsection{Tarefas}
+\begin{enumerate}
+	\item Leia o arquivo de áudio {\tt C4DM\_GreatHall\_Omni\_x00y05.wav} \footnote{Obtido em \url{http://isophonics.net/content/room-impulse-response-data-set}}, que contém uma resposta ao impulso medida em um salão, e escolha um sinal de entrada: o arquivo {\tt voz.wav} ou o arquivo {\tt cuica.wav}. A frequência de amostragem é de 48 kHz nos três casos. Plote a resposta ao impulso e pense sobre o que pode ter causado as principais características no gráfico entre 0s e 0,25 s.
+	\item Execute a convolução dos arquivos de áudio escolhidos usando sua função {\tt convdft()} e {\tt numpy.convolve()}. \textbf{Aviso}: Dependendo do desempenho do computador no qual o script é executado, este processo pode levar até vários minutos.
+	\item Auralize o sinal de saída e ouça o efeito resultante.
+\end{enumerate}

@@ -1,0 +1,14 @@
+\section{Convolução}
+\subsection{Revisão}\label{sec:SignalDefs}
+Dado um sinal de tempo discreto $x[n]$ de comprimento $L$ amostras, e um segundo sinal de tempo discreto $h[n]$ de comprimento $M$, a convolução $y[n]$ de $x[n]$ e $h[n]$ é definida como
+\begin{equation}\label{eq:convolution}
+	y[n] = x[n] \ast h[n] = \sum_{m=0}^{M-1}h[m]\cdot x[n-m].
+\end{equation}
+
+\subsection{Tarefas}
+\begin{enumerate}
+	\item Questão teórica: sejam {\tt x} e {\tt h} vetores de comprimento {\tt L=100} e {\tt M=4}, respectivamente. Qual será o comprimento do vetor {\tt y} resultante da convolução de {\tt x} e {\tt h}? Forneça uma solução geral para o comprimento {\tt Q} de {\tt y}.
+	\item Escreva uma função Python {\tt y = convtempo(x, h)} que implemente a equação (\ref{eq:convolution}) (não use a DFT!).
+	\item Escreva uma segunda função {\tt y = convdft(x, h)} para realizar a convolução com DFT usando a função DFT que você criou no Tutorial 3. Lembre-se de que o número de pontos da DFT deve ser igual ao comprimento da saída. Se houver problemas com sua função DFT, use a funçã {\tt numpy.fft.fft()}.
+	\item Teste as funções criadas nas Tarefas 2 e 3 usando {\tt x = [3, 4, 5]} e {\tt h = [1, 2, 3, 4]} como entradas. O pacote Numpy fornece a função {\tt numpy.convolve()} para realizar uma convolução. Compare as saídas das três funções. Elas são idênticas?
+\end{enumerate}

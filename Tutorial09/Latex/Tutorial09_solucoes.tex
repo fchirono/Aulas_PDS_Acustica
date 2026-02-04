@@ -1,0 +1,114 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use the 'listings' package to add code and the 'color' package to generate the highlights
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% set it to Python language highlighting
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% set size of fonts
+	breaklines=true,				% set automatic line breaking
+	linewidth=\textwidth,			% set size of code box
+	showstringspaces=false}			% show spaces as underscores only inside strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Soluções para Tutorial 09 - Convolução}
+\author{\href{https://github.com/fchirono/AulasDSP}{Fabio Casagrande Hirono}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+
+%\setcounter{section}{1}
+\section{Convolução}\label{sec:Convolution}
+\setcounter{subsection}{1}
+
+\subsection{Tarefa 1}
+A solução é $Q = L + M - 1 = 103$.
+
+\subsection{Tarefa 2}
+- 
+
+\subsection{Tarefa 3}
+- 
+
+\subsection{Tarefa 4}
+Os três resultados devem mostrar a mesma saída, pelo menos até a precisão numérica do sistema.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.6\textwidth]{VariantesConv.png}
+	\caption{Resultados da convolução para a implementação no domínio do tempo, no domínio DFT e a função {\tt numpy.convolve()}.}
+\end{figure}
+
+\section{Aplicações de Convolução}
+\subsection{Tarefa 1}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = 0.6\textwidth]{RespImpulso.png}
+	\caption{Gráfico da resposta ao impulso.}
+\end{figure}
+
+Você pode ver as primeiras reflexões discretas causadas por superfícies refletoras (paredes), seguidas pela curva de de.
+
+\subsection{Tarefas 2-3}
+É fortemente aconselhável usar a função {\tt convdft}, pois é muito mais rápida que a função {\tt convtime}. Você pode economizar mais algum tempo usando apenas alguns segundos do sinal de fala. As saídas dos métodos de convolução devem ser todas iguais. O efeito de reverberação que foi adicionado pela convolução do sinal com a resposta ao impulso dada deve ser claramente audível. Lembre-se de que os arrays Numpy devem ter sua amplitude normalizada antes de serem convertidos para arquivos {\tt.wav} para evitar distorção!
+
+\section{Convolução Overlap-Add}
+
+\subsection{Tarefa 1}
+-
+
+\subsection{Tarefa 2}
+O resultado da operação deve produzir uma matriz $10 \times 10$ {\tt X} com os valores do vetor {\tt x}. Isso pode ser alcançado simplesmente lendo fragmentos de comprimento {\tt N = 10} de {\tt x} e escrevendo-os nas linhas de {\tt X}.
+
+\subsection{Tarefa 3}
+Certifique-se de inicializar a matriz {\tt Y} com as dimensões corretas. As linhas de {\tt Y} são mais longas do que as linhas de {\tt X} para acomodar os fragmentos estendidos obtidos da convolução (veja Seção \ref{sec:Convolution}).
+
+\subsection{ Tarefa 4}
+Aqui é importante entender que você tem que \textbf{somar} cada fragmento de {\tt Y} ao segmento correspondente do vetor {\tt y}, para garantir que contribuções ao final do segmento anterior tenham um efeito no segmento atual. (É por isso que o método se chama ``Overlap-Add''!)
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.6\textwidth]{OverlapAdd.png}
+	\caption{Resultados da convolução para a implementação Overlap-Add.}
+\end{figure}
+
+\subsection{Tarefa 5}
+%Aqui é importante inicializar {\tt Y} com zeros, de modo que quando o segundo quadro for escrito, você apenas altere as primeiras 48 amostras da segunda linha em {\tt Y}.
+Novamente, certifique-se de inicializar a matriz {\tt Y} com as dimensões corretas para o problema.
+
+\end{document}
