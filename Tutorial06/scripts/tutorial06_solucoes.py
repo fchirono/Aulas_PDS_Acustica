@@ -1,5 +1,5 @@
 """
-Exemplo de solução para o Tutorial 6 de Processamento Digital de Sinais e Aplicações em Acústica
+Exemplo de solução para o Tutorial 06 de Processamento Digital de Sinais e Aplicações em Acústica
 
 https://github.com/fchirono/Aulas_PDS_Acustica
 
@@ -154,7 +154,7 @@ plt.ylabel('Magnitude')
 plt.grid()
 plt.tight_layout()
 if save_figs:
-    plt.savefig('Periodic_DTFT.png')
+    plt.savefig('DTFT_periodica.png')
 
 # %% Parte 2 : DFT
 
@@ -174,8 +174,7 @@ plt.ylabel('Amplitude')
 plt.xlim([-1, L+1])
 plt.ylim([1.2*ruido.min(), 1.2*ruido.max()])
 #plt.title('Sinal Aleatório Discreto')
-if save_figs:
-    plt.savefig('time_signal.png')
+
 
 plt.figure()
 plt.subplot(211)
@@ -209,7 +208,7 @@ plt.ylim([-4, 4])
 plt.xlim([-1, 21])
 plt.tight_layout()
 if save_figs:
-    plt.savefig('DFT_Lminus1.png')
+    plt.savefig('DFT_Lmenos1.png')
 
 plt.figure()
 plt.subplot(211)
@@ -226,7 +225,7 @@ plt.ylim([-4, 4])
 plt.xlim([-1, 21])
 plt.tight_layout()
 if save_figs:
-    plt.savefig('DFT_Lplus1.png')
+    plt.savefig('DFT_Lmais1.png')
 
 
 # %%

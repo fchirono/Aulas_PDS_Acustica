@@ -44,7 +44,7 @@
 	linewidth=\textwidth,			% set size of code box
 	showstringspaces=false}			% show spaces as underscores only inside strings
 
-\title{\vspace{-2cm} Processamento Digital de Sinais e Aplicações em Acústica\\ Soluções para Tutorial 6 - Transformada de Fourier de Tempo Discreto (DTFT) e Transformada Discreta de Fourier (DFT)}
+\title{\vspace{-2cm} Processamento Digital de Sinais e Aplicações em Acústica\\ Soluções para Tutorial 06 - Transformada de Fourier de Tempo Discreto (DTFT) e Transformada Discreta de Fourier (DFT)}
 \author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
 
 \begin{document}
@@ -99,14 +99,14 @@ Ver Figura \ref{fig:DTFTA1Hz}.
 \end{figure}
 
 \subsection*{Tarefa 8}
-Devido à periodicidade da DTFT, o espectro de amplitude se repete nos intervalos $[-3\pi, -\pi]$ e $[\pi,3\pi]$, conforme visto na Figura \ref{fig:PeriodicDTFT}.
+Devido à periodicidade da DTFT, o espectro de amplitude se repete nos intervalos $[-3\pi, -\pi]$ e $[\pi,3\pi]$, conforme visto na Figura \ref{fig:DTFT_periodica}.
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width = \textwidth,clip = true, trim = 0.5cm 0.2cm 0.5cm 0.2cm]{Periodic_DTFT.png}
+	\includegraphics[width = \textwidth,clip = true, trim = 0.5cm 0.2cm 0.5cm 0.2cm]{DTFT_periodica.png}
 	\vskip-14pt
 	\caption{DTFT do sinal {\tt A1.wav} plotado no intervalo $[-3\pi,3\pi]$ rad/amostra.}
-	\label{fig:PeriodicDTFT}
+	\label{fig:DTFT_periodica}
 \end{figure}
 
 Como o número de elementos em {\tt Omega} é o mesmo mas a faixa de frequência triplicou, a resolução em frequência é apenas um terço da resolução anterior, resultando em $\Delta f=\frac{3f_S}{4096 - 1}=16.15$ Hz $= 0.0046$ rad/amostra.
@@ -156,18 +156,15 @@ As três subfiguras na Figura \ref{fig:DFT} mostram o resultado para a magnitude
 \begin{figure}[h!]
 	\centering
 	\subfloat[$N_\textrm{DFT}=L$]{\label{subfig:DFT_L}
-		%\includegraphics[width = 0.33\textwidth,clip = true,trim = 1cm 0cm 1cm 0cm]{DFT_L.png}
 		\includegraphics[width = 0.33\textwidth]{DFT_L.png}
 	}
 	~
 	\subfloat[$N_\textrm{DFT}=L-1$]{
-		%\includegraphics[width = 0.33\textwidth,clip = true,trim = 1cm 0cm 1cm 0cm]{DFT_Lminus1.png}
-		\includegraphics[width = 0.33\textwidth]{DFT_Lminus1.png}
+		\includegraphics[width = 0.33\textwidth]{DFT_Lmenos1.png}
 	}
 	~
 	\subfloat[$N_\textrm{DFT}=L+1$]{
-		%\includegraphics[width = 0.33\textwidth,clip = true,trim = 1cm 0cm 1cm 0cm]{DFT_Lplus1.png}
-		\includegraphics[width = 0.33\textwidth]{DFT_Lplus1.png}
+		\includegraphics[width = 0.33\textwidth]{DFT_Lmais1.png}
 	}
 	\caption{DFT da sequência aleatória {\tt ruido} para os três valores de  {\tt N\_DFT}.}
 	\label{fig:DFT}
