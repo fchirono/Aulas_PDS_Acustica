@@ -1,0 +1,154 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use o pacote 'listings' para adicionar código e o pacote 'color' para gerar os destaques
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% definir para destaque de linguagem Python
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% definir tamanho das fontes
+	breaklines=true,				% definir quebra de linha automática
+	linewidth=\textwidth,			% definir tamanho da caixa de código
+	showstringspaces=false}			% mostrar espaços como sublinhados apenas dentro de strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Tutorial 10 - Espectro de Potência}
+\author{\href{https://github.com/fchirono/AulasDSP}{Fabio Casagrande Hirono}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	\section*{Objetivo de Aprendizagem}
+	Ao final desta sessão, você será capaz de:
+	\begin{itemize}
+		\item Estimar o espectro de potência cruzado e auto-espectro de potência de sequências em tempo discreto
+		\item Usar o espectro de potência cruzado e auto-espectro para estimar a resposta em frequência e as funções de resposta ao impulso de sistemas lineares, invariantes no tempo (LTI).
+	\end{itemize}
+	
+	\begingroup
+	\let\clearpage\relax
+	\tableofcontents
+	\endgroup
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Revisão}
+	\subsection{Estimação do espectro de potência cruzado e auto-espectro usando o método de Welch}
+	
+	Sejam $x[n]$ e $y[n]$, $n = 0, \ldots, K-1$ duas sequências em tempo discreto. Estas duas sequências são divididas em $L$ quadros de comprimento $N_{DFT}$, com $N_{sobreposicao}$ amostras sobrepostas entre quadros adjacentes. Para o $l$-ésimo quadro, $l = 0, \ldots, L-1$, a estimativa do espectro de potência cruzado discreto $\widetilde{P}_{xy}^{(l)}(\Omega)$ é calculada como
+	
+	\begin{equation}
+		\widetilde{P}_{xy}^{(l)}(\Omega) = \frac{1}{N_{DFT} \cdot U} X_w^{(l)}(\Omega ) \left[ Y_w^{(l)}(\Omega ) \right]^*,
+	\end{equation}
+	
+	\begin{equation}
+		\widetilde{P}_{xy}^{(l)}(\Omega) = \frac{1}{N_{DFT} \cdot U} \sum_{n=0}^{N_{DFT}-1} w[n] x[n+lD] e^{-j \Omega n} \left[ \sum_{m=0}^{N_{DFT}-1} w[m] y[m+lD] e^{-j \Omega m} \right]^*,
+	\end{equation}
+	
+	\noindent onde $\Omega$ é a frequência angular normalizada, $X^{(l)}(\Omega )$ e $Y^{(l)}(\Omega )$ são as DFT das sequências $x[n]$ e $y[n]$ no $l$-ésimo quadro, $w[n]$ é uma sequência de ``janela'' de comprimento $N_{DFT}$, $U = \frac{1}{N_{DFT}} \sum_{n=0}^{N_{DFT}-1} w^2[n]$ é um fator de normalização da janela, e $D = N_{DFT} - N_{sobreposicao}$.
+	
+	O número de quadros pode ser calculado como
+	
+	\begin{equation}
+		L = \frac{K-N_{sobreposicao}}{N_{DFT}-N_{sobreposicao}}.
+	\end{equation}
+	
+	O espectro de potência cruzado discreto $P_{xy}(\Omega)$ é calculado como
+	
+	\begin{equation}
+		P_{xy}(\Omega) = \frac{1}{L} \sum_{l=0}^{L-1} \widetilde{P}_{xy}^{(l)}(\Omega).
+	\end{equation}
+	
+	Similarmente, o auto-espectro de potência $P_{xx}(\Omega)$ da sequência $x[n]$ é definido como
+	
+	\begin{equation}
+		P_{xx}(\Omega) = \frac{1}{L} \sum_{l=0}^{L-1} \widetilde{P}_{xx}^{(l)}(\Omega) = \frac{1}{L} \frac{1}{N \cdot U}  \sum_{l=0}^{L-1} X_w^{(l)}(\Omega ) \left[ X_w^{(l)}(\Omega ) \right]^*
+	\end{equation}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Coerência entre dois sinais (usando os espectros de potência)}
+	
+	A função de coerência ao quadrado entre dois sinais é definida como
+	
+	\begin{equation}
+		\gamma^2 (\Omega) = \frac{|P_{xy} (\Omega)|^2}{P_{xx}(\Omega) P_{yy}(\Omega)}.
+	\end{equation}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Estimação da função de transferência usando o estimador H1}
+	
+	A estimação da função de transferência $\widetilde{H}(\Omega)$ de um sistema LTI pode ser obtida pelo estimador $H_1$:
+	
+	\begin{equation}
+		\widetilde{H}(\Omega) = \frac{P_{yx}(\Omega)}{P_{xx}(\Omega)}.
+	\end{equation}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Tarefas}
+	\begin{enumerate}
+		\item Carregue a função de resposta em frequência {\tt H\_sys}, a resposta ao impulso {\tt h\_sys} e o comprimento da DFT {\tt N\_dft} fornecidos no arquivo {\tt tutorial10.mat}. Esta resposta em frequência é uma função unilateral - ou seja, é dada apenas para $\Omega \in [0, \pi]$ rad/amostra - e foi obtida com uma frequência de amostragem de $f_s = 44100$ Hz. Calcule o vetor de frequência equivalente $f$ correspondente aos pontos da resposta em frequência, e plote a magnitude da resposta em frequência obtida.
+		
+		\item Calcule a resposta ao impulso {\tt h\_sys} a partir da função de resposta em frequência dada. Para fazer isso, assuma que a resposta ao impulso é uma função de valor real. Você portanto terá que complementar a resposta em frequência dada para obter uma função bilateral.
+		
+		\item Crie um sinal de ruído branco {\tt x} de comprimento $K = 44100$ amostras e calcule a convolução $x[n] \ast h[n] = y[n]$ usando as funções que você criou durante o Tutorial 4. Se você não estiver confiante sobre sua própria função, você também pode usar a função {\tt numpy.convolve()}. 
+		
+		\item Crie uma função Python para estimar o espectro cruzado {\tt Pxy = esp\_cruzado(x, y, win, N\_dft)} entre os sinais {\tt x} e {\tt y} usando o método de Welch sem sobreposição (ou seja, $D = N_{DFT}$), e valores padrão de {\tt win=scipy.signal.hann(N\_dft)} e {\tt N\_dft=4096}. Note que o auto-espectro {\tt Pxx} de um sinal {\tt x} pode ser estimado usando a função {\tt esp\_cruzado} com o sinal {\tt x} fornecido duas vezes como entrada.
+		
+		\item Usando a função {\tt esp\_cruzado} para calcular as quantidades apropriadas, compute e plote a coerência entre o sinal de entrada {\tt x} (ruído branco) e a saída do sistema {\tt y}.
+		
+		\item Crie uma função {\tt est\_sistema(x, y, N\_dft)} para estimar a função de resposta em frequência $H(\Omega)$ e a resposta ao impulso $h[n]$ do sistema usando o estimador $H_1$; esta função deve retornar uma tupla {\tt (h, H)} contendo os vetores de resposta ao impulso e resposta em frequência. Compare os resultados com os {\tt H\_sys} e {\tt h\_sys} originais carregados do arquivo {\tt tutorial10.mat}.
+		
+		\item Agora vamos analisar o caso de um sistema com ruído aditivo na saída. Gere um sinal de ruído branco {\tt z} do mesmo comprimento que {\tt y}. Multiplique-o por um ganho dado $\alpha$ (digamos, $\alpha = 0.5$) e calcule
+		
+		\begin{equation}
+			\tilde{y}[n] = x[n] \ast h[n] + \alpha \cdot z[n],
+		\end{equation}
+		
+		onde $\ast$ indica o operador de convolução. Repita a estimativa da FRF e IR e inspecione a função de coerência. Como isso se compara aos resultados obtidos no ponto anterior? 
+		
+		\item Repita os passos 3 e 6 no caso de $h[n] = \delta[n-M]$. Estude a coerência e a precisão do estimador de resposta do sistema nos seguintes casos:
+		\begin{enumerate}
+			\item $M = 200$, $N_{DFT} = 2^{12}$ ($M \ll N_{DFT}$);
+			\item $M = 1000$, $N_{DFT} = 2^{12}$ ($M < N_{DFT}$);
+			\item $M = 6000$, $N_{DFT} = 2^{12}$ ($M > N_{DFT}$).
+		\end{enumerate}
+		Qual efeito o valor de {\tt M} tem no resultado para a coerência? Pense no porquê o resultado deve ser diferente em (c).
+		
+		\item Modifique a função {\tt esp\_cruzado} para permitir que o usuário defina um parâmetro extra {\tt N\_sobreposicao} que define o número de pontos de sobreposição na estimação espectral; você pode defini-lo como um parâmetro opcional, com um valor padrão de zero amostras.
+	\end{enumerate}
+	
+\end{document}

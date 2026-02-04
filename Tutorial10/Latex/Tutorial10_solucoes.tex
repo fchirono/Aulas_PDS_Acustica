@@ -1,0 +1,156 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use o pacote 'listings' para adicionar código e o pacote 'color' para gerar os destaques
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% definir para destaque de linguagem Python
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% definir tamanho das fontes
+	breaklines=true,				% definir quebra de linha automática
+	linewidth=\textwidth,			% definir tamanho da caixa de código
+	showstringspaces=false}			% mostrar espaços como sublinhados apenas dentro de strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Soluções para Tutorial 10 - Espectro de Potência}
+\author{\href{https://github.com/fchirono/AulasDSP}{Fabio Casagrande Hirono}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	
+	%\setcounter{section}{1}
+	\section{Tarefas}
+	
+	\subsection{Tarefa 1}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{RespFreqT1.png}
+		\caption{Magnitude da Resposta em Frequência conforme extraída do arquivo {\tt tutorial10.mat}.}
+		\label{fig:RespFreqT1}
+	\end{figure}
+	
+	\subsection{Tarefa 2}
+	Complementar os dados da resposta em frequência fornecida de modo que corresponda ao resultado da DFT de um sinal no domínio do tempo de valor real produz a resposta ao impulso representada na Figura \ref{fig:RI_reconstruida}.
+
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{RI_T2.png}
+		\caption{As primeiras 11 amostras da resposta ao impulso conforme foi reconstruída a partir da resposta em frequência fornecida.}
+		\label{fig:RI_reconstruida}
+	\end{figure}
+
+	Note que apenas as primeiras 11 amostras da resposta ao impulso estão representadas no gráfico de hastes.
+	
+	\subsection{Tarefa 3}
+	-
+	
+	\subsection{Tarefa 4}
+	-
+	
+	\subsection{Tarefa 5}
+	A coerência entre o sinal de ruído branco {\tt x} e a saída do sistema {\tt y} é apresentada na Figura \ref{fig:Coerencia_T5}.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{Coerencia_T5.png}
+		\caption{Função de coerência entre o ruído branco de entrada {\tt x} e o sinal na saída do sistema {\tt y}.}
+		\label{fig:Coerencia_T5}
+	\end{figure}
+	
+	A razão para a coerência despencar em torno de duas frequências além de $f=10$ kHz pode ser encontrada na resposta em frequência do sistema na Figura \ref{fig:RespFreqT1}. As duas frequências são precisamente aquelas onde o sistema tem a menor magnitude de resposta.
+	
+	\subsection{Tarefa 6}
+	Pode-se observar nas Figuras \ref{fig:RespFreqT6} e \ref{fig:RespImpT6} que as estimativas mostram uma correspondência razoavelmente boa (embora não perfeita) com o sistema original.
+	
+	\begin{figure}[h!]
+		\centering
+		\subfloat[Respostas em frequência conforme fornecidas pelos dados originais e pela estimativa obtida pelo método H1.]{\label{fig:RespFreqT6}
+			\includegraphics[width = 0.75\textwidth]{RespFreqT6.png}
+		}
+		\\
+		\subfloat[Respostas ao impulso conforme fornecidas pelos dados originais e pela estimativa obtida pelo método H1.]{\label{fig:RespImpT6}
+			\includegraphics[width = 0.75\textwidth]{RespImpT6.png}
+		}
+		\caption{Respostas ao Impulso e em Frequência fornecidas pelos dados originais e pelo estimador H1.}
+	\end{figure}
+	
+	\subsection{Tarefa 7}
+	Pode-se observar da estimativa obtida de dados ruidosos, que embora as primeiras 11 amostras da IR pareçam não ser muito diferentes da estimativa anterior feita a partir de dados limpos (veja Fig. \ref{fig:RespImpT6} e \ref{fig:RespImpT7}), a resposta em frequência (veja Fig. \ref{fig:RespFreqT7}) mostra impacto substancial. Isso pode ser explicado ao observar a IR identificada completa, que mostra muito ruído na parte da IR além da 11ª amostra. Precisamente este ruído é a razão para a qualidade degradada da resposta em frequência.
+	
+	\begin{figure}[h!]
+		\centering
+		\subfloat[Respostas em frequência conforme fornecidas pelos dados originais e estimadas com o método H1 com dados limpos e com dados ruidosos.]{
+			\includegraphics[width = 0.75\textwidth]{RespFreqT7.png}
+			\label{fig:RespFreqT7}
+		}
+		\\
+		\subfloat[Estimativa de resposta ao impulso obtida pelo método H1 com dados ruidosos.]{
+			\includegraphics[width = 0.75\textwidth]{RespImpT7.png}
+			\label{fig:RespImpT7}
+		}
+		\caption{Respostas em Frequência e ao Impulso obtidas pelo estimador H1 com dados ruidosos.}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\subfloat[Erro de Estimação da IR]{
+			\includegraphics[width = 0.75\textwidth]{ErroEstimacaoT7.png}
+		}
+		\\
+		\subfloat[Coerência entre entrada e saída ruidosa]{
+			\includegraphics[width = 0.75\textwidth]{Coerencia_T7.png}
+		}
+		\caption{Erro de estimação da Resposta ao Impulso e Coerência obtidos pelo estimador H1 com dados ruidosos.}
+	\end{figure}
+	
+	\subsection{Tarefa 8}
+	Os resultados são exibidos nas Figuras \ref{fig:RespFreqT8} e \ref{fig:Coerencia_T8}. Como pode ser esperado, a estimação da resposta em frequência para {\tt M = 200} é razoavelmente boa. Para {\tt M=1000} o atraso relativamente grande da IR causa uma coerência ligeiramente pior entre os dados de entrada e saída, o que também afeta a precisão da estimativa da FRF. Para o caso de {\tt M=6000} a coerência despenca em direção a zero, mostrando que a estimativa da FRF obtida deve ser considerada nada mais que ruído. Isso é facilmente compreendido já que o atraso é tão grande que não será identificado dentro do quadro de observação dado. Isso também é o que causa a queda da coerência em direção a zero.
+	\begin{figure}[h!]
+		\centering
+		\subfloat[Respostas em frequência obtidas da estimação H1 para vários valores de {\tt M}.]{\label{fig:RespFreqT8}
+			\includegraphics[width = 0.75\textwidth]{RespFreqT8.png}
+		}
+		\\
+		\subfloat[Coerência entre sinais de entrada e saída para vários valores de {\tt M}.]{\label{fig:Coerencia_T8}
+			\includegraphics[width = 0.75\textwidth]{Coerencia_T8.png}
+		}
+		\caption{Efeito do parâmetro {\tt M}.}
+	\end{figure}
+	
+\end{document}
+
