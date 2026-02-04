@@ -1,0 +1,420 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use o pacote 'listings' para adicionar código e o pacote 'color' para gerar os destaques
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% define para destaque de linguagem Python
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% define tamanho das fontes
+	breaklines=true,				% define quebra automática de linha
+	linewidth=\textwidth,			% define tamanho da caixa de código
+	showstringspaces=false}			% mostra espaços como sublinhados apenas dentro de strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Soluções Propostas para Tutorial 13 - Filtros de Resposta ao Impulso Infinita (IIR)}
+\author{\url{https://github.com/fchirono/AulasDSP}}
+
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\setcounter{section}{1}
+	\section{Removendo uma Perturbação de um Sinal de Áudio}
+	
+	Para projetar um conjunto de filtros para uma dada tarefa, é importante definir primeiro quais são os parâmetros de desempenho desejados. Como visto no Tutorial anterior, o sinal de música {\tt BetterDaysAheadT.wav} contém uma perturbação tonal de 4 kHz, então foi decidido que um parâmetro importante do filtro era uma forte atenuação nessa frequência: escolhemos ter uma resposta de faixa de rejeição de pelo menos $-40$ dB em 4 kHz em todos os filtros (passa-baixas e passa-altas), enquanto a resposta da faixa de passagem seria uma atenuação máxima de $-3$ dB em 3 kHz para os filtros passa-baixas e $-3$ dB em 5 kHz para os filtros passa-altas. Para os filtros Chebyshev Tipo 1, escolhemos ter uma atenuação máxima de $-3$ dB na faixa de passagem, e para os filtros Chebyshev Tipo 2 escolhemos ter uma atenuação mínima de $-40$ dB na faixa de rejeição.
+	
+	Deve-se notar que os valores descritos acima foram escolhidos de forma um pouco arbitrária: escolhas diferentes produziriam diferentes parâmetros e desempenho de filtros, que não são necessariamente errados.
+	
+	Podemos estimar a ordem do filtro e a frequência de corte que satisfazem os requisitos acima usando as funções {\tt scipy.signal.buttord}, {\tt scipy.signal.cheb1ord} e {\tt scipy.signal.cheb2ord} para filtros Butterworth, Chebyshev Tipo 1 e Chebyshev Tipo 2, respectivamente; para mais informações sobre como usar essas funções, veja o Guia de Referência de Processamento de Sinais do SciPy\footnote{\url{http://docs.scipy.org/doc/scipy/reference/signal.html}}.
+	
+	Com a ordem do filtro e a frequência de corte (e valores de atenuação de faixa de passagem/rejeição para os tipos Chebyshev), podemos obter os coeficientes polinomiais da função de transferência do filtro usando as funções {\tt scipy.signal.butter}, {\tt scipy.signal.cheby1} e {\tt scipy.signal.cheby2}, conforme descrito nas instruções do Tutorial.
+	
+	Entretanto, essas funções podem produzir resultados sem sentido se os requisitos de desempenho forem muito rigorosos para uma dada topologia de filtro. Os polinômios da função de transferência são propensos a erros de arredondamento numérico, que podem mover os polos para fora do círculo unitário, resultando em um filtro instável. Portanto, é importante sempre verificar as características do filtro no diagrama polo-zero e no domínio do tempo (resposta ao impulso), bem como no domínio da frequência.
+	
+	Descreveremos agora os resultados obtidos dos filtros passa-baixas e dos filtros passa-altas separadamente.
+	
+	\subsection{Filtros Passa-Baixas}
+	
+	\subsubsection{Parâmetros dos Filtros}
+	
+	Para os filtros passa-baixas, os resultados obtidos para as ordens dos filtros IIR e frequências de corte normalizadas são mostrados na Tabela \ref{table:IIR_pb_parametros} abaixo; também adicionaremos o filtro FIR passa-baixas projetado no Tutorial 6, que foi projetado com requisitos de desempenho similares, para fins de comparação.
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Parâmetros dos Filtros Passa-Baixas}
+		\begin{tabular}{c|ccc||c}
+			\hline
+			Tipo de Filtro			& Butterworth	& Chebyshev 1	& Chebyshev 2	& FIR \\
+			\hline
+			Ordem do Filtro			& 16			& 7				& 7				& 201 \\
+			Freq. Corte Norm.		& 0.137			& 0.136			& 0.175			& 0.158 \\
+			\hline
+		\end{tabular}
+		\label{table:IIR_pb_parametros}
+	\end{table}
+	
+	Talvez o primeiro ponto marcante seja que, para os mesmos critérios de desempenho, os filtros IIR têm uma ordem muito menor do que o filtro FIR: isso mostra como adicionar retroalimentação a um filtro pode melhorar vastamente seu desempenho, reduzindo a ordem necessária do filtro em quase duas ordens de magnitude. Note também que os filtros Chebyshev requerem uma ordem muito menor do que o filtro Butterworth: isso geralmente é uma indicação da inclinação da região de transição do filtro, que será mostrada abaixo ser mais acentuada para filtros Chebyshev do que para filtros Butterworth.
+	
+	Interessantemente, também há uma pequena variação na frequência de corte normalizada obtida para cada filtro; isso também está relacionado à inclinação de cada filtro na região de transição, mas deve-se ressaltar que os filtros Chebyshev geralmente não adotam a definição da frequência de corte como sendo o ponto de $-3$ dB em sua resposta em frequência\footnote{Veja \url{https://pt.wikipedia.org/wiki/Filtro\_Chebyshev} .}.
+	
+	\subsubsection{Diagramas Polo-Zero dos Filtros}
+	
+	Os diagramas polo-zero dos filtros IIR passa-baixas são mostrados na Figura \ref{fig:IIR_pb_pz}. Note como todos os filtros têm zeros sobre o círculo unitário, particularmente perto da região do lado esquerdo do círculo: zeros sobre o círculo unitário irão atenuar a resposta do sistema em suas frequências correspondentes, e assim o comportamento passa-baixas deste sistema pode ser confirmado a partir das posições dos zeros.
+	
+	Note também a presença de polos perto da região do lado direito do círculo unitário para os filtros IIR: polos perto do círculo unitário irão amplificar a resposta do sistema em suas frequências correspondentes, embora deve-se tomar cuidado para sempre posicionar os polos dentro do círculo unitário.
+	
+	Também pode ser observado como todos os filtros IIR têm polos posicionados muito próximos ao círculo unitário. A posição dos polos é dada pelas raízes do denominador da função de transferência do filtro, e pequenos erros nos valores dos coeficientes podem então ter efeitos drásticos na localização dos polos, o que pode produzir uma resposta de filtro dramaticamente diferente da desejada. Este tipo de problema pode até levar à instabilidade do filtro se um ou mais polos alcançarem ou ultrapassarem os limites do círculo unitário, então é importante verificar o diagrama polo-zero de um filtro projetado.
+	
+	\subsubsection{Resposta em Frequência dos Filtros}
+	
+	A resposta em frequência dos filtros IIR passa-baixas pode ser vista na Figura \ref{fig:IIR_pb_RespFreq}, onde também incluímos a resposta em frequência do filtro FIR passa-baixas projetado no Tutorial 6. Podemos então fazer alguns comentários sobre as respostas:
+	
+	\begin{itemize}
+		\item Embora todos os filtros atendam ao requisito de faixa de rejeição de $-40$ dB em 4 kHz, pode-se ver que o filtro FIR tem a inclinação mais acentuada de todos, mantendo também uma resposta de faixa de passagem plana e uma resposta de faixa de rejeição oscilante mas de baixa magnitude;
+		
+		\item O filtro Butterworth não pode alcançar a mesma inclinação, mas isso é compensado por também manter uma resposta de faixa de passagem plana e pela resposta monotonicamente decrescente para altas frequências;
+		
+		\item O filtro Chebyshev Tipo 1 tem uma inclinação mais acentuada do que o filtro Butterworth e também tem uma resposta de faixa de rejeição monotonicamente decrescente, entretanto mostra oscilações na faixa de passagem;
+		
+		\item O filtro Chebyshev Tipo 2 tem uma inclinação mais acentuada do que o filtro Butterworth mas não tão acentuada quanto o Chebyshev Tipo 1 (particularmente perto da faixa de passagem), e este filtro também apresenta oscilações na faixa de rejeição (que é portanto não-monotônica);
+	\end{itemize}
+	
+	
+	\subsubsection{Resposta ao Impulso dos Filtros}
+	
+	A resposta ao impulso dos filtros IIR passa-baixas é mostrada na Figura \ref{fig:IIR_pb_RespImp}, junto com a resposta ao impulso do filtro FIR passa-baixas. Podemos fazer os seguintes comentários:
+	
+	\begin{itemize}
+		\item A primeira característica notável é como a resposta ao impulso do filtro FIR tem seu pico ocorrendo muito mais tarde do que todos os filtros IIR: este efeito está diretamente relacionado à alta ordem do filtro FIR, que por sua vez resulta em um grande atraso na resposta ao impulso do filtro. Também pode ser observado que a resposta ao impulso do filtro FIR é simétrica em relação ao seu valor máximo (i.e. tem o chamado \emph{pre-ringing}, oscilações na resposta ao impulso que antecedem o valor máximo), e que sua resposta decai ao longo do tempo;
+		
+		\item A resposta ao impulso do filtro Butterworth tem um atraso mais curto do que o filtro FIR e não mostra \emph{pre-ringing}, e decai bastante rapidamente ao longo do tempo;
+		
+		\item O filtro Chebyshev Tipo 1 tem um atraso comparável ao filtro Butterworth e também não mostra \emph{pre-ringing}, mas sua resposta leva muito mais tempo para decair: esta longa oscilação é chamada de ``\emph{ringing}'', e é geralmente um efeito indesejado, pois em certas circunstâncias pode ser audível na resposta do filtro;
+		
+		\item O filtro Chebyshev Tipo 2 tem o atraso mais curto de todos, e sua resposta decai razoavelmente rapidamente ao longo do tempo também.
+	\end{itemize}
+	
+	\subsection{Filtros Passa-Altas}
+	
+	Os resultados obtidos para as ordens dos filtros IIR passa-altas e frequências de corte normalizadas são mostrados na Tabela \ref{table:IIR_pa_parametros} abaixo; os resultados usados para o projeto do filtro FIR passa-altas no Tutorial 6 também foram incluídos para fins de comparação.
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Parâmetros dos Filtros Passa-Altas}
+		\begin{tabular}{c|ccc||c}
+			\hline
+			Tipo de Filtro			& Butterworth	& Chebyshev 1	& Chebyshev 2	& FIR \\
+			\hline
+			Ordem do Filtro			& 20			& 8				& 8				& 201 \\
+			Freq. Corte Norm.		& 0.225			& 0.227			& 0.187			& 0.204 \\
+			\hline
+		\end{tabular}
+		\label{table:IIR_pa_parametros}
+	\end{table}
+	
+	A discussão realizada para os filtros passa-baixas pode ser repetida de forma quase idêntica para os filtros passa-altas: o filtro FIR requer uma ordem muito maior para obter um desempenho similar aos filtros IIR; filtros Chebyshev requerem uma ordem menor do que filtros Butterworth; e a frequência de corte dos filtros é ligeiramente diferente devido à variação na inclinação da região de transição e diferentes definições da frequência de corte.
+	
+	O diagrama polo-zero dos filtros IIR passa-altas é mostrado na Figura \ref{fig:IIR_pa_pz}; a resposta em frequência dos filtros IIR passa-altas pode ser vista na Figura \ref{fig:IIR_pa_RespFreq}; e a resposta ao impulso desses filtros é mostrada na Figura \ref{fig:IIR_pa_RespImp}. A discussão dessas Figuras passaria pelos mesmos pontos discutidos para os gráficos dos filtros passa-baixas, então não será repetida aqui.
+	
+	
+	\clearpage
+	\newpage
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = \textwidth]{IIR_pb_pz.png}
+		\caption{Diagrama Polo-Zero para Filtros Passa-Baixas.}
+		\label{fig:IIR_pb_pz}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = \textwidth]{IIR_pb_RespFreq.png}
+		\caption{Resposta em Frequência para Filtros Passa-Baixas.}
+		\label{fig:IIR_pb_RespFreq}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = \textwidth]{IIR_pb_RespImp.png}
+		\caption{Resposta ao Impulso para Filtros Passa-Baixas.}
+		\label{fig:IIR_pb_RespImp}
+	\end{figure}
+	
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = \textwidth]{IIR_pa_pz.png}
+		\caption{Diagrama Polo-Zero para Filtros Passa-Altas.}
+		\label{fig:IIR_pa_pz}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = \textwidth]{IIR_pa_RespFreq.png}
+		\caption{Resposta em Frequência para Filtros Passa-Altas.}
+		\label{fig:IIR_pa_RespFreq}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = \textwidth]{IIR_pa_RespImp.png}
+		\caption{Resposta ao Impulso para Filtros Passa-Altas.}
+		\label{fig:IIR_pa_RespImp}
+	\end{figure}
+	
+	\clearpage
+	\newpage
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Filtrando um Sinal de Música}
+	
+	Aplicaremos agora esses filtros ao sinal de música {\tt BetterDaysAheadT.wav}, conforme descrito no Tutorial 6, e descreveremos os efeitos obtidos de cada tipo de filtro.
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsubsection{Filtro Butterworth}
+	A Figura \ref{fig:PB_PA_Butter} mostra os espectros de frequência do sinal de música filtrado passa-baixas e passa-altas com os filtros Butterworth, com o espectro do sinal de música original ao fundo. Pode-se ver que a faixa de passagem plana do filtro Butterworth não afetou a região da faixa de passagem, já que os espectros dos sinais filtrados e do original coincidem; as faixas de rejeição também estão fortemente atenuadas, e muito pouco conteúdo de energia pode ser visto nos sinais filtrados para essas faixas de frequência.
+	
+	A Figura \ref{fig:PB_mais_PA_butter} mostra os espectros da soma dos sinais filtrados passa-baixas e passa-altas Butterworth, e do sinal original. O efeito de filtro rejeita-faixa é claramente visto em torno de 4 kHz, com a amplitude da perturbação tonal em 4 kHz sendo atenuada em cerca de 35 dB; este não é um desempenho impressionante quando comparado aos filtros Chebyshev, mas a vantagem é a preservação do espectro na faixa de passagem.
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsubsection{Filtro Chebyshev Tipo 1}
+	
+	A Figura \ref{fig:PB_PA_Cheby1} mostra os espectros de frequência do sinal de música filtrado passa-baixas e passa-altas com os filtros Chebyshev Tipo 1, com o espectro do sinal de música original ao fundo. A atenuação na faixa de rejeição e a inclinação da atenuação parecem ser maiores do que no filtro Butterworth, mas o efeito das oscilações na faixa de passagem também é visível; note como o espectro filtrado não se sobrepõe exatamente ao espectro original nas faixas de passagem. As faixas de rejeição, entretanto, estão fortemente atenuadas como no filtro Butterworth.
+	
+	A Figura \ref{fig:PB_mais_PA_Cheby1} mostra os espectros da soma dos sinais filtrados passa-baixas e passa-altas Chebyshev Tipo 1, e do sinal original. A atenuação em 4 kHz é agora cerca de 45 dB, indicando um desempenho melhor do que o filtro Butterworth em termos de rejeitar a perturbação de 4 kHz; entretanto, as oscilações na faixa de passagem também são claramente visíveis. Dependendo da aplicação, pode ser mais importante escolher uma forte atenuação na banda de rejeição, ou uma faixa de passagem com resposta mais plana.
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsubsection{Filtro Chebyshev Tipo 2}
+	
+	A Figura \ref{fig:PB_PA_Cheby2} mostra os espectros de frequência do sinal de música filtrado passa-baixas e passa-altas com os filtros Chebyshev Tipo 2, com o espectro do sinal de música original ao fundo. Note agora como as faixas de passagem não são afetadas pela filtragem, mas as faixas de rejeição não são mais uniformemente atenuadas e agora mostram oscilações.
+	
+	A Figura \ref{fig:PB_mais_PA_Cheby2} mostra os espectros da soma dos sinais filtrados passa-baixas e passa-altas Chebyshev Tipo 2, e do sinal original. A atenuação em 4 kHz é novamente cerca de 45 dB, indicando um desempenho similar ao filtro Chebyshev Tipo 1; é claro que isso é esperado, já que ambos foram projetados para ter pelo menos 40 dB de atenuação nessa frequência. As faixas de passagem são agora menos visivelmente afetadas do que no filtro Chebyshev Tipo 1.
+	
+	
+	\clearpage
+	\newpage
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{PB_PA_Butter.png}
+		\caption{Espectros de frequência do sinal {\tt BetterDaysAheadT.wav} filtrado passa-baixas e passa-altas com filtros Butterworth.}
+		\label{fig:PB_PA_Butter}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{PB_mais_PA_butter.png}
+		\caption{Espectros de frequência da soma dos sinais {\tt BetterDaysAheadT.wav} filtrados passa-baixas e passa-altas com filtros Butterworth.}
+		\label{fig:PB_mais_PA_butter}
+	\end{figure}
+	
+	\clearpage
+	\newpage
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{PB_PA_Cheby1.png}
+		\caption{Espectros de frequência do sinal {\tt BetterDaysAheadT.wav} filtrado passa-baixas e passa-altas com filtros Chebyshev Tipo 1.}
+		\label{fig:PB_PA_Cheby1}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{PB_mais_PA_Cheby1.png}
+		\caption{Espectros de frequência da soma dos sinais {\tt BetterDaysAheadT.wav} filtrados passa-baixas e passa-altas com filtros Chebyshev Tipo 1.}
+		\label{fig:PB_mais_PA_Cheby1}
+	\end{figure}
+	
+	\clearpage
+	\newpage
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{PB_PA_Cheby2.png}
+		\caption{Espectros de frequência do sinal {\tt BetterDaysAheadT.wav} filtrado passa-baixas e passa-altas com filtros Chebyshev Tipo 2.}
+		\label{fig:PB_PA_Cheby2}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{PB_mais_PA_Cheby2.png}
+		\caption{Espectros de frequência da soma dos sinais {\tt BetterDaysAheadT.wav} filtrados passa-baixas e passa-altas com filtros Chebyshev Tipo 2.}
+		\label{fig:PB_mais_PA_Cheby2}
+	\end{figure}
+	
+	%% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\clearpage
+	\newpage
+	\section{Projeto de Filtro Baseado em Diagrama de Blocos}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.6\textwidth]{DiagramaBlocos.png}
+		\caption{Diagrama de Blocos de um Filtro IIR}
+		\label{fig:DiagramaBlocos}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Derive a equação de diferenças}
+	
+	\begin{equation}
+		y[n] = x[n] + 2 x[n-1] + y[n-1] - 0.5 y[n-2].
+		\label{eq:diff_eq}
+	\end{equation}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Calcule as primeiras 3 amostras da Resposta ao Impulso}
+	
+	Seja $x[n]$ um sinal impulso:
+	
+	\begin{equation}
+		x[n] = \left\{
+		\begin{array}{rl}
+			1 & n = 0,\\
+			0 & n \neq 0.
+		\end{array} \right.
+		\label{eq:impulse}
+	\end{equation}
+	
+	Assumindo $y[n] = 0$, $n < 0$, podemos encontrar as primeiras três amostras de $y[n]$ substituindo $n = 0, 1, 2$ nas Equações \ref{eq:diff_eq} e \ref{eq:impulse}:
+	
+	\begin{itemize}
+		\item Para $n=0$:
+		\begin{equation}
+			y[0] = x[0] + 2 x[-1] + y[-1] - 0.5 y[-2] = x[0] = 1.
+		\end{equation}
+		
+		\item Para $n=1$:
+		\begin{equation}
+			y[1] = x[1] + 2 x[0] + y[0] - 0.5 y[-1] = 2x[0] + y[0] = 3.
+		\end{equation}
+		
+		\item Para $n=2$:
+		\begin{equation}
+			y[2] = x[2] + 2 x[1] + y[1] - 0.5 y[0] = y[1] - 0.5 y[0] = 2.5.
+		\end{equation}
+	\end{itemize}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Calcule a Função de Transferência do sistema no Domínio Z}
+	
+	Aplicando a Transformada Z à Equação \ref{eq:diff_eq}, obtemos:
+	
+	\begin{equation}
+		Y(z) = X(z) + 2 X(z) z^{-1} + Y(z) z^{-1} - 0.5 Y(z) z^{-2},
+	\end{equation}
+	
+	que pode ser reescrita como
+	
+	\begin{equation}
+		Y(z) \left( 1 - z^{-1} + 0.5 z^{-2} \right) = X(z) \left( 1 + 2 z^{-1} \right),
+	\end{equation}
+	
+	o que nos leva a
+	
+	\begin{equation}
+		H(z) = \frac{Y(z)}{X(z)} = \frac{1 + 2 z^{-1}}{1 - z^{-1} + 0.5 z^{-2}}.
+		\label{eq:ZTransform}
+	\end{equation}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Calcule a Resposta em Frequência}
+	
+	A resposta em frequência $H(e^{j \omega})$ pode ser obtida avaliando a Função de Transferência sobre o círculo unitário $z = e^{j \omega}$:
+	
+	\begin{equation}
+		H(e^{j \omega}) = H(z) |_{z = e^{j \omega}} = \frac{1 + 2 e^{-j \omega}}{1 - e^{-j \omega} + 0.5 e^{-2j \omega}}.
+		\label{eq:freq_resp}
+	\end{equation}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Compare seus resultados com a Resposta ao Impulso e a Resposta em Frequência calculadas pelas funções Python}
+	
+	A resposta ao impulso do sistema pode ser obtida inserindo os coeficientes da Equação \ref{eq:ZTransform} em vetores Python e usando a função {\tt scipy.signal.dimpulse}. Esses coeficientes foram escritos como {\tt b\_block = [1, 2, 0]} e {\tt a\_block = [1, -1, 0.5]}, de modo que o numerador e o denominador tenham o mesmo comprimento; isso é equivalente a escrever o numerador da função de transferência como $1 + 2 z^{-1} + 0 z^{-2}$.
+	
+	A comparação da resposta ao impulso é mostrada na Figura \ref{fig:DiagramaBlocosRI}; pode-se ver que as primeiras três amostras concordam com o cálculo teórico realizado anteriormente.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{DiagramaBlocosRI.png}
+		\caption{Resposta ao Impulso do Diagrama de Blocos, conforme calculado teoricamente e pela função {\tt scipy.signal.dimpulse}.}
+		\label{fig:DiagramaBlocosRI}
+	\end{figure}
+	
+	A resposta em frequência do sistema pode ser obtida avaliando a Equação \ref{eq:freq_resp} sobre a faixa de frequência normalizada $\omega \in [0, \pi)$, e os resultados podem ser comparados àqueles obtidos usando a função Python {\tt scipy.signal.freqz}. A comparação é mostrada na Figura \ref{fig:DiagramaBlocosRespFreq}; pode-se ver que as duas funções correspondem perfeitamente sobre toda a faixa de frequência.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{DiagramaBlocosRespFreq.png}
+		\caption{Resposta em Frequência do Diagrama de Blocos, conforme calculado teoricamente e pela função {\tt scipy.signal.freqz}.}
+		\label{fig:DiagramaBlocosRespFreq}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Plote o diagrama polo-zero}
+	
+	Os zeros e polos do sistema podem ser calculados a partir das raízes do numerador e denominador da função de transferência do sistema (Equação \ref{eq:ZTransform}), e são mostrados na Figura \ref{fig:DiagramaBlocosPZ}.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{DiagramaBlocosPZ.png}
+		\caption{Polos e Zeros do Diagrama de Blocos}
+		\label{fig:DiagramaBlocosPZ}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{Aplique este filtro à amostra de música e ouça o resultado}
+	
+	O sinal de música {\tt BetterDaysAheadT.wav} pode ser filtrado usando a função {\tt scipy.signal.lfilter}, conforme discutido em tutoriais anteriores; deve-se tomar cuidado para normalizar o sinal antes de converter para o formato {\tt .wav}.
+	
+	Para melhor compreender os efeitos deste filtro em um sinal de música, plotamos a resposta em frequência do sistema novamente na Figura \ref{fig:DiagramaBlocosRespFreq_Hz}, mas desta vez contra a frequência temporal $f$ (em Hz); esta é simplesmente uma normalização do eixo-$x$ da Figura \ref{fig:DiagramaBlocosRespFreq}, e pode ser obtida assumindo que a frequência de amostragem do sinal de música é $f_s = 44100$ Hz.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{DiagramaBlocosRespFreq_Hz.png}
+		\caption{Resposta em Frequência do Diagrama de Blocos, plotada contra a frequência temporal $f$ (em Hz).}
+		\label{fig:DiagramaBlocosRespFreq_Hz}
+	\end{figure}
+	
+	A resposta em frequência do diagrama de blocos mostra um valor positivo (em dB) em baixas frequências, com um ganho maior ocorrendo em frequências em torno de 5 kHz; e uma atenuação suave para frequências acima de 5 kHz, com o cruzamento de zero ocorrendo perto de 15 kHz. Portanto, esperaríamos que frequências abaixo de 5 kHz fossem amplificadas por este filtro, frequências em torno de 15 kHz não fossem afetadas por ele, e frequências acima de 15 kHz fossem atenuadas por ele.
+	
+	Na prática, entretanto, a etapa de normalização realizada para escrever o arquivo {\tt .wav} atenuará toda a resposta em frequência do sinal filtrado por um fator constante, assim removendo efetivamente o efeito de amplificação. O efeito percebido será então uma filtragem passa-baixas com um corte em torno de 7 kHz, com uma atenuação suave (cerca de -15 dB/oitava) acima dessa frequência; o filtro também adicionará um pequeno aumento logo abaixo da frequência de corte, mas isso pode passar despercebido ao ouvir os arquivos de áudio sem placa de som e fones de ouvido/alto-falantes de alta qualidade.
+	
+\end{document}

@@ -1,0 +1,225 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use o pacote 'listings' para adicionar código e o pacote 'color' para gerar os destaques
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% define para destaque de linguagem Python
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% define tamanho das fontes
+	breaklines=true,				% define quebra automática de linha
+	linewidth=\textwidth,			% define tamanho da caixa de código
+	showstringspaces=false}			% mostra espaços como sublinhados apenas dentro de strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Tutorial 13 - Filtros de Resposta ao Impulso Infinita (IIR)}
+\author{\url{https://github.com/fchirono/AulasDSP}}
+
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	
+	\section*{Objetivos de Aprendizagem}
+	Ao final desta sessão, você será capaz de:
+	\begin{itemize}
+		\item Projetar e aplicar filtros IIR simples;
+		\item Projetar um filtro baseado em um diagrama de blocos.
+	\end{itemize}
+	
+	\begingroup
+	\let\clearpage\relax
+	\tableofcontents
+	\endgroup
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Removendo uma Perturbação de um Sinal de Áudio}
+	
+	\subsection*{Objetivo: Remover um ruído tonal irritante em 4000 Hz de um sinal de música}
+	
+	\begin{enumerate}
+		\item Repita a filtragem da Tarefa 1 do Tutorial 6 usando filtros IIR (Butterworth e Chebyshev). Compare e discuta o desempenho destes com o dos filtros FIR. Compare as faixas de passagem e de rejeição, nível de atenuação, e complexidade computacional.
+		
+	\end{enumerate}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Projeto de Filtro Baseado em Diagrama de Blocos}
+	
+	A partir do diagrama de blocos mostrado na Figura \ref{fig:DiagramaBlocos}:
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.6\textwidth]{DiagramaBlocos.png}
+		\caption{Diagrama de Blocos do Sistema.}
+		\label{fig:DiagramaBlocos}
+	\end{figure}
+	
+	\begin{enumerate}
+		\item Derive a equação de diferenças;
+		\item Calcule as primeiras 3 amostras da Resposta ao Impulso;
+		\item Calcule a Função de Transferência do sistema no domínio Z;
+		\item Calcule a Resposta em Frequência;
+		\item Compare seus resultados calculados a partir de princípios básicos com a Resposta ao Impulso calculada pela função Python {\tt scipy.signal.dimpulse} e a Resposta em Frequência de {\tt scipy.signal.freqz};
+		\item Plote o diagrama polo-zero (você pode usar a função {\tt scipy.signal.tf2zpk}) e considere como a posição dos polos e zeros se reflete na resposta em frequência;
+		\item Aplique este filtro à amostra de música {\tt BetterDaysAhead.wav} e ouça o resultado.
+	\end{enumerate}
+	
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Apêndice: Projeto de Filtros IIR em Python}
+	
+	Para o projeto de filtros IIR, usaremos a biblioteca {\tt scipy.signal}. Um filtro pode ser representado em SciPy/Python de algumas formas diferentes: usando seus coeficientes de função de transferência (``{\tt ba}''), usando sua representação zero-polo-ganho (``{\tt zpk}''), ou usando seções de segunda ordem em cascata (``{\tt sos}''). Algumas formas são mais apropriadas para algumas aplicações do que outras, mas discutiremos como usar apenas a representação ``{\tt ba}'' para este Tutorial.
+	
+	\subsection{Coeficientes da Função de Transferência do Filtro}
+	
+	Os coeficientes da função de transferência {\tt (b, a)} de um filtro passa-baixas podem ser obtidos usando o seguinte código:
+	
+	\begin{lstlisting}[frame=single]
+from scipy import signal
+
+# Filtro Butterworth
+b_butter, a_butter = signal.butter(N_filter, wn, btype='lowpass') 
+
+# Filtro Chebyshev Tipo 1
+b_cheby1, a_cheby1 = signal.cheby1(N_filter, r1, wn, btype='lowpass')
+
+# Filtro Chebyshev Tipo 2
+b_cheby2, a_cheby2 = signal.cheby2(N_filter, r2, wn, btype='lowpass')
+	\end{lstlisting}
+	
+	onde
+	
+	\begin{itemize}
+		\item {\tt (b, a)} são os vetores contendo os coeficientes do numerador e denominador da função de transferência do filtro, escritos em potências crescentes de $z^{-1}$ (i.e. o numerador é escrito como $b[0] + b[1] \cdot z^{-1} + b[2] \cdot z^{-2} + \ldots$). No SciPy é necessário que os vetores {\tt b} e {\tt a} tenham o mesmo comprimento para que os resultados sejam consistentes, então considere adicionar zeros a qualquer um deles se necessário;
+		\item {\tt N\_filter} é a ordem do filtro;
+		\item {\tt wn} é a frequência de corte do filtro normalizada para \emph{metade} da frequência de amostragem: para o filtro Butterworth, este é o ponto onde a resposta do filtro cai para $-3$ dB; para os filtros Chebyshev, este é o ponto onde a resposta atinge pela primeira vez {\tt -r} dB;
+		\item {\tt r} é a oscilação máxima (em decibéis) permitida nos filtros Chebyshev: para filtros Tipo 1, {\tt r1} define a oscilação máxima abaixo do ganho unitário na faixa de passagem, e para filtros Tipo 2, {\tt r2} define a atenuação mínima na faixa de rejeição;
+		\item e {\tt btype} define o tipo da resposta desejada do filtro: a função aceita as strings {\tt 'lowpass'} para obter um filtro passa-baixas, e {\tt 'highpass'} para obter um filtro passa-altas.
+	\end{itemize}
+	
+	O tipo de representação do filtro é controlado pelo argumento ``{\tt output}'' na chamada da função; este é definido como ``{\tt ba}'' por padrão, então não precisa ser explicitamente definido no nosso caso.
+	
+	\subsection{Diagrama Polo-Zero}
+	
+	Os zeros do filtro podem ser obtidos das raízes dos coeficientes do numerador {\tt b}, enquanto os polos do filtro podem ser obtidos das raízes dos coeficientes do denominador {\tt a}. A função {\tt numpy.roots} pode ser usada para encontrar as raízes dos polinômios a partir de um vetor contendo seus coeficientes. O diagrama polo-zero é então construído plotando a parte real versus a parte imaginária dos polos e zeros; podemos plotar os zeros como círculos e os polos como ``x'' em tais diagramas.
+	
+	Para tornar o diagrama mais visualmente atraente, pode-se também adicionar um círculo de raio unitário usando ``artists'' do Matplotlib\footnote{``Artists'' representam objetos gráficos padrão que queremos plotar; pense neles como funções de alto nível para desenhar formas geométricas simples. Veja {\tt http://matplotlib.org/users/artists.html} para mais informações sobre Matplotlib Artists.} e adicionar linhas verticais e horizontais marcando $Re(x) = 0$ e $Im(x) = 0$:
+	
+	\begin{lstlisting}[frame=single]
+import matplotlib.pyplot as plt
+
+# cria uma figura
+fig_pz = plt.figure()
+ax_pz = fig_pz.add_subplot(111)
+
+# cria um 'plt.Circle' artist para representar um circulo de raio unitario
+origin = (0, 0)
+radius = 1
+unit_circle = plt.Circle(origin, radius, facecolor="none", edgecolor="k",
+                         linestyle="dashdot")
+
+# adiciona o artist a figura
+ax_pz.add_artist(unit_circle)
+
+# adiciona linha horizontal do eixo (y=0)
+y_hline = 0
+x_min = -1.5
+x_max = 1.5
+ax_pz.hlines(y_hline, x_min, x_max, linestyle="dashdot")
+
+# adiciona linha vertical do eixo (x=0)
+x_vline = 0
+y_min = -1.5
+y_max = 1.5
+ax_pz.vlines(x_vline, y_min, y_max, linestyle="dashdot")
+
+# faz os eixos x e y terem razao de aspecto igual
+plt.axis("equal")
+	\end{lstlisting}
+	
+	Note que a chamada da função artist {\tt plt.Circle} requer a letra {\tt ``C''} maiúscula. Note também que é possível subdividir uma lista de argumentos para uma função em múltiplas linhas, se os argumentos estiverem envolvidos em parênteses.
+	
+	\subsection{Resposta em Frequência do Filtro}
+	
+	Uma vez que temos os coeficientes do filtro, podemos obter a resposta em frequência do filtro em {\tt N\_freq} pontos sobre o vetor de frequência normalizada {\tt w} $\in [0, \pi)$ usando a função {\tt scipy.signal.freqz}:
+	
+	\begin{lstlisting}[frame=single]
+# calcular a resposta em freq dos filtros em 'N_freq' pontos sobre as frequencias 'w'
+w, H_butter = signal.freqz(b_butter, a_butter, N_freq)
+	\end{lstlisting}
+	
+	\subsection{Resposta ao Impulso do Filtro}
+	
+	Também podemos obter as primeiras {\tt N\_IR} amostras da resposta ao impulso do filtro usando a função {\tt scipy.signal.dimpulse}:
+	
+	\begin{lstlisting}[frame=single]
+# calcular a RI do filtro em 'N_IR' pontos com resolucao temporal 'dt'
+butter_tupla = (b_butter, a_butter, dt)
+t_IR, IR_tupla = signal.dimpulse(butter_tupla, n=N_IR)
+
+# obter o 1o elemento da tupla de RI
+IR_butter = IR_tupla[0]
+	\end{lstlisting}
+	
+	Esta função retorna uma tupla {\tt IR\_tuple} contendo as respostas ao impulso correspondentes a cada uma das entradas do filtro. Como lidaremos apenas com filtros de entrada única para este curso, precisamos usar apenas o primeiro elemento da tupla.
+	
+	\subsection{Aplicando um Sinal a um Filtro}
+	
+	Finalmente, um sinal {\tt x} pode ser processado com um filtro definido por seus coeficientes de função de transferência ({\tt b}, {\tt a}) usando a função {\tt scipy.signal.lfilter}:
+	
+	\begin{lstlisting}[frame=single]
+# filtrar sinal 'x' com coeficientes de filtro 'b' e 'a'
+x_filtered = signal.lfilter(b_butter, a_butter, x)
+	\end{lstlisting}
+	
+	
+	\subsection{Observações Finais}
+	
+	As funcionalidades descritas neste Apêndice serão suficientes para completar o Tutorial; entretanto, essas funções são muito flexíveis e têm muitos mais parâmetros opcionais que não foram cobertos aqui. Recomenda-se ler a documentação para as funções mencionadas acima no Guia de Referência de Processamento de Sinais do SciPy\footnote{\url{http://docs.scipy.org/doc/scipy/reference/signal.html}} e se familiarizar com suas implementações.
+	
+	Todos os filtros têm limitações inerentes em termos de desempenho alcançável para uma dada ordem, e é frequentemente possível encontrar problemas ao usar ordens altas ou ao adotar frequências de corte muito próximas de $0$ ou $f_s/2$; portanto, é uma boa prática verificar os resultados do projeto do seu filtro\footnote{Na verdade, é uma boa prática sempre verificar \emph{todos} os resultados!}. Você pode fazer isso analisando a função de transferência, a resposta ao impulso e o diagrama polo-zero do seu filtro recém-projetado, e confirmando que eles são razoáveis: projetos de filtros práticos devem ser estáveis, o que pode ser verificado através do diagrama polo-zero e através do gráfico da resposta ao impulso, e sua resposta em frequência deve corresponder à resposta desejada.
+	
+	Se um comportamento de filtro desejado não for estável, pode-se reduzir a ordem do filtro, mas ao custo de desempenho um pouco pior. Se for imperativo usar filtros de ordem mais alta, implementações de seções de segunda ordem em cascata (`{\tt sos}', também conhecidas como ``\emph{filtros biquad digitais}'') são numericamente mais estáveis e podem ser uma boa alternativa.
+	
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	%\newpage
+	
+\end{document}
