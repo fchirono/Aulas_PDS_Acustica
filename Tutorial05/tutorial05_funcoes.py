@@ -1,5 +1,5 @@
 """
-Funcoes para o Tutorial 5 de Processamento Digital de Sinais
+Funcoes para o Tutorial 05 de Processamento Digital de Sinais
 
 https://github.com/fchirono/Aulas_PDS_Acustica
 
