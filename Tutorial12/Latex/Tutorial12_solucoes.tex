@@ -1,0 +1,309 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use o pacote 'listings' para adicionar código e o pacote 'color' para gerar os destaques
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% define para destaque de linguagem Python
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% define tamanho das fontes
+	breaklines=true,				% define quebra automática de linha
+	linewidth=\textwidth,			% define tamanho da caixa de código
+	showstringspaces=false}			% mostra espaços como sublinhados apenas dentro de strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Soluções para Tutorial 12 - Filtros de Resposta ao Impulso Finita (FIR)}
+\author{\url{https://github.com/fchirono/AulasDSP}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	%\setcounter{section}{1}
+	\section{Removendo uma Perturbação de um Sinal de Áudio}
+	
+	
+	\subsection{} % 1.1
+	-
+	
+	\subsection{} % 1.2
+	
+	O espectro de frequência do canal esquerdo do arquivo {\tt BetterDaysAheadT.wav} é mostrado na Figura \ref{fig:BetterDaysAheadT_espectro}. Este espectro foi calculado usando {\tt N\_dft} $=2^{15}$ pontos.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{BetterDaysAheadT_espectro.png}
+		\caption{Espectro de frequência do canal esquerdo de {\tt BetterDaysAheadT.wav}.}
+		\label{fig:BetterDaysAheadT_espectro}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{} %1.3
+	
+	Para o filtro passa-baixas, escolhemos {\tt N\_taps} $=201$ e {\tt f0} $=3500$ Hz para obter uma atenuação razoavelmente acentuada e atenuar a perturbação tonal sem afetar muito o espectro da música abaixo da frequência de corte. A resposta em frequência do filtro é mostrada na Figura \ref{fig:Filtros_RespFreq}.
+	
+	Note, entretanto, que as escolhas para a ordem do filtro e para a frequência de corte são um pouco arbitrárias; escolhas diferentes produzirão resultados diferentes dos mostrados aqui, e é difícil comparar seus desempenhos sem um critério de comparação claro. Por exemplo, os filtros poderiam ser comparados com base em seu desempenho na faixa de passagem (por exemplo, \emph{``atenuação máxima de $-1$ dB em 3500 Hz''} para o filtro passa-baixas) ou com base em seu desempenho na faixa de rejeição (por exemplo, \emph{``atenuação mínima de $-40$ dB em frequências acima de 4100 Hz''} para o filtro passa-baixas).
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{} %1.4
+	
+	Para o filtro passa-altas, escolhemos {\tt N\_taps} $=201$ e {\tt f0} $=4500$ Hz para obter uma atenuação razoavelmente acentuada e atenuar a perturbação tonal sem afetar muito o espectro da música acima da frequência de corte. A resposta em frequência do filtro também é mostrada na Figura \ref{fig:Filtros_RespFreq}.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{Filtros_RespFreq.png}
+		\caption{Resposta em frequência para filtros passa-baixas e passa-altas.}
+		\label{fig:Filtros_RespFreq}
+	\end{figure}
+	
+	Para uma referência visual, os espectros dos sinais filtrados são mostrados na Figura \ref{fig:Sinais_filtrados}.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{Sinais_filtrados.png}
+		\caption{Espectros de frequência para sinais filtrados passa-baixas e passa-altas.}
+		\label{fig:Sinais_filtrados}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{} % 1.5
+	
+	A razão entre os espectros de saída e entrada do filtro com música como sinal de entrada é mostrada na Figura \ref{fig:razao_espectros_sinal}. Esta é uma estimativa rudimentar da resposta em frequência do filtro; note como este método de estimativa retorna um espectro muito ``ruidoso'' (i.e. com variância alta). Esta é uma das razões pelas quais o Estimador H1 é preferido para estimar respostas em frequência, já que ele envolve a média dos espectros dos sinais ao longo de múltiplos quadros para reduzir a variância da estimativa.
+	
+	Seu desempenho também dependerá do conteúdo de frequência dos sinais: o sinal de música contém mais energia na região de baixa frequência do que na região de alta frequência, e assim a estimativa nessas frequências corresponde melhor à resposta em frequência do filtro do que em altas frequências. Portanto, é frequentemente preferível usar sinais com um conteúdo de frequência mais plano (tal como ruído branco, como visto a seguir) ao estimar a resposta em frequência de um sistema.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{razao_espectros_sinal.png}
+		\caption{Razão entre os espectros de saída e entrada para filtro passa-baixas e passa-altas usando música como sinal de entrada.}
+		\label{fig:razao_espectros_sinal}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{} % 1.6
+	
+	O espectro para o sinal filtrado passa-baixas somado com o sinal filtrado passa-altas é mostrado na Figura \ref{fig:PB_PA_soma}. Note como a perturbação tonal em 4 kHz foi atenuada em cerca de 45 dB; o efeito de rejeição de faixa é claramente visível, e o tom deve estar praticamente inaudível agora.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{PB_PA_soma.png}
+		\caption{Espectros de frequência do sinal original do canal esquerdo e da soma dos sinais filtrados passa-baixas e passa-altas.}
+		\label{fig:PB_PA_soma}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\subsection{} % 1.7
+	
+	A razão entre os espectros de saída e entrada do filtro com ruído branco como sinal de entrada é mostrada na Figura \ref{fig:razao_espectros_ruido}, parte superior. Note agora como a região de alta frequência se assemelha à resposta em frequência dos filtros originais da Figura \ref{fig:Filtros_RespFreq}; entretanto, os espectros resultantes ainda são muito ``ruidosos''.
+	
+	A razão de espectros entre a soma dos sinais filtrados e o sinal de entrada original também é mostrada na Figura \ref{fig:razao_espectros_ruido}, parte inferior. O efeito de rejeição de faixa em torno de 4 kHz é agora claramente visível, enquanto o restante do espectro de frequência não é afetado.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{razao_espectros_ruido.png}
+		\caption{Razão entre os espectros de saída e entrada para filtros passa-baixas e passa-altas usando ruído branco como sinal de entrada.}
+		\label{fig:razao_espectros_ruido}
+	\end{figure}
+	
+	\clearpage
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Simulando um Eco Simples}
+	
+	Para criar a resposta ao impulso de um eco após $\Delta t = 0.0455$ s, temos que criar um sinal contendo dois impulsos: o impulso direto em $t = 0$ e o impulso atrasado em $t = \Delta t$:
+	
+	\begin{equation}
+		IR_{eco}(t) = \delta(t) + \delta(t-\Delta t).
+	\end{equation}
+	
+	Dependendo da sua escolha de frequência de amostragem, você pode ter que arredondar o número da amostra do eco. A resposta ao impulso resultante é mostrada na Figura \ref{fig:eco_RI}.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{eco_RI.png}
+		\caption{Resposta ao impulso de eco simulado, com eco ocorrendo em $\Delta t = 0.0455$.}
+		\label{fig:eco_RI}
+	\end{figure}
+	
+	Calculando analiticamente a Transformada de Fourier da resposta ao impulso acima, pode-se mostrar que a Resposta em Frequência do ``sistema de eco'' é
+	
+	\begin{equation}
+		H_{eco}(f) = 1 + e^{-j 2 \pi f \Delta t},
+		\label{eq:FRF_teorica}
+	\end{equation}
+	
+	e sua magnitude ao quadrado é
+	
+	\begin{equation}
+		|H_{eco}(f)|^2 = 2 + 2 \cos(2 \pi f \Delta t).
+	\end{equation}
+	
+	Portanto, a magnitude ao quadrado da resposta em frequência consistirá de um termo constante mais um termo cossenoidal, cujo período de oscilação no domínio da frequência é $1/\Delta t \approx 21.98$ Hz. Para tornar este efeito visualmente perceptível, decidimos usar $2^{15}$ pontos de DFT, os quais produzem uma resolução de frequência de $\approx 5.4$ Hz quando pareados com uma frequência de amostragem de $44100$ Hz. Note também que o efeito de oscilação não é claramente visível se toda a faixa de frequência for mostrada na figura, e assim você precisará mostrar apenas uma porção da faixa de frequência.
+	
+	A resposta em frequência calculada para o sinal de eco é mostrada na Figura \ref{fig:eco_FRF} como a linha azul sólida sem marcadores, enquanto a resposta em frequência teórica dada na Equação \ref{eq:FRF_teorica} é mostrada como a linha amarela tracejada com marcadores triangulares. Nota-se a excelente concordância entre os dois traços. Note como quando plotada em decibéis, a resposta em frequência mostra uma série de nulos igualmente espaçados, idealmente indo até $-\infty$ dB (i.e. magnitude zero), daí o nome de ``\emph{filtro em pente}'' (\emph{comb filter}) para este tipo de efeito.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{eco_FRF.png}
+		\caption{Resposta em frequência de eco simulado, com eco ocorrendo em $\Delta t = 0.0455$; note as oscilações ocorrendo com um período de cerca de $22$ Hz.}
+		\label{fig:eco_FRF}
+	\end{figure}
+	
+	Em seguida, aplicamos esta resposta ao impulso ao sinal de música usando o comando {\tt scipy.signal.lfilter}, e comparamos seu espectro ao sinal de música original; o resultado é mostrado na Figura \ref{fig:musica_eco}. Note como as oscilações no domínio da frequência criadas pelo eco aparecem como uma variação do espectro do sinal filtrado sobre o espectro do sinal original.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.85\textwidth]{musica_eco.png}
+		\caption{Espectros de frequência do sinal de música antes e depois de aplicar um eco.}
+		\label{fig:musica_eco}
+	\end{figure}
+	
+	Ao ouvir o sinal filtrado, o efeito pente não é facilmente percebido como uma filtragem de frequência - em vez disso, percebemos apenas como um eco. Entretanto, valores diferentes para o eco produzirão valores diferentes para o efeito de filtro pente: um efeito muito dramático pode ser obtido ajustando o tempo de eco entre $0.003$ e $0.001$ s, onde o eco é muito curto para ser percebido como tal pelo ouvido humano, mas o efeito de filtragem pente produz uma sonoridade metálica.
+	
+	\section{OPCIONAL: Reflexão Simples de uma Parede} % 2.1
+	
+	O sinal emitido pela fonte irá se propagar por uma distância $d_{direto}$ e alcançar o microfone em um tempo $t_{direto}$ com uma amplitude $p_{direto}$. Assumindo que o sinal deixa a superfície da fonte e se propaga com a velocidade do som, as seguintes equações podem ser escritas:
+	
+	\begin{equation}
+		d_{direto} = d_{fonte-parede} - d_{mic-parede} - R,
+	\end{equation}
+	
+	\begin{equation}
+		t_{direto} = d_{direto}/c_0,
+	\end{equation}
+	
+	\begin{equation}
+		p_{direto} = P_1/d_{direto}.
+	\end{equation}
+	
+	Assumindo que o microfone é acusticamente transparente, o som continuará a se propagar em direção à parede, refletirá na parede e alcançará o microfone novamente em um tempo $t_{refletido}$, após se propagar por uma distância total $d_{refletido}$, com uma amplitude $p_{refletido}$. Podemos então escrever:
+	
+	\begin{equation}
+		d_{refletido} = d_{direto} + 2 d_{mic-parede},
+	\end{equation}
+	
+	\begin{equation}
+		t_{refletido} = d_{refletido}/c_0,
+	\end{equation}
+	
+	\begin{equation}
+		p_{refletido} = P_1/d_{refletido}.
+	\end{equation}
+	
+	Uma vez que os tempos de viagem são definidos, é necessário arredondá-los para sua amostra inteira mais próxima a fim de criar a resposta ao impulso digital. Isto pode ser alcançado dividindo o tempo de chegada do pulso acústico no microfone pelo período de amostragem $T_s = 1/f_s$:
+	
+	\begin{equation}
+		n = arredondar(t/T_s) = arredondar(t \cdot f_s).
+	\end{equation}
+	
+	Das equações acima e dos valores dados no exercício, obtemos os seguintes resultados:
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Resultados da Simulação de Eco Fonte-Parede}
+		\begin{tabular}{rcl|rcl}
+			
+			\hline
+			$d_{direto}$	&	$2.1$ 	&	$m$ 				& $d_{refletido}$	&	$5.7$ 					& $m$ \\
+			$t_{direto}$ 	&	$6.122 \cdot 10^{-3}$	&	$s$	& $t_{refletido}$	&	$1.662 \cdot 10^{-2}$ 	& $s$ \\
+			$n_{direto}$ 	&	270		&	amostras 			& $n_{refletido}$	&	$733$ 					& amostras \\
+			$p_{direto}$	&	$4.762 \cdot 10^{-2}$	&	$Pa$ & $p_{refletido}$	&	$1.754 \cdot 10^{-2}$ 	& $Pa$ \\
+			\hline
+		\end{tabular}
+		\label{table:source_wall_results}
+	\end{table}
+	
+	Estes valores permitirão então construir a resposta ao impulso mostrada na Figura \ref{fig:fonte_parede_RI}.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.75\textwidth]{fonte_parede_RI.png}
+		\caption{Resposta ao impulso simulada para um caso fonte-parede.}
+		\label{fig:fonte_parede_RI}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{OPCIONAL: Cálculo de Resposta ao Impulso e Resposta em Frequência de Filtros}
+	
+	\begin{figure}[h!]
+		\centering
+		\subfloat[]{\label{fig:Filtro1_RI}
+			\includegraphics[width = 0.5\textwidth]{Filtro1_RI.png}
+		}
+		\subfloat[]{\label{fig:Filtro1_FRF}
+			\includegraphics[width = 0.5\textwidth]{Filtro1_FRF.png}
+		}
+		\caption{\protect\subref{fig:Filtro1_RI} Resposta ao impulso e \protect\subref{fig:Filtro1_FRF} resposta em frequência do filtro de média móvel, $M=3$.}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\subfloat[]{\label{fig:Filtro2_RI}
+			\includegraphics[width = 0.5\textwidth]{Filtro2_RI.png}
+		}
+		\subfloat[]{\label{fig:Filtro2_FRF}
+			\includegraphics[width = 0.5\textwidth]{Filtro2_FRF.png}
+		}
+		\caption{\protect\subref{fig:Filtro2_RI} Resposta ao impulso e \protect\subref{fig:Filtro2_FRF} resposta em frequência do filtro de média móvel, $M=5$.}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\subfloat[]{\label{fig:Filtro3_RI}
+			\includegraphics[width = 0.5\textwidth]{Filtro3_RI.png}
+		}
+		\subfloat[]{\label{fig:Filtro3_FRF}
+			\includegraphics[width = 0.5\textwidth]{Filtro3_FRF.png}
+		}
+		\caption{\protect\subref{fig:Filtro3_RI} Resposta ao impulso e \protect\subref{fig:Filtro3_FRF} resposta em frequência do filtro de média móvel, $M=10$.}
+	\end{figure}
+	
+	\begin{figure}[h!]
+		\centering
+		\subfloat[]{\label{fig:Filtro4_RI}
+			\includegraphics[width = 0.5\textwidth]{Filtro4_RI.png}
+		}
+		\subfloat[]{\label{fig:Filtro4_FRF}
+			\includegraphics[width = 0.5\textwidth]{Filtro4_FRF.png}
+		}
+		\caption{\protect\subref{fig:Filtro4_RI} Resposta ao impulso e \protect\subref{fig:Filtro4_FRF} resposta em frequência do filtro de diferença.}
+	\end{figure}
+	
+\end{document}

@@ -1,0 +1,197 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use o pacote 'listings' para adicionar código e o pacote 'color' para gerar os destaques
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% define para destaque de linguagem Python
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% define tamanho das fontes
+	breaklines=true,				% define quebra automática de linha
+	linewidth=\textwidth,			% define tamanho da caixa de código
+	showstringspaces=false}			% mostra espaços como sublinhados apenas dentro de strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Tutorial 12 - Filtros de Resposta ao Impulso Finita (FIR)}
+\author{\url{https://github.com/fchirono/AulasDSP}}
+
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	
+	\section*{Objetivo de Aprendizagem}
+	Ao final desta sessão, você será capaz de:
+	\begin{itemize}
+		\item Projetar e aplicar filtros FIR simples.
+	\end{itemize}
+	
+	\begingroup
+	\let\clearpage\relax
+	\tableofcontents
+	\endgroup
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Removendo uma Perturbação de um Sinal de Áudio}
+	
+	\subsection*{Objetivo: Remover um ruído tonal irritante em 4000 Hz de um sinal de música}
+	
+	Tarefas:
+	\begin{enumerate}
+		\item Leia o arquivo {\tt BetterDaysAheadT.wav} e obtenha seu sinal e frequência de amostragem. Observe que este é um arquivo estéreo: você pode escolher trabalhar com o canal esquerdo (geralmente o primeiro canal) ou com o canal direito, mas não é necessário trabalhar com ambos.
+		
+		\item Confirme, usando uma DFT, a frequência do tom; sugerimos usar um comprimento de DFT longo (da ordem de $2^{15}$ pontos) para melhor visualização.
+		
+		\item Projete um filtro FIR passa-baixas que remova este tom, aplique-o ao sinal de música e ouça os resultados. Experimente com diferentes parâmetros de filtro, e justifique sua escolha final para os parâmetros.
+		
+		\item Projete um filtro passa-altas que também remova este tom e aplique-o ao sinal de música original. Justifique a escolha final dos parâmetros do filtro.
+		
+		\item Calcule a razão dos espectros de amplitude dos sinais de saída sobre o espectro de amplitude do sinal de entrada, e confirme que seus filtros alcançaram as respostas em frequência desejadas.
+		
+		\item Some os sinais passa-baixas e passa-altas e verifique o resultado.
+		
+		\item Usando a razão dos espectros de saída/entrada descrito no item 5 e usando ruído branco como sinal de entrada, demonstre que a combinação de ambos os filtros alcança um efeito de filtro rejeita-faixa.
+		
+	\end{enumerate}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Simulando um Eco Simples}
+	
+	Tarefas:
+	\begin{enumerate}
+		\item A partir de princípios básicos (usando análise matemática e, quando necessário, Python) gere a Resposta ao Impulso correspondente a um sinal direto em $t=0$ s e um eco após $\Delta T = 0.0455$ s.
+		
+		\item Qual é o efeito de um eco no domínio da frequência? Calcule a resposta em frequência do eco e plote sua magnitude; veja se o resultado corresponde ao que você esperava. (Dica: cuidado com a resolução em frequência que você precisará para observar o efeito!)
+		
+		\item Aplique esta Resposta ao Impulso à amostra de música, e analisando os espectros de entrada e saída das primeiras {\tt N\_DFT} amostras, confirme que você obtém a resposta em frequência esperada.
+		
+		\item Variando o atraso, avalie a mudança na amostra de áudio. Neste contexto, encoraja-se a leitura sobre filtros tipo ``\emph{comb}'' (filtro em pente)!
+	\end{enumerate}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{OPCIONAL: Reflexão Simples de uma Parede}
+	Calcule a resposta ao impulso para a configuração representada na Figura \ref{fig:FonteParede}. Assuma uma lei de decaimento da pressão irradiada pela fonte em função da distância $d$ do centro da fonte, dada por $A(d) = P_1 / d$. A parede é considerada perfeitamente rígida, e tanto a fonte quanto o microfone estão alinhados em uma linha perpendicular à parede. Considere os seguintes parâmetros e quantidades:
+	\begin{itemize}
+		\item $f_s = 44100$ Hz;
+		\item $c_0 = 343$ m/s;
+		\item $R = 0.1$ m;
+		\item a pressão equivalente na superfície da fonte é $P_1 = 0.1$ Pa$\cdot$m;
+		\item Distância do centro da fonte até a parede: 4 metros;
+		\item Distância do microfone até a parede: 1.8 metros.
+	\end{itemize}
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.35\textwidth]{FonteParede.png}
+		\caption{Fonte esférica e microfone em frente a parede rígida.}
+		\label{fig:FonteParede}
+	\end{figure}
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{OPCIONAL: Cálculo de Resposta ao Impulso e Resposta em Frequência de Filtro}
+	
+	Calcule as Respostas ao Impulso e em Frequência dos seguintes filtros FIR:
+	\begin{enumerate}
+		\item Filtro de média móvel:
+		\begin{equation}
+			y[n] = \frac{1}{M} \sum_{k=0}^{M-1} x[n-k], \nonumber
+		\end{equation}
+		
+		com a soma sobre $M=3$, $M=5$ e $M=10$ pontos. Compare os resultados dos diferentes filtros.
+		
+		\item Filtro de diferença:
+		\begin{equation}
+			y[n] = x[n] - x[n-1]. \nonumber
+		\end{equation}
+		
+	\end{enumerate}
+	
+	Compare seus resultados com aqueles da função {\tt scipy.signal.freqz} (veja Apêndice).
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Apêndice: Projeto de filtro FIR em Python}
+	
+	Para projeto de filtro FIR, usaremos a biblioteca {\tt scipy.signal}. O vetor {\tt b} dos coeficientes do filtro pode ser obtido via método da janela usando o seguinte código:
+	
+	\begin{lstlisting}[frame=single]
+import numpy as np
+from scipy import signal
+
+# obter os coeficientes do filtro
+b_lowpass = signal.firwin(N_taps, wn, pass_zero=True) 
+b_highpass = signal.firwin(N_taps, wn, pass_zero=False)
+
+# criar um vetor de coeficientes 'a' com o mesmo comprimento que 'b'
+a_lowpass = np.zeros(b_lowpass.shape)
+a_highpass = np.zeros(b_highpass.shape)
+
+# apenas o elemento zero de 'a' eh unitario
+a_lowpass[0] = 1.
+a_highpass[0] = 1.
+	\end{lstlisting}
+	
+	onde
+	
+	\begin{itemize}
+		
+		\item {\tt b\_lowpass}, {\tt b\_highpass} são os vetores contendo os coeficientes do numerador da função de transferência dos filtros em potências ascendentes de $z^{-1}$ (ou seja, o numerador é escrito como $b[0] + b[1] \cdot z^{-1} + b[2] \cdot z^{-2} + \ldots$);
+		
+		\item {\tt a\_lowpass}, {\tt a\_highpass} são os vetores contendo os coeficientes do denominador da função de transferência, também em potências ascendentes de $z^{-1}$. Embora filtros FIR tenham denominador unitário, o SciPy tem melhor desempenho quando tanto numerador quanto denominador têm o mesmo número de coeficientes, daí o vetor de zeros com um $1$ como a primeira amostra;
+		
+		\item {\tt N\_taps} é o número de elementos no numerador;
+		
+		\item {\tt wn} é a frequência de corte do filtro normalizada para \emph{metade} da frequência de amostragem;
+		\item e o parâmetro {\tt pass\_zero} determina se a frequência zero está incluída na banda de passagem ou não. Por exemplo, um filtro passa-baixas incluiria a frequência zero em sua banda de passagem, enquanto um filtro passa-altas excluiria a frequência zero de sua banda de passagem.
+	\end{itemize}
+	
+	Uma vez que temos o vetor de coeficientes do filtro, podemos obter a resposta em frequência do filtro em {\tt N} pontos sobre o vetor de frequência normalizada {\tt w} $\in [0, \pi)$ usando a função {\tt scipy.signal.freqz}:
+	
+	\begin{lstlisting}[frame=single]
+# calcular a resp em freq dos filtros em 'N' pontos sobre as frequencias 'w'
+w, H_lowpass = signal.freqz(b_lowpass, a_lowpass, N)
+	\end{lstlisting}
+	
+	Finalmente, um sinal {\tt x} pode ser processado com um filtro definido por seus coeficientes de função de transferência ({\tt b}, {\tt a}) usando a função {\tt scipy.signal.lfilter}:
+	
+	\begin{lstlisting}[frame=single]
+# filtrar sinal 'x' com coeficientes de filtro 'b' e 'a'
+x_filtered_lp = signal.lfilter(b_lowpass, a_lowpass, x)
+	\end{lstlisting}
+	
+	As funcionalidades descritas neste Apêndice serão suficientes para completar o Tutorial; no entanto, essas funções têm muitos outros parâmetros opcionais que não cobrimos, o que as torna muito flexíveis. Por favor, leia a documentação para as funções acima mencionadas no Guia de Referência de Processamento de Sinais do SciPy\footnote{URL: \url{http://docs.scipy.org/doc/scipy/reference/signal.html}} e certifique-se de se familiarizar com suas implementações.
+	
+\end{document}
