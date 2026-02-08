@@ -12,6 +12,23 @@ Este material é inspirado e baseado em uma coleção de tutoriais computacionai
 
 Este material inclui tutoriais práticos usando programas em linguagem Python. Recomenda-se instalar a distribuição *miniforge*, conforme descrito no Tutorial 1.
 
+Os temas abordados nestes Tutoriais são:
+
+01. Introdução / Revisão de Programação em Python
+02. Sinais e Sistemas
+03. Amostragem e aliasing *(em andamento)*
+04. Quantização *(em andamento)*
+05. Série de Fourier
+06. Transformada de Fourier de Tempo Discreto (DTFT) e Transformada Discreta de Fourier (DFT)
+07. Série de Fourier via DFT *(em andamento)*
+08. Janelamento e Zero-Padding *(em andamento)*
+09. Convolução
+10. Espectro de Potência
+11. Periodograma e Método de Welch *(em andamento)*
+12. Filtros de Resposta ao Impulso Finita (FIR)
+13. Filtros de Resposta ao Impulso Infinita (IIR)
+14. Resposta ao Impulso de uma Sala *(em andamento)*
+15. Sinais Modulados e Transformada de Hilbert *(em andamento)*
 
 ## Licença
 
