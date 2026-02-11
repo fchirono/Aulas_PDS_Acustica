@@ -71,84 +71,109 @@
 	
 	\subsection{Amostragem Temporal}
 	
-	A conversão de sinais analógicos (tempo contínuo) para digitais (tempo discreto) é realizada através da amostragem a uma frequência $f_s = 1/T_s$, onde $T_s$ é o intervalo de amostragem. O sinal discreto $x[n]$ representa o sinal contínuo $x(t)$ nos instantes $t = nT_s$.
+	A conversão de sinais analógicos (tempo contínuo) para digitais (tempo discreto) é realizada através da amostragem:
 	
-	\subsection{Teorema de Shannon (Teorema da Amostragem)}
+	\begin{equation}
+		x[n] = x(t) | _{t = n \cdot T_s}, \ n \in [0, \ldots N-1],
+	\end{equation}
+	
+	\noindent onde $T_s$ é o intervalo de amostragem em segundos e $f_s = 1/T_s$ é a frequência de amostragem em Hertz. O sinal discreto $x[n]$ representa o sinal contínuo $x(t)$ nos instantes $t = nT_s$.
+	
+	\subsection{Teorema de Nyquist-Shannon (Teorema da Amostragem)}
 	
 	Para que um sinal seja perfeitamente reconstruído a partir de suas amostras, a frequência de amostragem $f_s$ deve ser pelo menos duas vezes maior que a maior frequência presente no sinal:
 	
 	\begin{equation}
-		f_s \geq 2f_{\text{max}}
+		f_s \geq 2f_{\text{max}}.
 	\end{equation}
 	
-	A frequência $f_N = f_s/2$ é conhecida como frequência de Nyquist.
+	Em outras palavras, o sinal deve ser de \emph{banda limitada}. A frequência $f_s/2$ é conhecida como \emph{frequência de Nyquist}, e define a largura de banda máxima para que um sinal seja amostrado corretamente. 
+	
+	Quando a condição do Teorema de Nyquist-Shannon não é satisfeita ($f_s < 2f_{\text{max}}$), componentes de alta frequência aparecem ``disfarçadas'' como componentes de baixa frequência no sinal amostrado. Este fenômeno é chamado de \textit{aliasing}.
 	
 	\subsection{Interpolação usando funções sinc}
 	
-	A reconstrução ideal de um sinal contínuo a partir de suas amostras discretas é dada por:
+	Assumindo um sinal de banda limitada amostrado sem \emph{aliasing}, a reconstrução ideal do sinal de tempo contínuo a partir de suas amostras discretas é dada por:
 	
 	\begin{equation}
-		x(t) = \sum_{n=-\infty}^{\infty} x[n] \cdot \text{sinc}((t - nT_s)f_s)
+		x(t) = \sum_{n=-\infty}^{\infty} x[n] \cdot \text{sinc}\left( \left( t - n \cdot T_s \right) \cdot f_s \right),
 	\end{equation}
 	
-	onde $\text{sinc}(x) = \sin(\pi x)/(\pi x)$. Esta função tem a propriedade importante de valer 1 em $x=0$ e zero em todos os outros valores inteiros de $x$.
-	
-	\subsection{Aliasing}
-	
-	Quando a condição do Teorema de Shannon não é satisfeita ($f_s < 2f_{\text{max}}$), componentes de alta frequência aparecem ``disfarçadas'' como componentes de baixa frequência no sinal amostrado. Este fenômeno é chamado de \textit{aliasing}.
+	\noindent onde $\text{sinc}(x) = \sin(\pi x)/(\pi x)$ é a função interpolante ideal. Esta função tem a propriedade importante de valer 1 em $x=0$ e zero em todos os outros valores inteiros de $x$.
 	
 	\section{Exercícios}
 	
-	\subsection{Exercício 1: Visualização de Sinal Discreto vs Contínuo}
+	\subsection{Visualização do sinal discreto vs contínuo}
 	
 	Crie um script que:
 	
 	\begin{enumerate}
 		\item Defina uma frequência de amostragem $f_{s,d} = 1000$ Hz para tempo discreto
 		\item Defina uma frequência muito maior $f_{s,c} = 20 \times f_{s,d}$ para simular tempo ``contínuo''
-		\item Gere um sinal cosenoidal com frequência $f_0 = 53$ Hz e duração $T = 1.0$ s
-		\item Plote ambos os sinais (discreto com marcadores, contínuo com linha)
-		\item Limite o eixo $x$ para visualizar apenas os primeiros 0.1 segundos
+		\item Gere um sinal cosenoidal com frequência $f_0 = 53$ Hz e duração $T = 1.0$ s em ambas as frequências de amostragem
+		\item Plote ambos os sinais (discreto com marcadores, contínuo com linha).
 	\end{enumerate}
 	
 	\textbf{Questão:} O que você observa sobre a relação entre as amostras discretas e o sinal contínuo?
+	% As amostras do sinal discreto ocorrem a intervalos igualmente espaçados sobre o sinal "continuo"
 	
-	\subsection{Exercício 2: Propriedade da Função sinc}
+	\subsection{Propriedades da função sinc}
 	
-	Demonstre numericamente que a interpolação tipo sinc de uma única amostra possui valor zero nos instantes das outras amostras:
+	%Demonstre numericamente que a interpolação tipo sinc de uma única amostra possui valor zero nos instantes das outras amostras:
 	
 	\begin{enumerate}
-		\item Crie um vetor contendo zeros exceto na 15ª posição
-		\item Interpole esta amostra usando a função sinc no tempo ``contínuo''
-		\item Plote o resultado mostrando que a função vale zero nas outras amostras
-		\item Limite a visualização aos primeiros 0.03 segundos
+		\item Crie um sinal de tempo discreto com 1 segundo de duração, com valor unitário na 15a amostra e zero em todas as outras amostras
+		\item Interpole esta amostra usando a função sinc para o tempo ``contínuo''
+		\item Plote ambos os sinais, novamente com marcadores para o sinal discreto e com linhas para o sinal ``contínuo''
+		\item Limite a visualização ao início do sinal para melhor visualização.
 	\end{enumerate}
 	
-	\textbf{Questão:} A função sinc é causal? O que isso implica para sistemas físicos reais?
+	\textbf{Questão:} Qual é a relação entre o sinal discreto e o sinal ``contínuo''? A função sinc é causal? O que isso implica para sistemas físicos reais?
+	% A funcao tipo sinc(t-t0) interpola com unicamente a amostra no instante t=t0 com valor nao-zero, e com valor zero em todos os outros instantes do sinal discreto.
+	% A funcao sinc NAO é causal, pois ela possui valores não-zero tanto antes quando depois do seu pico - ou seja, amostras no presente sofrem influencia de amostras no futuro. Desta forma, um sistema interpolante ideal tipo sinc não pode ser realizado em um sistema físico em tempo real.
 	
-	\subsection{Exercício 3: Reconstrução Ideal de Sinais (Teorema de Shannon)}
+	\subsection{Reconstrução ideal de sinais (Teorema de Shannon)}
 	
 	Implemente a reconstrução de um sinal usando o somatório de funções sinc:
 	
 	\begin{enumerate}
 		\item Para as primeiras 15 amostras do sinal discreto do Exercício 1:
 		\begin{itemize}
-			\item Calcule a função sinc correspondente a cada amostra
+			\item Calcule a função sinc ``contínua'' correspondente a cada amostra
 			\item Plote cada contribuição individual no tempo contínuo
 			\item Some todas as contribuições para obter o sinal reconstruído
 		\end{itemize}
-		\item Compare visualmente o sinal reconstruído com o original
-		\item Limite o eixo $x$ ao intervalo $[-0.005, 0.02]$ segundos
+		\item Compare visualmente o sinal reconstruído (``contínuo'') com o original (discreto)
 	\end{enumerate}
 	
-	\textbf{Questões:}
+%	\textbf{Questões:}
+%	\begin{itemize}
+%		\item Por que as funções sinc não interferem entre si nos instantes de amostragem?
+%		\item Qual é a principal limitação prática do uso de funções sinc para interpolação?
+%	\end{itemize}
 	
+	\subsection{Aliasing por sub-amostragem}
+	
+	Demonstre o \textit{aliasing} quando um sinal de alta taxa de amostragem é dizimado:
+	
+	\begin{enumerate}
+		\item Gere sinais senoidais contínuos ($f_{s,c} = 20000$ Hz) com frequências 250, 450 e 750 Hz
+		\item Para cada sinal, plote:
+		\begin{itemize}
+			\item O sinal em tempo ``contínuo''
+			\item O sinal amostrado com amostras tomadas a cada 20 pontos (equivalente a $f_{s,d} = 1000$ Hz)
+		\end{itemize}
+		\item Para o sinal de 750 Hz, sobreponha um sinal senoidal de 250 Hz
+		\item Use \texttt{sounddevice.play()} para auralizar o sinal em tempo ``contínuo'' em $f_{s,c}=20000$ Hz, e o sinal sub-amostrado em $f_{s,d} = 1000$.
+	\end{enumerate}
+	
+		\textbf{Questões:}
 	\begin{itemize}
-		\item Por que as funções sinc não interferem entre si nos instantes de amostragem?
-		\item Qual é a principal limitação prática do uso de funções sinc para interpolação?
+		\item Sob quais condições o sinal ``contínuo'' e o sinal sub-amostrado resultam na mesma frequência?
 	\end{itemize}
 	
-	\subsection{Exercício 4: Visualização de Aliasing no Domínio do Tempo e Frequência}
+	
+	\subsection{Visualização de Aliasing no Domínio do Tempo e Frequência}
 	
 	Para cada uma das frequências $f_1 = [150, 350, 550, 750]$ Hz:
 	
@@ -157,51 +182,19 @@
 		\item Calcule a FFT de cada sinal
 		\item Para cada sinal, crie uma figura com dois subplots:
 		\begin{itemize}
-			\item Superior: sinal discreto (marcadores) e contínuo (linha tracejada)
-			\item Inferior: magnitude da FFT mostrando réplicas espectrais em $\pm f_s$
+			\item Superior: sinal discreto (marcadores) e ``contínuo'' (linha tracejada)
+			\item Inferior: magnitude da FFT centrada em $f=0$ Hz, e réplicas espectrais em $\pm f_s$. Marque também as frequências $\pm f_1$ da onda senoidal com linhas verticais \\(Sugestão: use \tt{matplotlib.pyplot.vlines})
 		\end{itemize}
-		\item Para frequências acima de $f_s/2$, plote também a frequência ``alias''
+		\item Para frequências acima de $f_s/2$, plote também o sinal senoidal da frequência ``alias'' correspondente no tempo ``contínuo''.
+		
 	\end{enumerate}
 	
 	\textbf{Questões:}
 	\begin{itemize}
 		\item Quais frequências sofrem \textit{aliasing}? Por quê?
 		\item Qual é a relação entre a frequência real e sua versão ``aliased''?
-		\item Como as réplicas espectrais ajudam a visualizar o \textit{aliasing}?
 	\end{itemize}
 	
-	\subsection{Exercício 5: Aliasing por Sub-amostragem}
-	
-	Demonstre o \textit{aliasing} quando um sinal de alta taxa de amostragem é dizimado:
-	
-	\begin{enumerate}
-		\item Gere sinais contínuos ($f_{s,c} = 20000$ Hz) com frequências 250, 450 e 750 Hz
-		\item Para cada sinal, plote:
-		\begin{itemize}
-			\item O sinal em tempo ``contínuo''
-			\item Amostras tomadas a cada 20 pontos (equivalente a $f_{s,d} = 1000$ Hz)
-		\end{itemize}
-		\item Para o sinal de 750 Hz, sobreponha um cosseno de 250 Hz
-	\end{enumerate}
-	
-	\textbf{Questão:} Por que os sinais de 250 Hz e 750 Hz produzem as mesmas amostras quando amostrados a 1000 Hz?
-	
-	\subsection{Exercício 6 (Opcional): Aliasing em Séries de Fourier}
-	
-	Crie um sinal composto por múltiplas componentes senoidais e observe o efeito do \textit{aliasing}:
-	
-	\begin{enumerate}
-		\item Defina amplitudes $A = [1, 0.6, 0.4]$ e frequências $f = [150, 300, 600]$ Hz
-		\item Crie um sinal somando as três componentes
-		\item Compare os sinais em tempo discreto ($f_{s,d}$) e contínuo ($f_{s,c}$)
-		\item Use \texttt{sounddevice.play()} para ouvir ambos os sinais (\textbf{OPCIONAL})
-	\end{enumerate}
-	
-	\textbf{Questão:} Como o \textit{aliasing} afeta a percepção sonora do sinal?
-	
-	\section{Referências}
-	
-	K. Shin, J. Hammond. \textit{Fundamentals of Signal Processing for Sound and Vibration Engineers}. John Wiley and Sons, 2008.
 	
 	\section{Observações Finais}
 	
@@ -209,7 +202,6 @@
 		\item Use \texttt{plt.grid()} para facilitar a leitura dos gráficos
 		\item Sempre inclua legendas e rótulos nos eixos
 		\item Experimente com diferentes valores de frequências e taxas de amostragem
-		\item Lembre-se: $f_s/2$ (frequência de Nyquist) é o limite teórico!
 	\end{itemize}
 	
 	

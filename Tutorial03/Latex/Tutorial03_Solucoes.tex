@@ -1,0 +1,117 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+\usepackage{graphicx}
+%\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage[caption=false]{subfig}  % pacote para subfloats
+
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use the 'listings' package to add code and the 'color' package to generate the highlights
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% set it to Python language highlighting
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% set size of fonts
+	breaklines=true,				% set automatic line breaking
+	linewidth=\textwidth,			% set size of code box
+	showstringspaces=false}			% show spaces as underscores only inside strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais e Aplicações em Acústica\\ Soluções para Tutorial 03 - Amostragem e Aliasing}
+\author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	\setcounter{section}{2}
+	\subsection{Visualização do sinal discreto vs contínuo}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{Ex1_visualizacao.png}
+		\caption{Visualização de sinal senoidal de tempo ``contínuo'' e tempo discreto.}
+		\label{fig:Ex1_visualizacao}
+	\end{figure}
+	
+	\subsection{Propriedades da função sinc}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{Ex2_sinc.png}
+		\caption{Visualização da função sinc em tempo ``contínuo'' e tempo discreto.}
+		\label{fig:Ex2_sinc}
+	\end{figure}
+		
+	\subsection{Reconstrução ideal de sinais (Teorema de Shannon)}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{Ex3_reconstrucao.png}
+		\caption{Visualização da reconstrução de sinal ``contínuo'' a partir das amostras em tempo discreto.}
+		\label{fig:Ex3_reconstrucao}
+	\end{figure}
+
+	\subsection{Aliasing por sub-amostragem}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{Ex4_subamostragem.png}
+		\caption{Visualização de aliasing.}
+		\label{fig:Ex4_subamostragem}
+	\end{figure}
+	
+	\subsection{Visualização de Aliasing no Domínio do Tempo e Frequência}
+	
+	
+	\begin{figure}
+		\centering
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{Ex5_aliasing_150Hz.png}
+			\label{fig:Ex5_aliasing_150Hz}
+			}
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{Ex5_aliasing_350Hz.png}
+			\label{fig:Ex5_aliasing_350Hz}
+			} \\
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{Ex5_aliasing_550Hz.png}
+			\label{fig:Ex5_aliasing_550Hz}
+			}
+		\subfloat[]{
+			\includegraphics[width=0.5\textwidth]{Ex5_aliasing_750Hz.png}
+			\label{fig:Ex5_aliasing_750Hz}
+			}
+		\caption{Sinais senoidais no tempo e na frequência: \protect\subref{fig:Ex5_aliasing_150Hz} $f_1 = 150$ Hz; \protect\subref{fig:Ex5_aliasing_350Hz}  $f_1 = 350$ Hz; \protect\subref{fig:Ex5_aliasing_550Hz}  $f_1 = 550$ Hz; e \protect\subref{fig:Ex5_aliasing_750Hz}  $f_1 = 750$ Hz;.}
+		\label{fig:Ex5_aliasing}
+	\end{figure}
+	
+\end{document}
