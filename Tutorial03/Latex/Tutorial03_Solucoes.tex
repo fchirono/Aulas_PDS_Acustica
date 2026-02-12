@@ -55,7 +55,9 @@
 	\setcounter{section}{2}
 	\subsection{Visualização do sinal discreto vs contínuo}
 	
-	\begin{figure}
+	A Figura \ref{fig:Ex1_visualizacao} mostra o sinal discreto amostrado a $f_s,d=1000$ Hz com círculos vermelhos, e o sinal ``contínuo'' com uma linha cinza pontilhada. Nota-se que as amostras do sinal discreto são igualmente espaçadas no tempo, e coincidem com o sinal ``contínuo'' nos instantes amostrados.
+	
+	\begin{figure}[h]
 		\centering
 		\includegraphics[width=0.8\textwidth]{Ex1_visualizacao.png}
 		\caption{Visualização de sinal senoidal de tempo ``contínuo'' e tempo discreto.}
@@ -64,7 +66,11 @@
 	
 	\subsection{Propriedades da função sinc}
 	
-	\begin{figure}
+	A Figura \ref{fig:Ex2_sinc} mostra o sinal discreto com amostra unitária na 15a amostra ($t=15$ ms), e o sinal ``contínuo'' interpolado desta amostra através da função sinc. Nota-se que a função $\mathrm{sinc}(x-x_0)$ assume valor zero em todas as amostras discretas exceto a amostra $x=x_0$, sendo assim uma opção natural para interpolação de sinais discretos.
+	
+	A função sinc \textbf{NÃO} é causal, pois valores no presente são afetados por valores no futuro - note como o sinal ``contínuo'' apresenta oscilações mesmo antes do pico aos 15 ms. Como sistemas físicos reais devem ser causais, não é possível realizar uma interpolação ou reconstrução digital-analógica utilizando funções sinc ideais. Porém, a função sinc pode ser utilizada em pós-processamento de dados
+	
+	\begin{figure}[h]
 		\centering
 		\includegraphics[width=0.8\textwidth]{Ex2_sinc.png}
 		\caption{Visualização da função sinc em tempo ``contínuo'' e tempo discreto.}
@@ -73,7 +79,9 @@
 		
 	\subsection{Reconstrução ideal de sinais (Teorema de Shannon)}
 	
-	\begin{figure}
+	A Figura \ref{fig:Ex3_reconstrucao} mostra a reconstrução do sinal em tempo contínuo através das amostras discretas utilizando funções sinc. Nota-se que a soma das funções sinc se aproxima do sinal senoidal original, interpolando o valor da função de tempo contínuo nos períodos entre as amostras discretas.
+	
+	\begin{figure}[h]
 		\centering
 		\includegraphics[width=0.8\textwidth]{Ex3_reconstrucao.png}
 		\caption{Visualização da reconstrução de sinal ``contínuo'' a partir das amostras em tempo discreto.}
@@ -82,7 +90,11 @@
 
 	\subsection{Aliasing por sub-amostragem}
 	
-	\begin{figure}
+	A Figura \ref{fig:Ex4_subamostragem} demonstra os sinais amostrados a $f_{s,c}=20000$ Hz e $f_{s,d=1000}$ Hz. O sinal de 750 Hz possui frequência acima de $f_{s,d}/2$, e portanto sua versão discreta não obedece o Teorema da Amostragem e apresenta \emph{aliasing} - note como este sinal e o sinal de 250 Hz possuem a mesma representação em tempo discreto.
+	
+	Ao auralizar os sinais usando {\tt sounddevice.play} (lembre-se de usar as frequências de amostragem corretas!), não será possível notar diferença alguma nos primeiros dois casos, já que ambos obedecem o Teorema da Amostragem no caso discreto e portanto não há perda de informação. Já o terceiro sinal, que apresenta aliasing, não pode ser reproduzido corretamente, e ouvimos então o resultado do aliasing: perde-se a frequência correta do sinal amostrado, e apresenta-se uma outra frequência mais baixa.
+	
+	\begin{figure}[h]
 		\centering
 		\includegraphics[width=0.8\textwidth]{Ex4_subamostragem.png}
 		\caption{Visualização de aliasing.}
@@ -91,8 +103,11 @@
 	
 	\subsection{Visualização de Aliasing no Domínio do Tempo e Frequência}
 	
+	A Figura \ref{fig:Ex5_aliasing} demonstra o mesmo fenômeno de aliasing, mas desta vez representando os domínios do tempo e da frequência simultaneamente. O espectro em frequência azul demonstra frequências centradas em $f=0$, enquanto as réplicas espectrais em $\pm f_s$ são indicadas em linhas cinza tracejadas. Finalmente, a frequência $f_1$ do sinal senoidal está indicada com linhas verticais pretas.
 	
-	\begin{figure}
+	Nota-se aqui que quando a frequência $f_1$ encontra-se dentro do domínio $[-f_s/2, +f_s/2]$, o sinal amostrado possui a mesma frequência do sinal contínuo. Quando a frequência $f_1$ sai deste domínio e entra no domínio das réplicas espectrais, o sinal passa a apresentar \emph{aliasing} devido às componentes de frequência originalmente pertencentes às réplicas espectrais que adentram o domínio original centrado em $f=0$. Nota-se, assim, que a frequência real $f_1$ e a frequência da componente ``aliased'' $f_a$ estão relacionadas da forma $f_a = |f_1 - m \cdot f_s|$, onde $m$ é um número inteiro.
+	
+	\begin{figure}[h]
 		\centering
 		\subfloat[]{
 			\includegraphics[width=0.5\textwidth]{Ex5_aliasing_150Hz.png}
