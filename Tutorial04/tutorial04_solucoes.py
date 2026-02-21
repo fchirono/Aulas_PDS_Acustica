@@ -105,6 +105,10 @@ def quantizar_sinal(sinal, n_bits, v_max=1.0):
     return sinal_quantizado, erro_quantizacao, tamanho_nivel
 
 
+def SNR_teorica(Nbits):
+    return 6.02*Nbits + 1.76
+
+
 # %% Gerar um sinal senoidal
 
 # frequencia de amostragem [Hz]
@@ -121,7 +125,7 @@ t = np.linspace(0, T-dt, int(T*fs))
 
 # **************************************************
 # Quantizar o sinal usando N bits (resultando em 2**(N_bits-1) niveis)
-N_bits = 5
+N_bits = 4
 v_max = 5
 
 # define o uso de dithering (True/False)
@@ -137,13 +141,14 @@ v_dig = v_lsb/np.sqrt(6*fs)
 # sinal senoidal de 4*LSB amplitude (pico-a-pico)
 
 f0 = 123.4
-sinal_original = (2*v_lsb) * np.sin(2 * np.pi * f0 * t)
+sinal_original = 1.25 * np.sin(2 * np.pi * f0 * t)
+# sinal_original = 10 * np.sin(2 * np.pi * f0 * t)
 
 if usar_dithering:    
     # dithering de espectro triangular, amplitude 2-LSB pico-a-pico
     #  --> soma de dois ruidos de espectro retangular independentes
-    ruido1 = v_lsb*rng.uniform(low=-1, high=+1, size=t.shape[0])
-    ruido2 = v_lsb*rng.uniform(low=-1, high=+1, size=t.shape[0])
+    ruido1 = rng.uniform(low=-v_lsb, high=+v_lsb, size=t.shape[0])
+    ruido2 = rng.uniform(low=-v_lsb, high=+v_lsb, size=t.shape[0])
     ruido = (ruido1 + ruido2)/2
     
     # # plotar histograma do ruido de dithering
@@ -154,6 +159,18 @@ if usar_dithering:
 
 sinal_quantizado, erro, tamanho_nivel = quantizar_sinal(sinal_original,
                                                         N_bits, v_max)
+
+# Imprimir valores unicos no sinal quantizado para verificar quantidade
+# correta
+niveis_unicos = np.unique(sinal_quantizado)
+print(f"Numero de bits: {N_bits}")
+print(f"SNR teorica: {SNR_teorica(N_bits):.1f} dB")
+print(f"SNR calculada: {10*np.log10(np.var(sinal_original)/np.var(erro)):.1f} dB")
+print(f"Numero de niveis de tensao no sinal quantizado: {len(niveis_unicos)}")
+print(f"Niveis de quantizacao no sinal quantizado: {niveis_unicos}")
+print(f"Tamanho do nivel: {tamanho_nivel:.6f}V")
+print(f"Erro maximo de quantizacao: {np.max(np.abs(erro)):.6f}V")
+
     
 # %% plotar os primeiros 10 ms do sinal
 plt.figure()
@@ -173,16 +190,18 @@ plt.xlabel("Tempo [s]")
 # **************************************************
 # plotar o espectro de amplitude do sinal 
 
+Ndft = 1024
+
 f, espectro_original = ss.welch(sinal_original, fs, 'hann',
-                                nperseg=2**12, noverlap=2**11,
+                                nperseg=Ndft, noverlap=Ndft//2,
                                 scaling='density')
 
 f, espectro_quantizado = ss.welch(sinal_quantizado, fs, 'hann',
-                                nperseg=2**12, noverlap=2**11,
+                                nperseg=Ndft, noverlap=Ndft//2,
                                 scaling='density')
 
 f, espectro_erro = ss.welch(erro, fs, 'hann',
-                            nperseg=2**12, noverlap=2**11,
+                            nperseg=Ndft, noverlap=Ndft//2,
                             scaling='density')
 
 plt.figure()
@@ -217,13 +236,3 @@ sd.play(0.1*erro, fs)
 
 # time.sleep(T+1)
 
-# **************************************************
-
-# Imprimir valores unicos no sinal quantizado para verificar quantidade
-# correta
-niveis_unicos = np.unique(sinal_quantizado)
-print(f"Numero de bits: {N_bits}")
-print(f"Numero de niveis de tensao: {len(niveis_unicos)}")
-print(f"Niveis de quantizacao: {niveis_unicos}")
-print(f"Tamanho do nivel: {tamanho_nivel:.6f}V")
-print(f"Erro maximo de quantizacao: {np.max(np.abs(erro)):.6f}V")
