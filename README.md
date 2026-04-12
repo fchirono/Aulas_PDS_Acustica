@@ -17,7 +17,7 @@ Os temas abordados nestes Tutoriais são:
 01. Introdução / Revisão de Programação em Python
 02. Sinais e Sistemas
 03. Amostragem e aliasing
-04. Quantização *(em andamento)*
+04. Quantização
 05. Série de Fourier
 06. Transformada de Fourier de Tempo Discreto (DTFT) e Transformada Discreta de Fourier (DFT)
 07. Série de Fourier via DFT *(em andamento)*
