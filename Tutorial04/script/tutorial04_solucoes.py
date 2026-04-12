@@ -1,24 +1,8 @@
 """
 Exercicio demonstrando o efeito de quantizacao de um sinal analogico durante
-o processo de amostragem usando 'N' bits.
+o processo de amostragem usando 'N' bits, com ou sem 'dithering'.
 
-O exemplo tambem permite utilizar "dithering", conforme descrito em Lipshitz et
-al (1992):
-    
-    "The object of dithering is to control the statistal properties of the total
-    error and its relationship to the system input. In undithered systems we
-    know that the error is a deterministic function of the input. If the input
-    is simple or comparable in magnitude to the quantization step size, the
-    total error signal is strongly input-dependent and audible as gross
-    distortion and noise modulation. We shall see that use of dither with
-    proper statistical properties can render the total error signal audibly
-    equivalent to a steady white noise."
-    
-    S. Lipshitz et al, 1992
-
-
-O processo exemplificado esta descrito nas seguintes referencias:
-    
+Referencias:
     - Secao 4.8.2 - Analog-to-Digital (A/D) Conversion
     A Oppenheim, R Schafer - Discrete-Time Signal Processing (2a Ed)
     Prentice-Hall, 1999
@@ -48,9 +32,10 @@ plt.close('all')
 
 import sounddevice as sd
 
+save_fig = False
 
 
-def quantizar_sinal(sinal, n_bits, v_max=1.0):
+def quantizar_sinal_dither(sinal, n_bits, v_max=1.0, dither=False):
     """
     Quantizar um sinal de tensao usando "Linear Pulse-Code Modulation" (L-PCM)
     com 'n_bits', e quantizador do tipo "midtread".
@@ -65,6 +50,9 @@ def quantizar_sinal(sinal, n_bits, v_max=1.0):
     
     v_max : float, opcional
         Tensao maxima de entrada do conversor AD (padrao: 1.0V)
+    
+    dither : bool, opcional
+        Flag para aplicar dithering triangular ao sinal de entrada
     
     Retorna:
     --------
@@ -87,6 +75,25 @@ def quantizar_sinal(sinal, n_bits, v_max=1.0):
     # Calcular tamanho de cada nivel binario
     tamanho_nivel = (v_max - v_min) / n_niveis
     
+    if dither:
+        # dithering de espectro triangular, amplitude 2-LSB pico-a-pico
+        #  --> soma de dois ruidos de espectro retangular independentes
+        ruido1 = rng.uniform(low = -tamanho_nivel,
+                             high = +tamanho_nivel,
+                             size = t.shape[0])
+        ruido2 = rng.uniform(low = -tamanho_nivel,
+                             high = +tamanho_nivel,
+                             size = t.shape[0])
+        ruido = (ruido1 + ruido2)/2
+        
+        # adicionar o ruido ao sinal original
+        sinal_tensao += ruido
+        
+        # # plotar histograma do ruido de dithering para confirmar
+        # # a distribuicao triangular
+        # plt.figure()
+        # plt.hist(ruido, bins=100)
+        
     # Criar array com os diferentes niveis de tensao eletrica
     # usando 'n_niveis' de '-v_max' ate (mas nao incluindo) '+v_max'
     niveis_tensao = np.linspace(v_min, v_max, n_niveis, endpoint=False)
@@ -105,10 +112,6 @@ def quantizar_sinal(sinal, n_bits, v_max=1.0):
     return sinal_quantizado, erro_quantizacao, tamanho_nivel
 
 
-def SNR_teorica(Nbits):
-    return 6.02*Nbits + 1.76
-
-
 # %% Gerar um sinal senoidal
 
 # frequencia de amostragem [Hz]
@@ -124,12 +127,23 @@ T = 2.0
 t = np.linspace(0, T-dt, int(T*fs))
 
 # **************************************************
+# sinal senoidal de 4*LSB amplitude (pico-a-pico)
+
+f0 = 123.4
+
+V0 = 1.25
+# V0 = 10
+# V0 = 0.5
+
+sinal_original = V0 * np.sin(2 * np.pi * f0 * t)
+
+# **************************************************
 # Quantizar o sinal usando N bits (resultando em 2**(N_bits-1) niveis)
 N_bits = 4
 v_max = 5
 
 # define o uso de dithering (True/False)
-usar_dithering = False
+usar_dithering = True
 
 # tensao do nivel menos significativo do conversor
 v_lsb = (2*v_max)/(2**(N_bits-1))
@@ -137,58 +151,48 @@ v_lsb = (2*v_max)/(2**(N_bits-1))
 # densidade espectral de tensao do ruido de conversao [V/sqrt(Hz)]
 v_dig = v_lsb/np.sqrt(6*fs)
 
-# **************************************************
-# sinal senoidal de 4*LSB amplitude (pico-a-pico)
+sinal_quantizado, erro, tamanho_nivel = quantizar_sinal_dither(sinal_original,
+                                                               N_bits, v_max,
+                                                               dither=usar_dithering)
 
-f0 = 123.4
-sinal_original = 1.25 * np.sin(2 * np.pi * f0 * t)
-# sinal_original = 10 * np.sin(2 * np.pi * f0 * t)
-
-if usar_dithering:    
-    # dithering de espectro triangular, amplitude 2-LSB pico-a-pico
-    #  --> soma de dois ruidos de espectro retangular independentes
-    ruido1 = rng.uniform(low=-v_lsb, high=+v_lsb, size=t.shape[0])
-    ruido2 = rng.uniform(low=-v_lsb, high=+v_lsb, size=t.shape[0])
-    ruido = (ruido1 + ruido2)/2
-    
-    # # plotar histograma do ruido de dithering
-    # plt.figure()
-    # plt.hist(ruido, bins=100)
-    
-    sinal_original += ruido
-
-sinal_quantizado, erro, tamanho_nivel = quantizar_sinal(sinal_original,
-                                                        N_bits, v_max)
-
-# Imprimir valores unicos no sinal quantizado para verificar quantidade
-# correta
+# Imprimir algumas informacoes sobre o sinal quantizado
 niveis_unicos = np.unique(sinal_quantizado)
 print(f"Numero de bits: {N_bits}")
-print(f"SNR teorica: {SNR_teorica(N_bits):.1f} dB")
-print(f"SNR calculada: {10*np.log10(np.var(sinal_original)/np.var(erro)):.1f} dB")
-print(f"Numero de niveis de tensao no sinal quantizado: {len(niveis_unicos)}")
 print(f"Niveis de quantizacao no sinal quantizado: {niveis_unicos}")
 print(f"Tamanho do nivel: {tamanho_nivel:.6f}V")
 print(f"Erro maximo de quantizacao: {np.max(np.abs(erro)):.6f}V")
 
     
 # %% plotar os primeiros 10 ms do sinal
+
 plt.figure()
 plt.subplot(211)
-plt.plot(t[:int(0.01*fs)], sinal_original[:int(0.01*fs)])
-plt.plot(t[:int(0.01*fs)], sinal_quantizado[:int(0.01*fs)], 'o-')
+plt.plot(t[:int(0.01*fs)], sinal_original[:int(0.01*fs)],
+         label='x[n]')
+plt.plot(t[:int(0.01*fs)], sinal_quantizado[:int(0.01*fs)], 'o-',
+         label='x_Q[n]')
 plt.grid()
+plt.legend(loc="lower left")
+plt.ylim([-2*V0, 2*V0])
 plt.ylabel("Amplitude [V]")
 
-
 plt.subplot(212)
-plt.plot(t[:int(0.01*fs)], erro[:int(0.01*fs)])
+plt.plot(t[:int(0.01*fs)], erro[:int(0.01*fs)], ':',
+         color='C2', label='e[n]')
 plt.grid()
+plt.ylim([-2*V0, 2*V0])
+plt.legend(loc="lower left")
 plt.ylabel("Amplitude [V]")
 plt.xlabel("Tempo [s]")
 
-# **************************************************
-# plotar o espectro de amplitude do sinal 
+if save_fig:
+    
+    if usar_dithering:
+        plt.savefig(f"2_1_SinalQuantizadoTempo_{V0}V_{N_bits}bits_dither.png")
+    else:
+        plt.savefig(f"2_1_SinalQuantizadoTempo_{V0}V_{N_bits}bits.png")    
+
+# %% plotar o espectro de potencia do sinal 
 
 Ndft = 1024
 
@@ -211,12 +215,18 @@ plt.semilogy(f, espectro_erro, ':', label='Erro')
 plt.hlines(v_dig**2, f[0], f[-1], linestyles='--', color='k')
 plt.legend()
 plt.grid()
+# plt.xlim([0, 5e3])
+plt.ylim([1e-10, 1e0])
 plt.ylabel("Magnitude")
 plt.xlabel("Frequencia [Hz]")
 
-
-# **************************************************
-# auralizar o sinal original, seguido do sinal quantizado e da diferenca
+if save_fig:
+    if usar_dithering:
+        plt.savefig(f"2_1_SinalQuantizadoPSD_{V0}V_{N_bits}bits_dither.png")
+    else:
+        plt.savefig(f"2_1_SinalQuantizadoPSD_{V0}V_{N_bits}bits.png")
+    
+# %% auralizar o sinal original, seguido do sinal quantizado e da diferenca
 
 # ***IMPORTANTE***: sempre atenue a amplitude do sinal antes de auralizar!
 
@@ -231,7 +241,7 @@ sd.play(0.1*sinal_quantizado, fs)
 
 time.sleep(T+1)
 
-print("Auralizando a diferenca...")
+print("Auralizando o sinal de erro...")
 sd.play(0.1*erro, fs)
 
 # time.sleep(T+1)
