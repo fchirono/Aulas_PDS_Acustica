@@ -17,8 +17,10 @@ import numpy as np
 import scipy.signal as ss
 import matplotlib.pyplot as plt
 
-
 plt.close('all')
+
+# flag para salvar figuras
+salvar_fig = False
 
 # %% variáveis preliminares
 
@@ -38,7 +40,7 @@ dt = 1./fs      # resolução temporal
 #
 # - Caso 4: separando duas senoides com janelamento
 
-caso = 2
+caso = 1
 
 match caso:
     case 1:
@@ -82,13 +84,13 @@ match caso:
         # CASO 3 - Separando ondas senoidais (sem janelas)
         # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
     
-        T1 = 2.5*Tp     # 2,5 períodos
+        T1 = 1.5*Tp     # 1,5 períodos
         T2 = 5.5*Tp     # 5,5 períodos
     
         f0b = f0*2*np.sqrt(2)
-        Ab = A/20.              # ~ -26 dB abaixo de A
+        Ab = A/20.
     
-        # sinal 1 (25 amostras)
+        # sinal 1 (15 amostras)
         N1 = int(T1*fs)
         t1 = np.arange(N1)/fs
         x1 = A*np.cos(2*np.pi*f0*t1) + Ab*np.cos(2*np.pi*f0b*t1)
@@ -103,13 +105,13 @@ match caso:
         # CASO 4 - Separando ondas senoidais usando janelas
         # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
     
-        T1 = 2.5*Tp     # 2,5 períodos
+        T1 = 1.5*Tp     # 1,5 períodos
         T2 = 5.5*Tp     # 5,5 períodos
     
         f0b = f0*2*np.sqrt(2)
-        Ab = A/20.              # ~ -26 dB abaixo de A
+        Ab = A/20.
     
-        # sinal 1 (25 amostras)
+        # sinal 1 (15 amostras)
         N1 = int(T1*fs)
         t1 = np.arange(N1)/fs
         win1 = ss.windows.hann(N1)
@@ -124,7 +126,7 @@ match caso:
 # %% plotar os sinais no domínio do tempo
 
 plt.figure()
-for n in range(-2, 3):
+for n in range(-1, 2):
     # plotar repetições periódicas
     plt.plot(t1 + n*T1, x1, 'o-', color='0.75')
 
@@ -143,10 +145,14 @@ plt.xlabel('Tempo [s]')
 plt.ylabel('Amplitude')
 plt.title('x1')
 plt.ylim(-3, 3)
+plt.grid()
+
+if salvar_fig:
+    plt.savefig(f"caso{caso}_x1_tempo.png")
 
 
 plt.figure()
-for n in range(-2, 3):
+for n in range(-1, 2):
     # plotar repetições periódicas
     plt.plot(t2 + n*T2, x2, 'o-', color='0.75')
 
@@ -164,7 +170,11 @@ if caso == 4:
 plt.xlabel('Tempo [s]')
 plt.ylabel('Amplitude')
 plt.title('x2')
-plt.ylim(-5, 5)
+plt.ylim(-3, 3)
+plt.grid()
+
+if salvar_fig:
+    plt.savefig(f"caso{caso}_x2_tempo.png")
 
 # %% preenchimento com zeros ('zero-padding') dos sinais no domínio do tempo
 # --> usar 5000 pontos (aproximação da DTFT)
@@ -192,7 +202,10 @@ plt.xlabel('Tempo [s]')
 plt.ylabel('Amplitude')
 plt.title('x1 (com zero-padding)')
 plt.ylim(-3, 3)
-
+plt.grid()
+if salvar_fig:
+    plt.savefig(f"caso{caso}_x1_zp_tempo.png")
+    
 plt.figure()
 for n in range(-2, 3):
 
@@ -206,8 +219,11 @@ plt.plot(t_zp, x2_zp, 'ro-')
 plt.xlabel('Tempo [s]')
 plt.ylabel('Amplitude')
 plt.title('x2 (com zero-padding)')
-plt.ylim(-5, 5)
-
+plt.ylim(-3, 3)
+plt.grid()
+if salvar_fig:
+    plt.savefig(f"caso{caso}_x2_zp_tempo.png")
+    
 # %% calcular as DFTs
 
 # sinal 1
@@ -233,40 +249,53 @@ X2_zp = np.fft.fft(x2_zp)
 # plotar as DFTs
 plt.figure()
 plt.plot(freq1, np.abs(X1)/N1, 'bo', label='DFT (N={})'.format(N1))
-plt.plot(freq_zp, np.abs(X1_zp)/N1, 'r--', label='DFT (N={})'.format(N_zp))
+plt.plot(freq_zp, np.abs(X1_zp)/N1, 'r:', label='DFT (N={})'.format(N_zp))
 plt.ylabel('Magnitude')
 plt.xlabel('Freq [Hz]')
 plt.title('|X1|')
 plt.legend()
+plt.grid()
+if salvar_fig:
+    plt.savefig(f"caso{caso}_x1_freq.png")
 
 plt.figure()
 plt.plot(freq2, np.abs(X2)/N2, 'bo', label='DFT (N={})'.format(N2))
-plt.plot(freq_zp, np.abs(X2_zp)/N2, 'r--', label='DFT (N={})'.format(N_zp))
+plt.plot(freq_zp, np.abs(X2_zp)/N2, 'r:', label='DFT (N={})'.format(N_zp))
 plt.ylabel('Magnitude')
 plt.xlabel('Freq [Hz]')
 plt.title('|X2|')
 plt.legend()
-
+plt.grid()
+if salvar_fig:
+    plt.savefig(f"caso{caso}_x2_freq.png")
 
 # plotar em dB
 plt.figure()
 plt.plot(freq1, 20*np.log10(np.abs(X1)/N1), 'bo',
          label='DFT (N={})'.format(N1))
-plt.plot(freq_zp, 20*np.log10(np.abs(X1_zp)/N1), 'r--',
+plt.plot(freq_zp, 20*np.log10(np.abs(X1_zp)/N1), 'r:',
          label='DFT (N={})'.format(N_zp))
 plt.ylabel('Magnitude [dB]')
 plt.xlabel('Freq [Hz]')
 plt.title('|X1| (em dB)')
 plt.ylim(-60, 20)
 plt.legend()
+plt.grid()
+
+if salvar_fig:
+    plt.savefig(f"caso{caso}_x1_freq_dB.png")
 
 plt.figure()
 plt.plot(freq2, 20*np.log10(np.abs(X2)/N2), 'bo',
          label='DFT (N={})'.format(N2))
-plt.plot(freq_zp, 20*np.log10(np.abs(X2_zp)/N2), 'r--',
+plt.plot(freq_zp, 20*np.log10(np.abs(X2_zp)/N2), 'r:',
          label='DFT (N={})'.format(N_zp))
 plt.ylabel('Magnitude [dB]')
 plt.xlabel('Freq [Hz]')
 plt.title('|X2| (em dB)')
 plt.ylim(-60, 20)
 plt.legend()
+plt.grid()
+
+if salvar_fig:
+    plt.savefig(f"caso{caso}_x2_freq_dB.png")
