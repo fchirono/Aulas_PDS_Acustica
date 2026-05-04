@@ -10,14 +10,14 @@ https://github.com/fchirono/Aulas_PDS_Acustica
 
 Autor:
     Fabio Casagrande Hirono
-    Fev 2026
+    Maio 2026
 """
 
 import numpy as np
+import scipy.signal as ss
 import matplotlib.pyplot as plt
 
 
-plt.rc('text', usetex=True)
 plt.close('all')
 
 # %% variáveis preliminares
@@ -28,100 +28,98 @@ Tp = 1./f0      # período fundamental
 fs = 10./Tp     # frequência de amostragem (10 amostras por Tp)
 dt = 1./fs      # resolução temporal
 
-# %% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-# escolha um dos 4 casos de exemplo:
+# %% 4 casos:
 #
-# - Caso 1: senoides simples, comprimentos da DFT são múltiplos exatos dos períodos
+# - Caso 1: senoide simples, comprimentos da DFT são múltiplos exatos dos períodos
 #
-# - Caso 2: senoides simples, comprimentos da DFT são múltiplos não-inteiros dos períodos
+# - Caso 2: senoide simples, comprimentos da DFT são múltiplos não-inteiros dos períodos
 #
 # - Caso 3: separando duas senoides, sem janelamento
 #
 # - Caso 4: separando duas senoides com janelamento
-#
-# *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
-caso = 1
+caso = 2
 
-if caso == 1:
-    # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-    # CASO 1 - comprimentos da DFT são números exatos de períodos
-    # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+match caso:
+    case 1:
+        # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+        # CASO 1 - comprimentos da DFT são números exatos de períodos
+        # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+    
+        T1 = 1*Tp       # um período
+        T2 = 5*Tp       # cinco períodos
+    
+        # sinal 1 (10 amostras)
+        N1 = int(T1*fs)
+        t1 = np.arange(N1)/fs
+        x1 = A*np.cos(2*np.pi*f0*t1)
+    
+        # sinal 2 (50 amostras)
+        N2 = int(T2*fs)
+        t2 = np.arange(N2)/fs
+        x2 = A*np.cos(2*np.pi*f0*t2)
 
-    T1 = 1*Tp       # um período
-    T2 = 5*Tp       # cinco períodos
+    case 2:
+        # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+        # CASO 2 - comprimentos da DFT são números não-inteiros de períodos
+        # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+    
+        T1 = 1.5*Tp     # 1,5 períodos
+        T2 = 5.5*Tp     # 5,5 períodos
+    
+        # sinal 1 (15 amostras)
+        N1 = int(T1*fs)
+        t1 = np.arange(N1)/fs
+        x1 = A*np.cos(2*np.pi*f0*t1)
+    
+        # sinal 2 (55 amostras)
+        N2 = int(T2*fs)
+        t2 = np.arange(N2)/fs
+        x2 = A*np.cos(2*np.pi*f0*t2)
 
-    # sinal 1 (10 amostras)
-    t1 = np.linspace(0, T1 - dt, int(T1*fs))
-    N1 = np.size(t1)
-    x1 = A*np.cos(2*np.pi*f0*t1)
+    case 3:
+        # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+        # CASO 3 - Separando ondas senoidais (sem janelas)
+        # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+    
+        T1 = 2.5*Tp     # 2,5 períodos
+        T2 = 5.5*Tp     # 5,5 períodos
+    
+        f0b = f0*2*np.sqrt(2)
+        Ab = A/20.              # ~ -26 dB abaixo de A
+    
+        # sinal 1 (25 amostras)
+        N1 = int(T1*fs)
+        t1 = np.arange(N1)/fs
+        x1 = A*np.cos(2*np.pi*f0*t1) + Ab*np.cos(2*np.pi*f0b*t1)
+    
+        # sinal 2 (55 amostras)
+        N2 = int(T2*fs)
+        t2 = np.arange(N2)/fs
+        x2 = A*np.cos(2*np.pi*f0*t2) + (A/10.)*np.cos(2*np.pi*f0b*t2)
 
-    # sinal 2 (50 amostras)
-    t2 = np.linspace(0, T2 - dt, int(T2*fs))
-    N2 = np.size(t2)
-    x2 = A*np.cos(2*np.pi*f0*t2)
-
-elif caso == 2:
-    # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-    # CASO 2 - comprimentos da DFT são números não-inteiros de períodos
-    # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-
-    T1 = 1.5*Tp     # 1,5 períodos
-    T2 = 3.5*Tp     # 3,5 períodos
-
-    # sinal 1 (15 amostras)
-    t1 = np.linspace(0, T1 - dt, int(T1*fs))
-    N1 = np.size(t1)
-    x1 = A*np.cos(2*np.pi*f0*t1)
-
-    # sinal 2 (35 amostras)
-    t2 = np.linspace(0, T2 - dt, int(T2*fs))
-    N2 = np.size(t2)
-    x2 = A*np.cos(2*np.pi*f0*t2)
-
-elif caso == 3:
-    # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-    # CASO 3 - Separando ondas senoidais (sem janelas)
-    # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-
-    T1 = 2.5*Tp     # 2,5 períodos
-    T2 = 5.5*Tp     # 5,5 períodos
-
-    f0b = f0*2*np.sqrt(2)
-    Ab = A/20.              # ~ -26 dB abaixo de A
-
-    # sinal 1 (25 amostras)
-    t1 = np.linspace(0, T1 - dt, int(T1*fs))
-    N1 = np.size(t1)
-    x1 = A*np.cos(2*np.pi*f0*t1) + Ab*np.cos(2*np.pi*f0b*t1)
-
-    # sinal 2 (55 amostras)
-    t2 = np.linspace(0, T2 - dt, int(T2*fs))
-    N2 = np.size(t2)
-    x2 = A*np.cos(2*np.pi*f0*t2) + (A/10.)*np.cos(2*np.pi*f0b*t2)
-
-elif caso == 4:
-    # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-    # CASO 4 - Separando ondas senoidais usando janelas
-    # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-
-    T1 = 2.5*Tp     # 2,5 períodos
-    T2 = 5.5*Tp     # 5,5 períodos
-
-    f0b = f0*2*np.sqrt(2)
-    Ab = A/20.              # ~ -26 dB abaixo de A
-
-    # sinal 1 (25 amostras)
-    t1 = np.linspace(0, T1 - dt, int(T1*fs))
-    N1 = np.size(t1)
-    win1 = np.hanning(N1)
-    x1 = (A*np.cos(2*np.pi*f0*t1) + Ab*np.cos(2*np.pi*f0b*t1))*win1
-
-    # sinal 2 (55 amostras)
-    t2 = np.linspace(0, T2 - dt, int(T2*fs))
-    N2 = np.size(t2)
-    win2 = np.hanning(N2)
-    x2 = (A*np.cos(2*np.pi*f0*t2) + (A/10.)*np.cos(2*np.pi*f0b*t2))*win2
+    case 4:
+        # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+        # CASO 4 - Separando ondas senoidais usando janelas
+        # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+    
+        T1 = 2.5*Tp     # 2,5 períodos
+        T2 = 5.5*Tp     # 5,5 períodos
+    
+        f0b = f0*2*np.sqrt(2)
+        Ab = A/20.              # ~ -26 dB abaixo de A
+    
+        # sinal 1 (25 amostras)
+        N1 = int(T1*fs)
+        t1 = np.arange(N1)/fs
+        win1 = ss.windows.hann(N1)
+        x1 = (A*np.cos(2*np.pi*f0*t1) + Ab*np.cos(2*np.pi*f0b*t1))*win1
+    
+        # sinal 2 (55 amostras)
+        N2 = int(T2*fs)
+        t2 = np.arange(N2)/fs
+        win2 = ss.windows.hann(N2)
+        x2 = (A*np.cos(2*np.pi*f0*t2) + (A/10.)*np.cos(2*np.pi*f0b*t2))*win2
 
 # %% plotar os sinais no domínio do tempo
 
@@ -173,7 +171,8 @@ plt.ylim(-5, 5)
 
 N_zp = 5000
 T_zp = N_zp*dt
-t_zp = np.linspace(0, T_zp-dt, N_zp)
+# t_zp = np.linspace(0, T_zp-dt, N_zp)
+t_zp = np.arange(N_zp)/fs
 
 x1_zp = np.concatenate((x1, np.zeros(N_zp-N1)))
 x2_zp = np.concatenate((x2, np.zeros(N_zp-N2)))
@@ -213,17 +212,20 @@ plt.ylim(-5, 5)
 
 # sinal 1
 df1 = fs/N1
-freq1 = np.linspace(0, fs-df1, N1)
+# freq1 = np.linspace(0, fs-df1, N1)
+freq1 = np.arange(N1)*df1
 X1 = np.fft.fft(x1, N1)
 
 # sinal 2
 df2 = fs/N2
-freq2 = np.linspace(0, fs-df2, N2)
+# freq2 = np.linspace(0, fs-df2, N2)
+freq2 = np.arange(N2)*df2
 X2 = np.fft.fft(x2, N2)
 
 # sinais com zero-padding
 df_zp = fs/N_zp
-freq_zp = np.linspace(0, fs-df_zp, N_zp)
+# freq_zp = np.linspace(0, fs-df_zp, N_zp)
+freq_zp = np.arange(N_zp)*df_zp
 X1_zp = np.fft.fft(x1_zp)
 X2_zp = np.fft.fft(x2_zp)
 
@@ -232,7 +234,7 @@ X2_zp = np.fft.fft(x2_zp)
 plt.figure()
 plt.plot(freq1, np.abs(X1)/N1, 'bo', label='DFT (N={})'.format(N1))
 plt.plot(freq_zp, np.abs(X1_zp)/N1, 'r--', label='DFT (N={})'.format(N_zp))
-plt.ylabel('Magnitude Escalonada')
+plt.ylabel('Magnitude')
 plt.xlabel('Freq [Hz]')
 plt.title('|X1|')
 plt.legend()
@@ -240,7 +242,7 @@ plt.legend()
 plt.figure()
 plt.plot(freq2, np.abs(X2)/N2, 'bo', label='DFT (N={})'.format(N2))
 plt.plot(freq_zp, np.abs(X2_zp)/N2, 'r--', label='DFT (N={})'.format(N_zp))
-plt.ylabel('Magnitude Escalonada')
+plt.ylabel('Magnitude')
 plt.xlabel('Freq [Hz]')
 plt.title('|X2|')
 plt.legend()
@@ -252,7 +254,7 @@ plt.plot(freq1, 20*np.log10(np.abs(X1)/N1), 'bo',
          label='DFT (N={})'.format(N1))
 plt.plot(freq_zp, 20*np.log10(np.abs(X1_zp)/N1), 'r--',
          label='DFT (N={})'.format(N_zp))
-plt.ylabel('Magnitude Escalonada [dB]')
+plt.ylabel('Magnitude [dB]')
 plt.xlabel('Freq [Hz]')
 plt.title('|X1| (em dB)')
 plt.ylim(-60, 20)
@@ -263,7 +265,7 @@ plt.plot(freq2, 20*np.log10(np.abs(X2)/N2), 'bo',
          label='DFT (N={})'.format(N2))
 plt.plot(freq_zp, 20*np.log10(np.abs(X2_zp)/N2), 'r--',
          label='DFT (N={})'.format(N_zp))
-plt.ylabel('Magnitude Escalonada [dB]')
+plt.ylabel('Magnitude [dB]')
 plt.xlabel('Freq [Hz]')
 plt.title('|X2| (em dB)')
 plt.ylim(-60, 20)
