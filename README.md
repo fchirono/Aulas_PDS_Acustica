@@ -21,7 +21,7 @@ Os temas abordados nestes Tutoriais são:
 05. Série de Fourier
 06. Transformada de Fourier de Tempo Discreto (DTFT) e Transformada Discreta de Fourier (DFT)
 07. Série de Fourier via DFT *(em andamento)*
-08. Janelamento e Zero-Padding *(em andamento)*
+08. Janelamento e Zero-Padding
 09. Convolução
 10. Espectro de Potência
 11. Periodograma e Método de Welch *(em andamento)*
