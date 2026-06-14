@@ -51,17 +51,21 @@ t = np.linspace(0, T-dt, Nt)        # vetor de amostras no tempo
 
 # %% funcoes para obter coeficientes de Fourier 
 
-# Onda dente-de-serra (serie de Fourier de senos)
-coef_dente_sen = lambda m: -2*((-1)**(m+1))/(np.pi*m)
+def coef_dente_sen(m):
+    # Onda dente-de-serra (serie de Fourier de senos)
+    return -2*((-1)**(m+1))/(np.pi*m)
 
-# onda quadrada (serie de Fourier de senos)
-coef_quad_sen = lambda m: 2*(1-np.cos(np.pi*m))/(m*np.pi)
+def coef_quad_sen(m):
+    # onda quadrada (serie de Fourier de senos)
+    return 2*(1-np.cos(np.pi*m))/(m*np.pi)
 
-# onda triangular (serie de Fourier de senos)
-coef_triang_cos = lambda m: 8*np.sin(m*np.pi/2)/ (np.pi*m)**2
+def coef_triang_cos(m):
+    # onda triangular (serie de Fourier de senos)
+    return 8*np.sin(m*np.pi/2)/ (np.pi*m)**2
 
-# onda triangular (serie de Fourier de senos)
-coef_triang_sen = lambda m: 2 * (np.cos(np.pi*m)-1)/(np.pi*m**2)
+def coef_triang_sen(m):
+    # onda triangular (serie de Fourier de senos)
+    return 2 * (np.cos(np.pi*m)-1)/(np.pi*m**2)
 
 
 # %% cria coeficientes da serie de cosenos/senos
@@ -78,7 +82,7 @@ A_n = np.zeros(N)
 B_n = np.zeros(N)
 
 # sinal : ["arbitrario", "serra", "quad", "triang1", "triang2"]
-sinal = "triang1"
+sinal = "serra"
 
 
 match sinal:
@@ -107,6 +111,7 @@ match sinal:
 
 
 # %% sintetiza sinal no tempo a partir dos coeficientes de Fourier
+
 x = np.zeros(Nt)
 for n in range(N):
     x += A_n[n]*np.cos(2*np.pi*n*f0*t) + B_n[n]*np.sin(2*np.pi*n*f0*t)
