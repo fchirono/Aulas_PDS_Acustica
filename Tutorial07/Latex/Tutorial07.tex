@@ -88,7 +88,7 @@
 	\noindent onde $A_k$ e $B_k$ são os coeficientes reais das componentes de cosseno e seno do $k$-ésimo harmônico, respectivamente. Na forma exponencial complexa:
 	
 	\begin{equation}
-		x(t) = \sum_{n=-\infty}^{+\infty} C_k \, e^{\,j \, 2\pi k f_0 t},
+		x(t) = \sum_{k=-\infty}^{+\infty} C_k \, e^{\,j \, 2\pi k f_0 t},
 		\label{eq:sintese_complexa}
 	\end{equation}
 	
@@ -163,51 +163,37 @@ Nt  = int(T*fs)     # No. de amostras (= 1 periodo exato)
 t   = np.linspace(0, T-dt, Nt)  # vetor de tempo
 
 # Numero de coeficientes da Serie de Fourier
-N = 25
+K = 25
 	\end{lstlisting}
 	
 	
 	% -----------------------------------------------------------------------
-	\subsection{Condições de Correspondência DFT -- Série de Fourier}
+	\subsection{Correspondência entre DFT e Série de Fourier}
 	\label{sec:tarefa_condicoes}
 	
-	 Utilize como sinal de referência a onda dente-de-serra, cujos coeficientes de seno são dados por:
+		
+	\begin{enumerate}
+		\item Descreva analiticamente as condições necessárias para que a DFT de um sinal discreto produza exatamente os coeficientes da Série de Fourier. 
+	\end{enumerate}
+	 
+	Para os exercícios seguintes, utilize como sinal de referência a onda dente-de-serra, cujos coeficientes de seno são dados por:
 	
 	\begin{equation}
-		B_n = -\frac{2(-1)^{n+1}}{\pi n}, \quad n = 1, 2, 3, \ldots
+		B_k = -\frac{2(-1)^{k+1}}{\pi n}, \quad k = 1, 2, 3, \ldots
 		\label{eq:coef_serra}
 	\end{equation}
 	
-	\begin{enumerate}
-		\item Descreva analiticamente as condições necessárias para que a DFT de um sinal discreto produza exatamente os coeficientes da Série de Fourier. 
-		
-		\item Usando as configurações iniciais acima, sintetize o sinal $x(t)$ no domínio do tempo somando $N = 25$ termos da Série de senos de Fourier (equação de síntese \eqref{eq:sintese_real} com $A_n = 0$):
+	\begin{enumerate}	
+		\setcounter{enumi}{1}
+		\item Usando as configurações iniciais acima, sintetize o sinal $x[n]$ no domínio do tempo discreto somando $K = 25$ termos da Série de senos de Fourier (equação de síntese \eqref{eq:sintese_real} com $A_k = 0$):
 		\begin{equation*}
-			x(t) = \sum_{n=1}^{N} B_n \sin(2\pi n f_0 t).
+			x[n] = \sum_{k=1}^{K} B_k \sin(2\pi k f_0 n).
 		\end{equation*}
 		Plote o sinal sintetizado no domínio do tempo. O sinal obtido se assemelha a uma onda dente-de-serra? O que você observa ao usar mais termos na série?
 		
 		\item Calcule a DFT do sinal usando \texttt{numpy.fft.fft} e normalize-a pelo número de amostras $N_t$. Plote o espectro de magnitude e fase em função da frequência em Hz. Compare visualmente os coeficientes obtidos pela DFT com os coeficientes teóricos $C_n$ calculados a partir de $B_n$ via equação \eqref{eq:relacao_coefs}. Note que os coeficientes $C_{-n}$ aparecem nos índices superiores do vetor da DFT (isto é, as frequências negativas são espelhadas para as frequências acima de $f_s/2$).
 		
 		\item Experimente com uma duração \textbf{não inteira}: use $T_{ni} = 1{,}5 / f_0$ (1,5 períodos). Sintetize o sinal com essa duração e calcule sua DFT. O que acontece com os coeficientes em comparação com os casos anteriores? Explique o resultado observado com base nas condições descritas na questão 1.
-		
-	\end{enumerate}
-	
-	
-	% -----------------------------------------------------------------------
-	\subsection{Efeito da Frequência de Amostragem}
-	
-	Nesta tarefa, você irá investigar o efeito da frequência de amostragem $f_s$ na análise espectral. Utilize novamente a onda dente-de-serra com os coeficientes da equação \eqref{eq:coef_serra}, mas agora com $N = 50$ termos.
-	
-	\begin{enumerate}
-		
-		\item Calcule a maior frequência presente no sinal sintetizado (considere os $N = 50$ termos da série). Qual é o valor mínimo de $f_s$ necessário para satisfazer o critério de Nyquist para este sinal?
-		
-		\item Sintetize o sinal com três valores de frequência de amostragem: $f_{s,1} = 500$\,Hz, $f_{s,2} = 5000$\,Hz, e $f_{s,3} = 50000$\,Hz. Para cada caso, mantenha a duração de exatamente um período ($T = 1/f_0$). Plote os sinais no domínio do tempo na mesma figura.
-		
-		\item Calcule a DFT de cada sinal e plote os espectros de magnitude normalizados. O que acontece com o espectro quando a frequência de amostragem está abaixo do mínimo necessário? O que acontece com os coeficientes de alta frequência da série quando $f_s$ é aumentada?
-		
-		\item \textbf{Aliasing}: Com $f_{s,1} = 500$\,Hz, identifique quais harmônicos do sinal sofrem \emph{aliasing}. Para cada harmônico $f_n = n \cdot f_0$ com $f_n > f_{s,1}/2$, calcule a frequência aparente $f_{alias}$ na qual ele irá aparecer no espectro. Sobreponha os resultados ao espectro de magnitude calculado no item anterior.
 		
 	\end{enumerate}
 	
@@ -241,7 +227,7 @@ def coef_triang_sen(m):
 		
 		\item Sintetize o sinal no domínio do tempo usando a equação de síntese \eqref{eq:sintese_real} e plote-o. O formato visual do sinal converge para a forma de onda esperada com $N = 25$ termos?
 		
-		\item Calcule os coeficientes teóricos $C_n$ e $C_{-n}$ a partir de $A_n$ e $B_n$, usando as relações da equação \eqref{eq:relacao_coefs}. Verifique também se os coeficientes analíticos fornecidos acima são consistentes com as equações de análise \eqref{eq:analise_An}--\eqref{eq:analise_Bn}: para a onda quadrada, por exemplo, calcule numericamente a integral $B_n = \frac{2}{T_0}\int_0^{T_0} f(t)\sin(2\pi n f_0 t)\,dt$ usando \texttt{numpy.trapz} e compare com \texttt{coef\_quad\_sen(n)}.
+		\item Calcule os coeficientes teóricos $C_n$ e $C_{-n}$ a partir de $A_n$ e $B_n$, usando as relações da equação \eqref{eq:relacao_coefs}. Verifique também se os coeficientes analíticos fornecidos acima são consistentes com as equações de análise \eqref{eq:analise_Ak}--\eqref{eq:analise_Bk}: para a onda quadrada, por exemplo, calcule numericamente a integral $B_n = \frac{2}{T_0}\int_0^{T_0} f(t)\sin(2\pi n f_0 t)\,dt$ usando \texttt{numpy.trapz} e compare com \texttt{coef\_quad\_sen(n)}.
 		
 		\item Calcule a DFT do sinal sintetizado e compare, em um mesmo gráfico de magnitude e fase, os coeficientes obtidos numericamente pela DFT com os coeficientes teóricos $C_n$. A correspondência é exata?
 		
@@ -249,23 +235,6 @@ def coef_triang_sen(m):
 		
 	\end{enumerate}
 	
-	
-	% -----------------------------------------------------------------------
-	\subsection{Aplicação: Análise Espectral de um Sinal de Áudio}
-	
-	Sinais de instrumentos musicais possuem conteúdo harmônico característico de cada instrumento, formando o chamado \emph{timbre}. Nesta tarefa, você irá sintetizar um sinal de áudio com conteúdo harmônico controlado e analisar seu espectro com a DFT.
-	
-	\begin{enumerate}
-		
-		\item Sintetize um sinal de áudio correspondente à nota Lá (A4, $f_0 = 440$\,Hz) com duração de exatamente um período ($T = 1/f_0$) e frequência de amostragem $f_s = 44100$\,Hz (padrão de CD). Use os coeficientes de seno da onda dente-de-serra (equação \eqref{eq:coef_serra}) com $N = 30$ termos.
-		
-		\item Calcule a DFT e plote o espectro de magnitude em função da frequência em Hz, apenas até a frequência de Nyquist ($f_s/2$). Identifique no gráfico a frequência fundamental e os primeiros harmônicos.
-		
-		\item Repita a síntese com os coeficientes da onda quadrada (\texttt{coef\_quad\_sen}) e da onda triangular (\texttt{coef\_triang\_cos}), mantendo $f_0 = 440$\,Hz. Plote os três espectros de magnitude em um mesmo gráfico (use escala logarítmica em dB). Como a taxa de decaimento da magnitude dos harmônicos difere entre as três formas de onda? O que isso implica perceptualmente para o timbre de cada sinal?
-		
-		\item \textbf{Desafio}: Crie um sinal com conteúdo harmônico próprio, escolhendo livremente os valores dos coeficientes $A_n$ e $B_n$ para $n = 1, 2, \ldots, 10$ (mantenha as amplitudes entre $-1$ e $1$). Plote o sinal no domínio do tempo e seu espectro de magnitude. Descreva brevemente o timbre esperado com base no espectro gerado.
-		
-	\end{enumerate}
 	
 	
 	% -----------------------------------------------------------------------

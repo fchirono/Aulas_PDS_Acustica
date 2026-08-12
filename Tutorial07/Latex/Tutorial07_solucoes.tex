@@ -57,7 +57,7 @@
 
 \subsection*{Tarefa 1}
 
-Para comparar a equação da DFT (Eq. 8) com a equação de análise da Série de Fourier na forma exponencial (Eq. 7), podemos aproximar a integral de análise em $t$ por uma somatória em $n$ (onde $t = n \cdot \Delta t$):
+Para comparar a equação da DFT (Eq. 8) com a equação de análise da Série de Fourier na forma exponencial (Eq. 7), podemos aproximar a integral de uma função $f(t)$ por uma somatória em $n$ (onde $t = n \cdot \Delta t$):
 
 \begin{equation}
 	\int_{t=0}^{T_0} f(t) \ dt \approx \sum_{n=0}^{N_t-1} f(n \cdot \Delta t) \ \Delta t.
@@ -70,7 +70,7 @@ Continuando a derivação, encontram-se três condições devem ser satisfeitas 
 	
 	\item \textbf{Periodicidade do sinal analisado}: o sinal deve ser periódico com período $T_0 = 1/f_0$.
 	
-	\item \textbf{Análise de um período inteiro}: a duração $T = N_t \cdot \Delta t$ do vetor de amostras deve ser exatamente igual ao período $T_0 = 1/f_0$ do sinal. Quando esta condição é satisfeita, $f_0 = \Delta f$ e o $k$-ésimo harmônico ($k \cdot f_0$) da frequência fundamental coincide exatamente com o $k$-ésimo \emph{bin} da DFT ($k \cdot \Delta f$).
+	\item \textbf{Análise de um período inteiro}: a duração $T = N_t \cdot \Delta t$ do sinal temporal $x(t)$ deve ser exatamente igual ao período fundamental $T_0 = 1/f_0$ do sinal. Quando esta condição é satisfeita, $f_0 = \Delta f$ e o $k$-ésimo harmônico ($k \cdot f_0$) da frequência fundamental coincide exatamente com o $k$-ésimo \emph{bin} da DFT ($k \cdot \Delta f$).
 \end{enumerate}
 
 A violação da segunda condição leva ao \emph{vazamento espectral} (\textit{spectral leakage}), estudado em detalhes no Tutorial 08. Naturalmente, o critério de Nyquist ($f_s \geq 2 f_{max}$, onde $f_{max}$ é a maior frequência presente no sinal) ainda deve ser satisfeito.
