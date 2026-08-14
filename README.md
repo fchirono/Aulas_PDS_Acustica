@@ -20,7 +20,7 @@ Os temas abordados nestes Tutoriais são:
 04. Quantização
 05. Série de Fourier
 06. Transformada de Fourier de Tempo Discreto (DTFT) e Transformada Discreta de Fourier (DFT)
-07. Série de Fourier via DFT *(em andamento)*
+07. Série de Fourier via DFT
 08. Janelamento e Zero-Padding
 09. Convolução
 10. Espectro de Potência
