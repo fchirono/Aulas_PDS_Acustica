@@ -57,9 +57,8 @@
 	Ao final desta sessão, você será capaz de:
 	\begin{itemize}
 		\item Identificar as condições necessárias para que a DFT de um sinal discreto resulte exatamente nos coeficientes da Série de Fourier,
-		\item Compreender a relação entre os parâmetros de aquisição (frequência de amostragem, duração do sinal, frequência fundamental) e a qualidade dos coeficientes obtidos via DFT,
-		\item Sintetizar sinais periódicos a partir de coeficientes da Série de Fourier e verificar sua reconstrução no domínio do tempo,
-		\item Calcular e interpretar a DFT de sinais periódicos, comparando os resultados numéricos com os coeficientes teóricos esperados.
+		\item Compreender a relação entre os parâmetros de aquisição (frequência de amostragem, duração do sinal, frequência fundamental) e os coeficientes obtidos via DFT,
+		\item Sintetizar sinais periódicos a partir de coeficientes da Série de Fourier e verificar sua reconstrução no domínio do tempo.
 	\end{itemize}
 	
 	\begingroup
@@ -78,14 +77,16 @@
 	
 	\subsection{A Série de Fourier -- Equações de Síntese}
 	
-	Um sinal periódico $x(t)$ com período $T_0 = 1/f_0$ pode ser representado pela Série de Fourier. As \emph{equações de síntese} reconstroem o sinal a partir dos seus coeficientes. Na forma real (seno e cosseno):
+	Um sinal periódico $x(t)$ com período $T_0 = 1/f_0$ pode ser representado por uma Série de Fourier. As \emph{equações de síntese} reconstroem o sinal a partir dos seus coeficientes. Na forma real (seno e cosseno):
 	
 	\begin{equation}
 		x(t) = \sum_{k=0}^{\infty} \left[ A_k \cos(2\pi k f_0 t) + B_n \sin(2\pi k f_0 t) \right],
 		\label{eq:sintese_real}
 	\end{equation}
 	
-	\noindent onde $A_k$ e $B_k$ são os coeficientes reais das componentes de cosseno e seno do $k$-ésimo harmônico, respectivamente. Na forma exponencial complexa:
+	\noindent onde $A_k$ e $B_k$ são os coeficientes reais das componentes de cosseno e seno do $k$-ésimo harmônico, respectivamente.
+	
+	Na forma exponencial complexa:
 	
 	\begin{equation}
 		x(t) = \sum_{k=-\infty}^{+\infty} C_k \, e^{\,j \, 2\pi k f_0 t},
@@ -114,18 +115,20 @@
 		\label{eq:analise_Bk}
 	\end{align}
 	
-	Note que $A_0$ corresponde ao valor médio (componente DC) do sinal, e o fator $2/T_0$ (em lugar de $1/T_0$) nos coeficientes $A_k$ e $B_k$ com $k \geq 1$ resulta da normalização pela metade da energia da senoide no período. Na forma exponencial, o coeficiente complexo do $k$-ésimo harmônico é dado por:
+	Note que $A_0$ corresponde ao valor médio (componente DC) do sinal, e o fator $2/T_0$ (em lugar de $1/T_0$) nos coeficientes $A_k$ e $B_k$ com $k \geq 1$ resulta da normalização pela metade da energia da senoide no período.
+	
+	Na forma exponencial, o coeficiente complexo do $k$-ésimo harmônico é dado por:
 	
 	\begin{equation}
 		C_k = \frac{1}{T_0} \int_0^{T_0} x(t) \, e^{-j2\pi k f_0 t} \, dt, \quad k \in \mathbb{Z}.
 		\label{eq:analise_Ck}
 	\end{equation}
 	
-	\noindent Esta expressão é válida para todo $k$ inteiro (positivo, negativo e zero), e unifica as equações \eqref{eq:analise_A0}--\eqref{eq:analise_Bk} em uma única fórmula. A integral pode ser calculada sobre qualquer intervalo de duração $T_0$; o intervalo $[0, T_0]$ é utilizado por conveniência.
+	\noindent Esta expressão é válida para todo $k$ inteiro (positivo, negativo e zero), e unifica as equações \eqref{eq:analise_A0}--\eqref{eq:analise_Bk} em uma única equação. A integral pode ser calculada sobre qualquer intervalo de duração $T_0$; o intervalo $[0, T_0]$ é utilizado por conveniência.
 	
 	\subsection{A DFT e os Coeficientes da Série de Fourier}
 	
-	A DFT de um vetor de $N_t$ amostras $x[n]$, com $n = 0, 1, \ldots, N_t-1$, é definida como:
+	A DFT de um vetor $x[n]$ de $N_t$ amostras, com $n = 0, 1, \ldots, N_t-1$, é definida como:
 	
 	\begin{equation}
 		X[k] = \sum_{n=0}^{N_t-1} x[n] \, e^{-j2\pi kn/N_t}, \quad k = 0, 1, \ldots, N_t-1.
@@ -150,20 +153,24 @@
 	\begin{lstlisting}[frame=single, caption={Configurações iniciais comuns aos exercícios.}]
 import numpy as np
 import matplotlib.pyplot as plt
-plt.close("all")
 
-# Frequencia de amostragem [Hz]
-fs  = 10000
-dt  = 1/fs          # intervalo de amostragem [s]
 
-# Frequencia fundamental [Hz]
-f0  = 100.
-T   = 1/f0          # duracao de um periodo [s]
-Nt  = int(T*fs)     # No. de amostras (= 1 periodo exato)
-t   = np.linspace(0, T-dt, Nt)  # vetor de tempo
+def zera_valores_pequenos(arr, tol=1e-13):
+    """Zera valores reais ou imaginarios muito proximos de zero"""
+    arr.real[np.abs(arr.real) < tol] = 0
+    arr.imag[np.abs(arr.imag) < tol] = 0
+    return arr
 
-# Numero de coeficientes da Serie de Fourier
-K = 25
+
+fs = 10000                      # Frequencia de amostragem [Hz]
+dt = 1/fs                       # intervalo de amostragem [s]
+
+f0 = 100.                       # frequencia fundamental [Hz]
+T = 1./f0                       # duracao [s]
+Nt = int(T*fs)                  # No. de amostras no tempo
+t = np.linspace(0, T-dt, Nt)    # vetor de amostras no tempo
+
+K = 25                          # numero de coeficientes da Serie de Fourier
 	\end{lstlisting}
 	
 	
@@ -173,69 +180,32 @@ K = 25
 	
 		
 	\begin{enumerate}
-		\item Descreva analiticamente as condições necessárias para que a DFT de um sinal discreto produza exatamente os coeficientes da Série de Fourier. 
+		\item Descreva analiticamente as condições necessárias para que a DFT de um sinal discreto produza exatamente os coeficientes da Série de Fourier do sinal contínuo. 
 	\end{enumerate}
 	 
-	Para os exercícios seguintes, utilize como sinal de referência a onda dente-de-serra, cujos coeficientes de seno são dados por:
+	\noindent Para os exercícios seguintes, utilize como sinal de referência a onda dente-de-serra, cujos coeficientes da Série de Fourier são dados por:
 	
 	\begin{equation}
-		B_k = -\frac{2(-1)^{k+1}}{\pi n}, \quad k = 1, 2, 3, \ldots
+		A_k = 0, \qquad B_k = -\frac{2 \cos(\pi k)}{\pi k}, \quad k = 1, 2, 3, \ldots
 		\label{eq:coef_serra}
 	\end{equation}
 	
 	\begin{enumerate}	
 		\setcounter{enumi}{1}
-		\item Usando as configurações iniciais acima, sintetize o sinal $x[n]$ no domínio do tempo discreto somando $K = 25$ termos da Série de senos de Fourier (equação de síntese \eqref{eq:sintese_real} com $A_k = 0$):
-		\begin{equation*}
-			x[n] = \sum_{k=1}^{K} B_k \sin(2\pi k f_0 n).
-		\end{equation*}
-		Plote o sinal sintetizado no domínio do tempo. O sinal obtido se assemelha a uma onda dente-de-serra? O que você observa ao usar mais termos na série?
+		\item Usando as configurações iniciais acima, sintetize o sinal $x[n]$ no domínio do tempo discreto somando $K = 25$ termos da Série de Fourier de senos. Plote o sinal sintetizado no domínio do tempo. O sinal obtido se assemelha a uma onda dente-de-serra? O que você observa ao usar mais ou menos termos na série?
 		
-		\item Calcule a DFT do sinal usando \texttt{numpy.fft.fft} e normalize-a pelo número de amostras $N_t$. Plote o espectro de magnitude e fase em função da frequência em Hz. Compare visualmente os coeficientes obtidos pela DFT com os coeficientes teóricos $C_n$ calculados a partir de $B_n$ via equação \eqref{eq:relacao_coefs}. Note que os coeficientes $C_{-n}$ aparecem nos índices superiores do vetor da DFT (isto é, as frequências negativas são espelhadas para as frequências acima de $f_s/2$).
+		\item Calcule a DFT $X[k]$ do sinal usando \texttt{numpy.fft.fft}. Plote o espectro de magnitude e fase em função da frequência em Hz. Compare os coeficientes $X[k]$ obtidos pela DFT com os coeficientes teóricos $C_k$ calculados a partir de $B_k$ via equação \eqref{eq:relacao_coefs} -- normalize os coeficientes caso necessário, e use a função \texttt{zera\_valores\_pequenos} para eliminar pequenos resíduos devido à precisão numérica. Note que os coeficientes $C_{-k}$ aparecem nos índices superiores do vetor da DFT (isto é, as frequências negativas são espelhadas para as frequências acima de $f_s/2$).
 		
 		\item Experimente com uma duração \textbf{não inteira}: use $T_{ni} = 1{,}5 / f_0$ (1,5 períodos). Sintetize o sinal com essa duração e calcule sua DFT. O que acontece com os coeficientes em comparação com os casos anteriores? Explique o resultado observado com base nas condições descritas na questão 1.
 		
-	\end{enumerate}
-	
-	
-	% -----------------------------------------------------------------------
-	\subsection{Síntese e Análise de Diferentes Formas de Onda}
-	
-	Nesta tarefa, você irá trabalhar com quatro formas de onda periódicas clássicas: onda dente-de-serra, onda quadrada, e duas formas de onda triangular. As funções para calcular os coeficientes analíticos de cada onda são fornecidas abaixo:
-	
-	\begin{lstlisting}[frame=single, caption={Funções para calcular coeficientes analíticos de diferentes formas de onda.}]
-def coef_dente_sen(m):
-	# Onda dente-de-serra (coeficientes de seno)
-	return -2*((-1)**(m+1))/(np.pi*m)
-
-def coef_quad_sen(m):
-	# Onda quadrada (coeficientes de seno)
-	return 2*(1 - np.cos(np.pi*m))/(m*np.pi)
-
-def coef_triang_cos(m):
-	# Onda triangular, x em [-1, 1] (coeficientes de cosseno)
-	return 8*np.sin(m*np.pi/2) / (np.pi*m)**2
-
-def coef_triang_sen(m):
-	# Onda triangular, x em [0, pi] (coeficientes de seno, com DC)
-	return 2*(np.cos(np.pi*m) - 1)/(np.pi*m**2)
-	\end{lstlisting}
-	
-	\noindent Use as configurações iniciais da Seção~\ref{sec:tarefas} com $N = 25$ termos. Repita os itens abaixo para cada uma das quatro formas de onda.
-	
-	\begin{enumerate}
+		\item A onda dente-de-serra do exercício anterior é uma função ímpar, portanto possui apenas os termos $B_k$ em sua Série de Fourier. Compare os coeficientes da Série de Fourier com os coeficientes da DFT para uma função par (onda triangular), cujos coeficientes de Fourier são dados por:
 		
-		\item Sintetize o sinal no domínio do tempo usando a equação de síntese \eqref{eq:sintese_real} e plote-o. O formato visual do sinal converge para a forma de onda esperada com $N = 25$ termos?
-		
-		\item Calcule os coeficientes teóricos $C_n$ e $C_{-n}$ a partir de $A_n$ e $B_n$, usando as relações da equação \eqref{eq:relacao_coefs}. Verifique também se os coeficientes analíticos fornecidos acima são consistentes com as equações de análise \eqref{eq:analise_Ak}--\eqref{eq:analise_Bk}: para a onda quadrada, por exemplo, calcule numericamente a integral $B_n = \frac{2}{T_0}\int_0^{T_0} f(t)\sin(2\pi n f_0 t)\,dt$ usando \texttt{numpy.trapz} e compare com \texttt{coef\_quad\_sen(n)}.
-		
-		\item Calcule a DFT do sinal sintetizado e compare, em um mesmo gráfico de magnitude e fase, os coeficientes obtidos numericamente pela DFT com os coeficientes teóricos $C_n$. A correspondência é exata?
-		
-		\item Para a onda quadrada, observe que apenas os harmônicos ímpares estão presentes na Série de Fourier. Verifique se a DFT reproduz corretamente este comportamento, e confirme que os coeficientes dos harmônicos pares são numericamente próximos de zero.
+		\begin{equation}
+			A_k = 8 \frac{\sin^2(k \pi/2)}{(k\pi)^2}, \qquad B_k = 0, \quad k = 1, 2, 3, \ldots
+			\label{eq:coef_triang_par}
+		\end{equation}
 		
 	\end{enumerate}
-	
-	
 	
 	% -----------------------------------------------------------------------
 	\section*{Referências}

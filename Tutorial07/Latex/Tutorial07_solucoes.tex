@@ -51,11 +51,10 @@
 	\date{}
 	\maketitle
 
-%\setcounter{section}{1}
-\section{Condições de Correspondência DFT -- Série de Fourier}
-\setcounter{subsection}{1}
+\setcounter{section}{2}
+\subsection{Condições de Correspondência DFT -- Série de Fourier}
 
-\subsection*{Tarefa 1}
+\subsubsection*{Tarefa 1}
 
 Para comparar a equação da DFT (Eq. 8) com a equação de análise da Série de Fourier na forma exponencial (Eq. 7), podemos aproximar a integral de uma função $f(t)$ por uma somatória em $n$ (onde $t = n \cdot \Delta t$):
 
@@ -63,7 +62,7 @@ Para comparar a equação da DFT (Eq. 8) com a equação de análise da Série d
 	\int_{t=0}^{T_0} f(t) \ dt \approx \sum_{n=0}^{N_t-1} f(n \cdot \Delta t) \ \Delta t.
 \end{equation}
 
-Continuando a derivação, encontram-se três condições devem ser satisfeitas simultaneamente para que esta aproximação seja \emph{exata}:
+Continuando a derivação, encontram-se quatro condições que devem ser satisfeitas simultaneamente para que a equivalência entre a DFT e a Série de Fourier seja \emph{exata}:
 
 \begin{enumerate}
 	\item \textbf{Normalização dos coeficientes}: $C_k = X[k] \ / \ N_t$
@@ -71,9 +70,83 @@ Continuando a derivação, encontram-se três condições devem ser satisfeitas 
 	\item \textbf{Periodicidade do sinal analisado}: o sinal deve ser periódico com período $T_0 = 1/f_0$.
 	
 	\item \textbf{Análise de um período inteiro}: a duração $T = N_t \cdot \Delta t$ do sinal temporal $x(t)$ deve ser exatamente igual ao período fundamental $T_0 = 1/f_0$ do sinal. Quando esta condição é satisfeita, $f_0 = \Delta f$ e o $k$-ésimo harmônico ($k \cdot f_0$) da frequência fundamental coincide exatamente com o $k$-ésimo \emph{bin} da DFT ($k \cdot \Delta f$).
+	
+	\item \textbf{Critério de Nyquist}: a maior frequência presente no sinal deve ser menor que a frequência de Nyquist $f_s/2$. Para uma série de Fourier com $K$ termos ($k=0, \ldots, K-1$), temos então que $(K-1) f_0 < f_s/2$.
 \end{enumerate}
 
-A violação da segunda condição leva ao \emph{vazamento espectral} (\textit{spectral leakage}), estudado em detalhes no Tutorial 08. Naturalmente, o critério de Nyquist ($f_s \geq 2 f_{max}$, onde $f_{max}$ é a maior frequência presente no sinal) ainda deve ser satisfeito.
+A violação da segunda condição leva ao \emph{vazamento espectral} (\textit{spectral leakage}), estudado em detalhes no Tutorial 08.
 
+\subsubsection*{Tarefa 2}
+
+A Figura \ref{fig:SerieFourier_DenteDeSerra} mostra o sinal dente-de-serra criado com 10, 25, e 40 termos da Série de Fourier. Nota-se que o sinal se aproxima cada vez mais de uma onda dente-de-serra ideal conforme o número de termos da Série de Fourier aumenta. A Série de Fourier converge lentamente, então é necessário fazer grandes alterações no número de termos para obter resultados visíveis.
+
+
+\begin{figure}[h!]
+	\centering
+	\subfloat[$K=10$]{\label{subfig:SerieFourier10}
+		\includegraphics[width = 0.33\textwidth]{denteserra_10termos.png}
+	}
+	~
+	\subfloat[$K=25$]{\label{subfig:SerieFourier25}
+		\includegraphics[width = 0.33\textwidth]{denteserra_25termos.png}
+	}
+	~
+	\subfloat[$K=40$]{\label{subfig:SerieFourier40}
+		\includegraphics[width = 0.33\textwidth]{denteserra_40termos.png}
+	}
+	\caption{Onda dente-de-serra sintetizada com diferentes números de termos ($K=10$, 25, e 40) da Série de Fourier.}
+	\label{fig:SerieFourier_DenteDeSerra}
+\end{figure}
+
+
+\subsubsection*{Tarefa 3}
+
+Retornemos ao caso $K=25$. Conforme descrito na Tarefa 1, os coeficientes $C_k$ podem ser obtidos através dos coeficientes da DFT normalizados $X[k]/N_t$. A Figura \ref{fig:DFT_DenteDeSerra} compara a magnitude e fase de ambos os conjuntos de coeficientes, e demonstra que estes são idênticos -- desde que as condições acima determinadas sejam seguidas.
+
+Note que como o sinal sintetizado é de banda limitada (apenas $K=25$ termos), os coeficientes de Fourier obtidos através da DFT assumem valor não-zero apenas até o $(K-1)$-ésimo harmônico da frequência fundamental -- neste caso, até 2400 Hz. Note também que é necessário utilizar a função \texttt{zera\_valores\_pequenos} para remover pequenos resíduos numéricos dos coeficientes, que podem aparecer como termos de fase espúria.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.75\textwidth]{DFT_MagFase_DenteDeSerra_25termos.png}
+	\caption{Magnitude e fase dos coeficientes analíticos da Série de Fourier e dos termos normalizados $X[k]/N_t$ da DFT de um sinal dente-de-serra com $K=25$ termos.}
+	\label{fig:DFT_DenteDeSerra}
+\end{figure}
+
+
+\subsubsection*{Tarefa 4}
+A Figura \ref{fig:DenteSerra_1p5T} mostra o sinal $x[n]$ no domínio do tempo discreto, e a comparação entre os coeficientes $C_k$ da Série de Fourier e os coeficientes $X[k]$ (normalizados) da DFT. Ao adotar uma duração $T = 1,5/f0$ não-inteira de períodos da onda dente-de-serra, quebramos a condição no. 3 listada acima. Como consequência, a resolução $\Delta f$ da DFT não será idêntica à frequência fundamental $f_0$ da onda dente-de-serra, e os termos da DFT não irão coincidir com os termos da Série de Fourier, como pode se observar na Figura \ref{fig:DenteSerra_1p5T}.
+
+\begin{figure}[h!]
+	\centering
+	\subfloat[Função no tempo]{
+		\label{subfig:DenteSerra_t_1p5T}
+		\includegraphics[width = 0.5\textwidth]{denteserra_25termos_1p5T.png}
+	} \\
+	\subfloat[Função na frequência]{
+		\label{subfig:DFT_DenteSerra_1p5T}
+		\includegraphics[width = 0.75\textwidth]{DFT_MagFase_DenteDeSerra_25termos_1p5T.png}
+	}
+	\caption{Onda dente-de-serra sintetizada com $K=25$ termos da Série de Fourier e duração $1,5 T_0$.}
+	\label{fig:DenteSerra_1p5T}
+\end{figure}
+
+
+\subsubsection*{Tarefa 5}
+
+A Figura \ref{fig:Triang} mostra a onda triangular sintetizada com $K=25$ termos, e a comparação entre os coeficientes analíticos da Série de Fourier e os coeficientes normalizados da DFT. Nota-se que a magnitude dos coeficientes da onda triangular decai mais rapidamente que os coeficientes da onda dente-de-serra, e apenas harmônicos ímpares estão presentes.
+
+\begin{figure}[h!]
+	\centering
+	\subfloat[Função no tempo]{
+		\label{subfig:Triang_t}
+		\includegraphics[width = 0.5\textwidth]{triang_25termos.png}
+	} \\
+	\subfloat[Função na Frequência]{
+		\label{subfig:DFT_Triang}
+		\includegraphics[width = 0.75\textwidth]{DFT_MagFase_Triang_25termos.png}
+	}
+	\caption{Onda triangular sintetizada com $K=25$ termos da Série de Fourier.}
+	\label{fig:Triang}
+\end{figure}
 
 \end{document}
