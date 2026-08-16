@@ -53,7 +53,7 @@ Atividades:
         para Dfr = 2 m e Dfp = 1 m, e auralise a resposta deste sistema usando
         uma gravacao da sua propria voz como sinal de entrada.
         
-https://github.com/fchirono/AulasDSP
+https://github.com/fchirono/Aulas_PDS_Acustica
 
 Autor:
     Fabio Casagrande Hirono

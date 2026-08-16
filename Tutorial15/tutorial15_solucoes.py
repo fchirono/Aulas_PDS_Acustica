@@ -16,7 +16,7 @@ Sugestao de exercicio:
 
 Funcoes de criar sinais AM/FM copiadas do pacote MOSQITO: https://github.com/Eomys/MoSQITo
 
-https://github.com/fchirono/AulasDSP
+https://github.com/fchirono/Aulas_PDS_Acustica
 
 Autor:
     Fabio Casagrande Hirono

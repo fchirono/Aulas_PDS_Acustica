@@ -1,13 +1,13 @@
 """
 Exemplo de solução para o Tutorial 09 de Processamento Digital de Sinais
 
-https://github.com/fchirono/AulasDSP
-
 Resposta ao Impulso da sala acessado de:
     Stewart, Rebecca and Sandler, Mark. "Database of Omnidirectional and 
     B-Format Impulse Responses", in Proc. of IEEE Int. Conf. on Acoustics, 
     Speech, and Signal Processing (ICASSP 2010), Dallas, Texas, March 2010.
     URL: http://isophonics.net/content/room-impulse-response-data-set
+
+https://github.com/fchirono/Aulas_PDS_Acustica
 
 Autor:
     Fabio Casagrande Hirono

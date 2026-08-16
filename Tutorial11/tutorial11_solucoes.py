@@ -33,7 +33,7 @@ Referencias:
     https://holometer.fnal.gov/GH_FFT.pdf
    
    
-https://github.com/fchirono/AulasDSP
+https://github.com/fchirono/Aulas_PDS_Acustica
 
 Autor:
     Fabio Casagrande Hirono

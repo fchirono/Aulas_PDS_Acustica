@@ -1,7 +1,7 @@
 """
 Exemplo de solução para o Tutorial 12 de Processamento Digital de Sinais
 
-https://github.com/fchirono/AulasDSP
+https://github.com/fchirono/Aulas_PDS_Acustica
 
 Autor:
     Fabio Casagrande Hirono
