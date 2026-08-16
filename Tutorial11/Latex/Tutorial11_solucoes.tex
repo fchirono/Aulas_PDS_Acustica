@@ -52,10 +52,12 @@
 	\maketitle
 	
 	
-	%\setcounter{section}{1}
+	\setcounter{section}{1}
 	\section{Tarefas}
 	
-	\subsection{Tarefa 1}
+	\subsection{Periodograma e Método de Welch}
+	
+	\subsubsection*{Tarefa 1}
 	A Figura \ref{fig:SinaisTempo_T1} compara as primeiras amostras do sinal de ruído branco original com o sinal resultante após a filtragem passa-faixas. Nota-se que o sinal filtrado apresenta uma envoltória mais lenta, característica da remoção do conteúdo de alta e baixa frequência pelo filtro passa-faixas.
 	
 	\begin{figure}[h!]
@@ -65,10 +67,10 @@
 		\label{fig:SinaisTempo_T1}
 	\end{figure}
 	
-	\subsection{Tarefa 2}
+	\subsubsection*{Tarefa 2}
 	-
 	
-	\subsection{Tarefa 3}
+	\subsubsection*{Tarefa 3}
 	A Figura \ref{fig:PSD_Periodograma_T2} apresenta a Densidade Espectral de Potência do sinal {\tt x\_passafaixa} estimada pelo periodograma, para diferentes durações do sinal analisado.
 	
 	\begin{figure}[h!]
@@ -80,10 +82,10 @@
 	
 	Conforme a duração da série temporal analisada aumenta, o estimador tipo periodograma aumenta a resolução em frequência (i.e. diminui a distância entre amostras adjacentes da DFT), mas \textbf{não} reduz a variância da estimativa - as curvas permanecem igualmente ``ruidosas'' (erráticas) independentemente da duração do sinal utilizado. Como consequência, o periodograma não converge para a Densidade Espectral de Potência teórica do sinal conforme mais dados são utilizados.
 	
-	\subsection{Tarefa 4}
+	\subsubsection*{Tarefa 4}
 	-
 	
-	\subsection{Tarefa 5}
+	\subsubsection*{Tarefa 5}
 	A Figura \ref{fig:PSD_Welch_T3} apresenta a Densidade Espectral de Potência do sinal {\tt x\_passafaixa} estimada pelo método de Welch, mantendo $N_{DFT}=512$ e $N_{sobreposicao}=256$ fixos e variando a duração total do sinal analisado.
 	
 	\begin{figure}[h!]
@@ -97,10 +99,12 @@
 	
 	\textbf{Nota:} neste caso em particular, o número de pontos da DFT não resulta em uma resolução em frequência (aprox. 94 Hz) fina o bastante para ``resolver'' a frequência de corte inferior (50 Hz) do filtro passa-faixas. Para melhor observar este efeito, seria necessário aumentar o tamanho da DFT.
 	
-	\subsection{Tarefa 6}
+	\subsection{Espectro de Potência (PS) e Densidade Espectral de Potência (PSD)}
+	
+	\subsubsection*{Tarefa 1}
 	A amplitude RMS do sinal senoidal gerado, calculada diretamente a partir da série temporal, é de $2.00$ V, consistente com o valor $V_{rms}=2$ V especificado.
 	
-	\subsection{Tarefa 7}
+	\subsubsection*{Tarefa 2}
 	A Figura \ref{fig:PSD_Welch_Ndft_T4} apresenta a Densidade Espectral de Potência do sinal {\tt x\_soma} (senoide + ruído passa-faixa), estimada pelo método de Welch com janela de Hann, para diferentes valores de $N_{DFT}$.
 	
 	\begin{figure}[h!]
@@ -114,7 +118,7 @@
 	
 	Isso ocorre porque cada elemento da DEP corresponde à potência contida dentro de uma ``caixinha'' de largura $\Delta f = f_s/N_{DFT}$, dividida pela própria largura da caixinha. Assim, a potência do sinal senoidal (que é concentrada em uma única frequência) pode ser obtida considerando-se a integral (área) da DEP em uma faixa de frequências ao redor do pico; uma primeira aproximação é simplesmente o produto entre a magnitude do pico e a resolução em frequência $\Delta f$, correspondente à potência contida em uma única caixinha da DEP centrada no pico.
 	
-	\subsection{Tarefa 8}
+	\subsubsection*{Tarefa 3}
 	A Figura \ref{fig:PS_Welch_Ndft_T5} apresenta o Espectro de Potência (ao invés da Densidade Espectral de Potência) do mesmo sinal {\tt x\_soma}, para os mesmos valores de $N_{DFT}$ utilizados na Tarefa 7. A linha tracejada horizontal indica o valor teórico $V_{rms}^2 = 4$ V\textsuperscript{2}.
 	
 	\begin{figure}[h!]
@@ -128,7 +132,7 @@
 	
 	Para obter a potência total de um sinal de espectro contínuo (tipo ruído) a partir do Espectro de Potência, basta somar todos os seus valores (não é necessário integrar, i.e. não é necessário multiplicar pela resolução em frequência).
 	
-	\subsection{Tarefa 9}
+	\subsubsection*{Tarefa 4}
 	A duração total do sinal analisado é mantida constante em todos os casos; portanto, valores menores de $N_{DFT}$ geram um número maior de quadros (janelas) curtos, resultando em mais elementos disponíveis para o cálculo da média do espectro, e portanto em uma estimativa com menor variância (mais ``suave''). Por outro lado, valores maiores de $N_{DFT}$ resultam em um número menor de quadros calculados e, portanto, em menos elementos disponíveis para a média, resultando em uma estimativa com maior variância (mais ``errática''/ruidosa) - às custas, porém, de uma melhor resolução em frequência.
 	
 	Este é precisamente o compromisso fundamental do método de Welch: dada uma duração fixa de sinal, é preciso escolher entre melhor resolução em frequência (usando $N_{DFT}$ maior, com menos quadros médios) ou menor variância da estimativa espectral (usando $N_{DFT}$ menor, com mais quadros médios).
