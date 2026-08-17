@@ -1,0 +1,201 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use o pacote 'listings' para adicionar código e o pacote 'color' para gerar os destaques
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% definir para destaque de linguagem Python
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% definir tamanho das fontes
+	breaklines=true,				% definir quebra de linha automática
+	linewidth=\textwidth,			% definir tamanho da caixa de código
+	showstringspaces=false}			% mostrar espaços como sublinhados apenas dentro de strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Soluções para Tutorial 14 - Resposta ao Impulso de Sistemas com Atraso e Reflexão}
+\author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	
+	\setcounter{section}{1}
+	\section{Tarefas}
+	
+	\subsection{Resposta ao Impulso de um Sistema Atraso Ideal}
+	
+	\subsubsection*{Tarefa 1}
+	
+	A função abaixo implementa as duas abordagens solicitadas. No domínio do tempo, localiza-se a amostra mais próxima do atraso desejado com \texttt{np.argmin(np.abs(t - T\_atraso))} e posiciona-se ali um valor unitário. No domínio da frequência, cria-se o termo de fase linear $e^{-j 2\pi f T_0}$ usando o vetor de frequências bilateral retornado por \texttt{np.fft.fftfreq} (contendo frequências positivas e negativas), e aplica-se a IFFT para obter a resposta ao impulso.
+	
+	\begin{lstlisting}[frame=single]
+import numpy as np
+
+def cria_impulso_atrasado(T_atraso, T_duracao, fs, t_ou_f='f'):
+    dt = 1/fs
+    N_amostras = int(T_duracao*fs)
+    t = np.linspace(0, T_duracao-dt, N_amostras)
+	
+    if t_ou_f == "t":
+        # encontra a amostra temporal mais proxima a "T_atraso"
+        n_impulso = np.argmin(np.abs(t - T_atraso))
+        IR_atraso = np.zeros(N_amostras)
+        IR_atraso[n_impulso] = 1
+	
+    elif t_ou_f == "f":
+        # vetor de frequencias bilateral (positivas E negativas)
+        f = np.fft.fftfreq(N_amostras, dt)
+		
+        # atraso exato: termo de fase linear no dominio da frequencia
+        Xf = np.exp(-1j * 2*np.pi * f * T_atraso)
+        
+        # retorna ao dominio do tempo via IFFT
+        IR_atraso = np.fft.ifft(Xf, n=N_amostras)
+	
+    return t, IR_atraso.real
+	\end{lstlisting}
+	
+	\textbf{Nota importante}: se um vetor de frequências estritamente positivas (\texttt{np.linspace(0, fs, N)}, por exemplo) for usado no lugar de \texttt{np.fft.fftfreq}, o termo de fase $e^{-j2\pi f T_0}$ deixa de representar corretamente um atraso real quando $T_0$ é fracionário, e a IFFT resultante apresenta artefatos (a RI deixa de ser real, ou apresenta oscilações espúrias). Isso ocorre porque a simetria conjugada do espectro de um sinal real ($X(-f) = X^*(f)$) só é respeitada quando as frequências negativas são explicitamente incluídas no cálculo.
+	
+	\subsubsection*{Tarefa 2}
+	
+	A Figura \ref{fig:T1_RI} compara, com um ``zoom'' em torno da amostra de atraso, as RIs obtidas pelas duas implementações para um atraso fracionário de $1253.45$ amostras ($f_s=48\,000$ Hz). A implementação no domínio do tempo (\emph{'t'}) resulta em um único impulso, deslocado para a amostra $n=1253$ (a mais próxima de $1253.45$) -- ou seja, com um erro de arredondamento de $0.45$ amostras ($\approx 9.4~\upmu$s). Já a implementação no domínio da frequência (\emph{'f'}) produz um trem de amostras não-nulas ao redor do atraso desejado, com o valor de pico \emph{não} sendo unitário (mas sim próximo de $0.70$), e distribuído por várias amostras vizinhas -- este é o comportamento correto e esperado para um atraso ideal fracionário (ver Tarefa 3).
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.7\textwidth]{T1_RI_tempo_freq.png}
+		\caption{Comparação, em detalhe, das RIs calculadas no domínio do tempo (aproximação para a amostra mais próxima) e no domínio da frequência (atraso exato), para um atraso fracionário de $1253.45$ amostras.}
+		\label{fig:T1_RI}
+	\end{figure}
+	
+	A implementação no domínio do tempo é computacionalmente mais simples, mas introduz um erro de quantização temporal de até $\pm T_s/2 \approx \pm 10.4~\upmu$s neste exemplo -- o que corresponde a um erro de fase que cresce linearmente com a frequência, podendo ser perceptualmente relevante (por exemplo, ao localizar espacialmente reflexões em uma simulação binaural). A implementação no domínio da frequência é exata, ao custo de ``espalhar'' a energia do impulso por diversas amostras vizinhas.
+	
+	\subsubsection*{Tarefa 3}
+	
+	A Figura \ref{fig:T2_sinc} sobrepõe a RI calculada no domínio da frequência com a função analítica $\mathrm{sinc}(n-n_0)$, onde $n_0 = T_{atraso} \cdot f_s = 1253.45$. As duas curvas coincidem ponto a ponto (dentro da precisão numérica), confirmando que a implementação no domínio da frequência, usando a propriedade de deslocamento da Transformada de Fourier com um vetor de frequências bilateral, reproduz exatamente a resposta ao impulso teórica de um atraso ideal fracionário.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.7\textwidth]{T2_RI_sinc.png}
+		\caption{Comparação entre a RI calculada no domínio da frequência e a resposta analítica $\mathrm{sinc}(n-n_0)$ (curva pontilhada, interpolada entre amostras) para um atraso fracionário de $n_0=1253.45$ amostras.}
+		\label{fig:T2_sinc}
+	\end{figure}
+	
+	\subsubsection*{Tarefa 4}
+	
+	Quando o atraso corresponde a um número \emph{inteiro} de amostras ($n_0 \in \mathbb{Z}$), a função $\mathrm{sinc}(n-n_0)$ vale $1$ em $n=n_0$ e é \emph{exatamente} zero em todas as demais amostras inteiras (pois $\sin[\pi(n-n_0)] = 0$ para qualquer $n-n_0$ inteiro não-nulo). Neste caso particular, a resposta ao impulso ideal se reduz a um único impulso discreto, $h[n]=\delta[n-n_0]$, e \textbf{as duas implementações (tempo e frequência) coincidem exatamente} -- a implementação no domínio do tempo deixa de ter qualquer erro de aproximação, pois a ``amostra mais próxima'' é a própria amostra do atraso.
+	
+	Este resultado mostra que o erro da implementação no domínio do tempo só existe para atrasos \emph{fracionários}; ele é nulo sempre que o atraso coincide com um múltiplo inteiro do período de amostragem.
+	
+	\newpage
+	\subsection{Sistema Fonte-Parede-Receptor}
+	
+	\subsubsection*{Tarefa 1: Resposta ao Impulso analítica}
+	
+	Pelo método das imagens (Seção 1.3 do enunciado), o receptor recebe a superposição de duas ondas monopolares em campo livre: o som direto, vindo da fonte real a uma distância $D_{fr}$, e o som refletido, equivalente ao som de uma fonte imagem a uma distância $D_{eco} = \sqrt{D_{fr}^2 + (2D_{fp})^2}$. Assumindo uma parede rígida (coeficiente de reflexão $R=+1$, sem perda de energia nem inversão de fase), a resposta ao impulso do sistema é a soma das duas respostas monopolares individuais:
+	\begin{equation}
+		\boxed{h(t) = \frac{1}{D_{fr}} \, \delta\!\left(t - \frac{D_{fr}}{c_0}\right) \; + \; \frac{1}{D_{eco}} \, \delta\!\left(t - \frac{D_{eco}}{c_0}\right)}
+	\end{equation}
+	com $D_{eco} = \sqrt{D_{fr}^2 + 4D_{fp}^2}$. Ou seja, a RI é composta por dois impulsos: o primeiro (som direto), com amplitude $1/D_{fr}$ e atraso $T_1 = D_{fr}/c_0$; e o segundo (som refletido, sempre mais atrasado e de amplitude menor que o direto, pois $D_{eco} > D_{fr}$), com amplitude $1/D_{eco}$ e atraso $T_2 = D_{eco}/c_0$.
+	
+	\subsubsection*{Tarefa 2: Resposta em Frequência analítica}
+	
+	Aplicando a Transformada de Fourier ao resultado da Tarefa 1 (par $\delta(t-T) \leftrightarrow e^{-j2\pi f T}$):
+	\begin{equation}
+		\boxed{H(f) = \frac{1}{D_{fr}} \, e^{-j 2\pi f T_1} \; + \; \frac{1}{D_{eco}} \, e^{-j 2\pi f T_2}}, \qquad T_1 = \frac{D_{fr}}{c_0}, \quad T_2 = \frac{D_{eco}}{c_0}.
+	\end{equation}
+	
+	\subsubsection*{Tarefa 3: Oscilação senoidal de $|H(f)|^2$}
+	
+	Escrevendo $A_1 = 1/D_{fr}$ e $A_2 = 1/D_{eco}$ para simplificar a notação, temos $H(f) = A_1 e^{-j2\pi f T_1} + A_2 e^{-j2\pi f T_2}$. A magnitude ao quadrado é:
+	\begin{align}
+		|H(f)|^2 &= H(f)\, H^*(f) \nonumber \\
+		&= \left(A_1 e^{-j2\pi f T_1} + A_2 e^{-j2\pi f T_2}\right)\left(A_1 e^{j2\pi f T_1} + A_2 e^{j2\pi f T_2}\right) \nonumber \\
+		&= A_1^2 + A_2^2 + A_1 A_2 \left[e^{-j2\pi f(T_1-T_2)} + e^{j2\pi f(T_1-T_2)}\right] \nonumber \\
+		&= A_1^2 + A_2^2 + 2 A_1 A_2 \cos\!\big[2\pi f (T_2-T_1)\big].
+	\end{align}
+	
+	Ou seja:
+	\begin{equation}
+		\boxed{|H(f)|^2 = \frac{1}{D_{fr}^2} + \frac{1}{D_{eco}^2} + \frac{2}{D_{fr}D_{eco}} \cos\!\big[2\pi f \, \Delta T\big]}, \qquad \Delta T = T_2 - T_1 = \frac{D_{eco}-D_{fr}}{c_0}.
+	\end{equation}
+	
+	Esta expressão é a soma de um termo constante ($A_1^2+A_2^2$, o ``piso'' médio) com um termo puramente \textbf{senoidal em $f$}, de amplitude $2A_1A_2$ e frequência angular $2\pi \Delta T$ (rad por Hz). Como o cosseno tem período $2\pi$ em seu argumento, o período de oscilação de $|H(f)|^2$ \emph{ao longo do eixo de frequências} -- isto é, o espaçamento $\Delta f$ entre picos (ou vales) consecutivos -- é obtido fazendo $2\pi \Delta f \, \Delta T = 2\pi$:
+	\begin{equation}
+		\boxed{\Delta f = \frac{1}{\Delta T} = \frac{c_0}{D_{eco}-D_{fr}}}.
+	\end{equation}
+	
+	Este é exatamente o padrão de \textbf{filtro-pente} (\emph{comb filter}) característico da interferência entre um som direto e uma única reflexão: quanto \emph{menor} a diferença de caminho $D_{eco}-D_{fr}$ (i.e., quanto mais próximas as duas distâncias percorridas), \emph{maior} o espaçamento em frequência entre os ``dentes'' do pente; e quanto \emph{maior} a diferença de caminho, mais estreitos (mais próximos entre si) ficam os vales de cancelamento.
+	
+	\subsubsection*{Tarefa 4: Verificação numérica}
+	
+	Para $D_{fr}=2$ m, $D_{fp}=1$ m e $c_0=340$ m/s, obtemos $D_{eco} = \sqrt{2^2+(2\cdot1)^2} = 2\sqrt{2} \approx 2.828$ m, $T_1 \approx 5.88$ ms, $T_2 \approx 8.32$ ms, e portanto:
+	\begin{equation}
+		\Delta T = T_2-T_1 \approx 2.44 \text{ ms} \quad \Longrightarrow \quad \Delta f = \frac{1}{\Delta T} \approx 410 \text{ Hz}.
+	\end{equation}
+	
+	A Figura \ref{fig:T3_RI} mostra a resposta ao impulso numérica (calculada com a função \texttt{cria\_impulso\_atrasado} no modo \texttt{'f'}), com os dois impulsos localizados exatamente em $T_1$ e $T_2$, com amplitudes $1/D_{fr}$ e $1/D_{eco}$, respectivamente (cada um ``espalhado'' em torno de sua amostra central, pois ambos os atrasos são fracionários -- ver Tarefa 1.2).
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.7\textwidth]{T3_RI_eco.png}
+		\caption{Resposta ao impulso numérica do sistema fonte-parede-receptor, para $D_{fr}=2$ m e $D_{fp}=1$ m.}
+		\label{fig:T3_RI}
+	\end{figure}
+	
+	A Figura \ref{fig:T3_RF} mostra $|H(f)|^2$ (em dB) obtida pela FFT da RI numérica. O padrão de filtro-pente é claramente visível, com vales de cancelamento espaçados por aproximadamente $410$ Hz -- em excelente concordância com o valor previsto na Tarefa 3.
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.7\textwidth]{T3_RF_eco.png}
+		\caption{Resposta em frequência (magnitude ao quadrado, em dB) do sistema fonte-parede-receptor, para $D_{fr}=2$ m e $D_{fp}=1$ m. O espaçamento entre vales consecutivos é de aproximadamente $\Delta f \approx 410$ Hz, conforme previsto analiticamente.}
+		\label{fig:T3_RF}
+	\end{figure}
+	
+	\subsubsection*{Tarefa 5: Auralização}
+	
+	A convolução da resposta ao impulso $h[n]$ com um sinal de ruído branco (ou uma gravação de voz) simula o efeito acústico da reflexão sobre o sinal original. A Figura \ref{fig:T3_ruido} ilustra, no domínio do tempo, o efeito desta convolução: o sinal de saída apresenta uma versão atrasada e atenuada do sinal de entrada somada a si mesma (a ``cópia'' refletida, atrasada por $T_2-T_1\approx 2.44$ ms e de amplitude ligeiramente menor).
+	
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.7\textwidth]{T3_ruido_eco.png}
+		\caption{Efeito, no domínio do tempo, da convolução de um sinal de ruído branco com a resposta ao impulso do sistema fonte-parede-receptor.}
+		\label{fig:T3_ruido}
+	\end{figure}
+	
+	Perceptualmente, como o atraso entre o som direto e o refletido ($\approx 2.44$ ms, neste exemplo) é muito curto -- bem abaixo do limiar de percepção de eco distinto (tipicamente $\gtrsim$ 30-50 ms para sinais de fala) --, o ouvido humano \textbf{não} percebe as duas chegadas como sons separados (um ``eco''), mas sim como uma única fonte sonora com \textbf{timbre alterado}: o filtro-pente resultante atenua e reforça periodicamente diferentes bandas de frequência (com ``vales'' a cada $\sim$410 Hz), produzindo uma coloração espectral característica, muitas vezes descrita como um som mais ``metálico'', ``oco'' ou ``nasal'' em comparação com o som direto sem a reflexão. Para geometrias com maior diferença de caminho $D_{eco}-D_{fr}$ (atrasos maiores que $\sim$30-50 ms), este mesmo sistema passaria a ser percebido como um eco distinto, ao invés de uma simples coloração timbral.
+	
+\end{document}
