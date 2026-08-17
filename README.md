@@ -24,7 +24,7 @@ Os temas abordados nestes Tutoriais são:
 08. Janelamento e Zero-Padding
 09. Convolução
 10. Espectro de Potência
-11. Periodograma e Método de Welch *(em andamento)*
+11. Periodograma e Método de Welch
 12. Filtros de Resposta ao Impulso Finita (FIR)
 13. Filtros de Resposta ao Impulso Infinita (IIR)
 14. Resposta ao Impulso de uma Sala *(em andamento)*

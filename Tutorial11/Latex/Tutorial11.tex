@@ -54,10 +54,9 @@
 	\section*{Objetivo de Aprendizagem}
 	Ao final desta sessão, você será capaz de:
 	\begin{itemize}
-		\item Estimar a Densidade Espectral de Potência (PSD) de uma sequência em tempo discreto usando o método do periodograma, e reconhecer suas limitações;
-		\item Estimar o Espectro de Potência (PS) e a Densidade Espectral de Potência (PSD) de uma sequência em tempo discreto usando o método de Welch;
-		\item Compreender a diferença entre as normalizações de Espectro de Potência e Densidade Espectral de Potência, e escolher a normalização apropriada de acordo com a natureza determinística ou aleatória do sinal analisado;
-		\item Avaliar o efeito do comprimento da DFT sobre a resolução em frequência e a variância das estimativas espectrais.
+		\item Estimar o espectro de uma sequência em tempo discreto usando o método do periodograma, e reconhecer suas limitações;
+		\item Compreender as diferenças entre as normalizações de Espectro de Potência (PS) e Densidade Espectral de Potência (PSD), e escolher a normalização apropriada de acordo com a natureza do sinal analisado;
+		\item Avaliar o efeito da duração total do sinal e o comprimento da DFT sobre a resolução em frequência e a variância das estimativas espectrais.
 	\end{itemize}
 	
 	\begingroup
@@ -70,28 +69,30 @@
 	\section{Revisão}
 	\subsection{Periodograma}
 	
-	Seja $x[n]$, $n = 0, \ldots, N-1$ uma sequência de tempo discreto. O periodograma é a estimativa espectral obtida a partir da DFT normalizada de um único segmento (ou ``quadro'') de comprimento $N$ desta sequência, aplicando-se opcionalmente uma janela $w[n]$:
+	Seja $x[n]$, $n = 0, \ldots, N-1$ uma sequência de tempo discreto. O periodograma é a estimativa espectral obtida a partir da DFT normalizada de um único segmento (ou ``quadro'') de duração $N$ desta sequência, aplicando-se opcionalmente uma janela $w[n]$:
 	
 	\begin{equation}
-		X_w(\Omega) = \sum_{n=0}^{N-1} w[n] x[n] e^{-j \Omega n}.
+		X_N(\Omega) = \sum_{n=0}^{N-1} w[n] x[n] e^{-j \Omega n}.
 	\end{equation}
 	
-	Diferentemente do estimador de Welch (ver Tutorial 10), o periodograma \textbf{não} reduz a variância da estimativa conforme a quantidade de dados analisados aumenta: ao aumentar o comprimento $N$ do sinal analisado, a resolução em frequência $\Delta f = f_s / N$ melhora (i.e. diminui), mas a variância da estimativa permanece constante. Como consequência, o periodograma não converge para a Densidade Espectral de Potência teórica do sinal conforme mais dados são adicionados. Esta limitação do periodograma motivou o desenvolvimento do método de Welch.
+	O periodograma \emph{não} reduz a variância da estimativa conforme a quantidade de dados analisados aumenta: ao aumentar a duração $N$ do sinal analisado, a resolução em frequência $\Delta f = f_s / N$ melhora (i.e. diminui), mas a variância da estimativa permanece constante. Como consequência, o periodograma não converge para o espectro teórico do sinal conforme mais dados são adicionados.
+	
+	Esta limitação do periodograma motivou o desenvolvimento do método de Welch, que realiza a média de várias estimativas espectrais $|X_{N_{W}}|$ usando segmentos de duração $N_{W}$ menores que a duração total do sinal $N$ com sobreposição entre os segmentos, conforme descrito no Tutorial 10.
 	
 	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	\subsection{Normalizações do Espectro de Potência e da Densidade Espectral de Potência}
+	\subsection{Espectro de Potência (PS) e da Densidade Espectral de Potência (PSD)}
 	
-	Para uma sequência $x[n]$ de comprimento $N$, janelada por $w[n]$, e com fatores de normalização de janela $S_1 = \sum_{n=0}^{N-1} w[n]$ e $S_2 = \sum_{n=0}^{N-1} w^2[n]$, as duas normalizações possíveis do estimador (periodograma ou Welch) são:
+	Para uma sequência $x[n]$ de comprimento $N$, janelada por $w[n]$, e com fatores de normalização de janela $S_1 = \sum_{n=0}^{N-1} w[n]$ e $S_2 = \sum_{n=0}^{N-1} w^2[n]$, duas normalizações do espectro estimado (por periodograma ou Welch) são possíveis:
 	
 	\begin{itemize}
-		\item \textbf{Espectro de Potência} (\emph{Power Spectrum}, PS): estima a \emph{potência total} contida dentro de cada ``bin'' em frequência. A PS resulta em estimativas consistentes para a potência (e portanto, para a amplitude) de sinais deterministicos (e.g. sinais senoidais), independentemente do comprimento $N$ usado:
+		\item \textbf{Espectro de Potência} (\emph{Power Spectrum}, PS): estima a \emph{potência total} contida dentro de cada ``bin'' em frequência. A PS resulta em estimativas consistentes para a potência (e portanto, para a amplitude) de sinais determinísticos (e.g. sinais senoidais), independentemente do comprimento $N$ do sinal de entrada:
 		\begin{equation}
 			PS(\Omega) = \frac{2}{S_1^2} \left| X_w(\Omega) \right|^2;
 		\end{equation}
 		
 		Para um sinal $x[n]$ em Volts ($V$), o seu Espectro de Potência terá unidades $V^2$.
 		
-		\item \textbf{Densidade Espectral de Potência} (\emph{Power Spectral Density}, PSD): estima a \emph{densidade de potência} -- isto é, potência total dividida pela largura de banda de cada ``bin'' em frequência. A PSD resulta em estimativas consistentes para a densidade espectral de potência de sinais não-deterministicos (e.g. ruído), independentemente do comprimento $N$ usado:
+		\item \textbf{Densidade Espectral de Potência} (\emph{Power Spectral Density}, PSD): estima a \emph{densidade de potência} -- isto é, potência total dividida pela largura de banda de cada ``bin'' em frequência. A PSD resulta em estimativas consistentes para a densidade espectral de potência de sinais não-determinísticos (e.g. ruído), independentemente do comprimento $N$ usado:
 		\begin{equation}
 			PSD(\Omega) = \frac{2}{f_s S_2} \left| X_w(\Omega) \right|^2.
 		\end{equation}
@@ -100,9 +101,11 @@
 		
 	\end{itemize}
 	
-	Ambas as expressões definem um espectro unilateral (isto é, apenas de $f=0$ a $f_s/2$, descartando as frequências negativas), e o fator ``2'' é usado para preservar a potência total do sinal.
+	Ambas as expressões definem um espectro \emph{unilateral}: definido apenas de $f=0$ a $f_s/2$, descartando as frequências negativas, e o fator ``2'' é usado para preservar a potência total do sinal.
 	
-	A potência de um sinal dentro de uma faixa de frequências pode ser obtida pela \emph{soma} dos valores do seu Espectro de Potência dentro desta faixa, ou pela \emph{integral} -- isto é, levando em consideração a resolução em frequência $\Delta f$ -- da Densidade Espectral de Potência dentro desta faixa de frequências.
+	A potência de um sinal dentro de uma faixa de frequências pode ser obtida pela \emph{soma} dos valores do seu Espectro de Potência dentro desta faixa, ou pela \emph{integral} da Densidade Espectral de Potência dentro desta faixa de frequências -- isto é, levando em consideração a resolução em frequência $\Delta f$.
+	
+	Note que a PSD unilateral de um sinal de ruído branco com variância $\sigma^2 = 1$ é dada por $PSD(f) = 2 \sigma^2/f_s$ -- isto é, a potência $\sigma^2$ do sinal está distribuída uniformemente por toda a largura de banda $f_s$ do sinal discreto.
 	
 	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -110,8 +113,9 @@
 	
 	\subsection{Periodograma e Método de Welch}
 	\begin{enumerate}
-		\item Gere um sinal do tipo ruído branco {\tt x\_ruidobranco} com $T = 2$ s de duração, amostrado a $f_s = 48000$ Hz, com distribuição normal (gaussiana) de média zero e desvio padrão unitário. Filtre este sinal usando um filtro passa-faixas Butterworth de 4\textsuperscript{a} ordem, com frequências de corte $f_{c,baixa} = 50$ Hz e $f_{c,alta} = 2000$ Hz, obtendo o sinal {\tt x\_passafaixa}. O projeto de filtros em Python é assunto de um tutorial futuro; para este tutorial, siga o exemplo abaixo:
+		\item Gere um sinal do tipo ruído branco {\tt x\_ruidobranco} com $T = 0.5$ s de duração, amostrado a $f_s = 48000$ Hz, com distribuição normal (gaussiana) de média zero e desvio padrão unitário. Filtre este sinal usando um filtro passa-faixas Butterworth de 4\textsuperscript{a} ordem, com frequências de corte $f_{c,baixa} = 50$ Hz e $f_{c,alta} = 2000$ Hz, obtendo o sinal {\tt x\_passafaixa}.
 		
+		O projeto de filtros em Python é assunto de um tutorial futuro; para este tutorial, siga o exemplo abaixo:
 		
 		\begin{lstlisting}[frame=single]
 import numpy as np
@@ -136,26 +140,26 @@ b, a = ss.butter(ordem, [fc_baixa, fc_alta], btype='band', fs=fs)
 x_passafaixa = ss.lfilter(b, a, x_ruidobranco)
 		\end{lstlisting}
 		
-		\item Escreva uma função Python {\tt periodograma(x, fs, nome\_janela, normalizacao)} que calcule o periodograma unilateral de um sinal {\tt x}, com opção de escolha da janela (use {\tt scipy.signal.get\_window()}) e da normalização (``espectro'' ou ``densidade''). A função deve retornar o vetor de frequências {\tt f} e a estimativa espectral correspondente.
+		\item Escreva uma função Python {\tt periodograma(x, fs, nome\_janela, normalizacao)} que calcule o periodograma unilateral de um sinal {\tt x}, com opção de escolha da janela (use {\tt scipy.signal.get\_window()}) e da normalização (use as strings \texttt{"espectro"} ou \texttt{"densidade"} como opções). A função deve retornar o vetor de frequências {\tt f} e a estimativa espectral correspondente.
 		
-		\item Usando a função {\tt periodograma}, calcule a Densidade Espectral de Potência do sinal {\tt x\_passafaixa} considerando diferentes durações do sinal (por exemplo, $N_{per}$, $2 N_{per}$, $5 N_{per}$ e $10 N_{per}$ amostras, com $N_{per} = 512$). Plote as curvas obtidas em um mesmo gráfico e comente o efeito do aumento da duração do sinal sobre a resolução em frequência e sobre a variância da estimativa.
+		\item Usando a função {\tt periodograma}, calcule a Densidade Espectral de Potência do sinal {\tt x\_passafaixa} considerando diferentes durações do sinal (por exemplo, $N$, $2 N$, $5 N$ e $10 N$ amostras, com $N = 512$). Plote as curvas obtidas em um mesmo gráfico e comente o efeito do aumento da duração do sinal sobre a resolução em frequência e sobre a variância da estimativa.
 		
-		\item Usando a função Python criada para o tutorial 10 como ponto de partida, escreva uma função Python {\tt welch(x, Ndft, N\_sobreposicao, nome\_janela, fs, normalizacao)} que calcule a estimativa espectral de {\tt x} pelo método de Welch, com sobreposição e janelamento configuráveis, e com opção de escolha da normalização (``espectro'' ou ``densidade''). A função deve retornar o vetor de frequências {\tt f} e a estimativa espectral correspondente.
+		\item Usando a função Python criada para o tutorial 10 como ponto de partida, escreva uma função Python {\tt welch(x, Ndft, N\_sobreposicao, nome\_janela, fs, normalizacao)} que calcule a estimativa espectral de {\tt x} pelo método de Welch, com sobreposição e janelamento configuráveis, e com opção de escolha da normalização (\texttt{"espectro"} ou \texttt{"densidade"}). A função deve retornar o vetor de frequências {\tt f} e a estimativa espectral correspondente.
 		
-		\item Usando a função {\tt welch}, calcule a Densidade Espectral de Potência do sinal {\tt x\_passafaixa} mantendo $N_{DFT} = 512$ e $N_{sobreposicao} = 256$ fixos, mas variando a duração total do sinal analisado (por exemplo, 1000, 2000, 5000 e 10000 amostras). Plote as curvas obtidas em um mesmo gráfico e compare o resultado com o obtido na Tarefa 3 usando o periodograma. O que muda em relação à resolução em frequência e à variância da estimativa?
+		\item Usando a função {\tt welch}, calcule a Densidade Espectral de Potência do sinal {\tt x\_passafaixa} mantendo $N_{DFT} = 512$ e $N_{sobreposicao} = 256$ fixos, mas variando a duração total do sinal analisado (por exemplo, $N$, $2 N$, $5 N$ e $10 N$ amostras, com $N = 512$). Plote as curvas obtidas em um mesmo gráfico e compare o resultado com o obtido na Tarefa 3 usando o periodograma. O que muda em relação à resolução em frequência e à variância da estimativa?
 	\end{enumerate}
 	
 	
 	\subsection{Espectro de Potência (PS) e Densidade Espectral de Potência (PSD)}
 	
 	\begin{enumerate}
-		\item Gere um sinal senoidal {\tt x\_senoidal} de frequência $f_0 = 1234$ Hz e amplitude RMS $V_{rms} = 2$ V, com a mesma duração e frequência de amostragem do sinal {\tt x\_passafaixa}. Some os dois sinais para obter {\tt x\_soma = x\_senoidal + x\_passafaixa}.
+		\item Gere um sinal senoidal {\tt x\_senoidal} de frequência $f_0 = 1234$ Hz e amplitude RMS $V = 2 V_{rms}$, com a mesma duração e frequência de amostragem do sinal {\tt x\_passafaixa}. Some os dois sinais para obter {\tt x\_soma = x\_senoidal + x\_passafaixa}.
 		
-		\item Usando a função {\tt welch} com janela de Hann e normalização ``densidade'', calcule a DEP do sinal {\tt x\_soma} para diferentes comprimentos de DFT (por exemplo, $N_{DFT}$, $2 N_{DFT}$, $5 N_{DFT}$ e $10 N_{DFT}$ amostras, mantendo a mesma proporção de sobreposição). Plote as curvas obtidas (eixos log-log) e comente o comportamento do pico correspondente à senoide e do patamar correspondente ao ruído passa-faixa, conforme $N_{DFT}$ varia.
+		\item Usando a função {\tt welch} com janela Hann, calcule a Densidade Espectral de Potência (PSD) do sinal {\tt x\_soma} para diferentes comprimentos de DFT (por exemplo, $N_{DFT}$, $2 N_{DFT}$, $5 N_{DFT}$ e $10 N_{DFT}$ amostras, mantendo a mesma $N_{sobreposicao}$). Plote as curvas obtidas usando a função \texttt{matplotlib.pyplot.loglog} para obter eixos log-log) e comente o comportamento do pico correspondente à senóide e do patamar correspondente ao ruído passa-faixa, conforme $N_{DFT}$ varia.
 		
-		\item Repita a Tarefa 7 usando agora a normalização ``espectro'' (Espectro de Potência) ao invés de ``densidade''. Compare o valor do pico obtido com $V_{rms}^2$ do sinal senoidal, para os diferentes valores de $N_{DFT}$ utilizados. O resultado é consistente independentemente do valor de $N_{DFT}$? Compare também o comportamento do patamar de ruído nesta normalização com o observado na Tarefa 7.
+		\item Repita a Tarefa 7 usando agora o Espectro de Potência (PS) ao invés da PSD. Comente o comportamento do valor de pico do sinal senoidal e do patamar do ruído para os diferentes valores de $N_{DFT}$ utilizados, e compare com o resultado observado na PSD calculada na tarefa anterior. 
 		
-		\item Com base nos resultados obtidos, explique por que as curvas de DEP/EP calculadas pelo método de Welch (Tarefas 7 e 8) apresentam diferentes graus de variância (i.e. de ``rugosidade'') para diferentes valores de $N_{DFT}$, dado que a duração total do sinal analisado é mantida constante.
+		\item Com base nos resultados obtidos, explique por que as curvas de PS e PSD calculadas nas tarefas anteriores apresentam diferentes graus de variância para diferentes valores de $N_{DFT}$.
 	\end{enumerate}
 	
 		% -----------------------------------------------------------------------
