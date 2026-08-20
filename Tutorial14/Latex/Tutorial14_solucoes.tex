@@ -59,36 +59,74 @@
 	
 	\subsubsection*{Tarefa 1}
 	
-	A função abaixo implementa as duas abordagens solicitadas. No domínio do tempo, localiza-se a amostra mais próxima do atraso desejado com \texttt{np.argmin(np.abs(t - T\_atraso))} e posiciona-se ali um valor unitário. No domínio da frequência, cria-se o termo de fase linear $e^{-j 2\pi f T_0}$ usando o vetor de frequências bilateral retornado por \texttt{np.fft.fftfreq} (contendo frequências positivas e negativas), e aplica-se a IFFT para obter a resposta ao impulso.
+	A função abaixo implementa as duas abordagens solicitadas. No domínio do tempo, cria-se uma função sinc usando \texttt{numpy.sinc}. No domínio da frequência, cria-se o termo de fase linear $e^{-j 2\pi f T_0}$ usando o vetor de frequências bilateral retornado por \texttt{numpy.fft.fftfreq} (contendo frequências positivas e negativas), e aplica-se a IFFT para obter a resposta ao impulso.
 	
 	\begin{lstlisting}[frame=single]
 import numpy as np
 
 def cria_impulso_atrasado(T_atraso, T_duracao, fs, t_ou_f='f'):
-    dt = 1/fs
-    N_amostras = int(T_duracao*fs)
-    t = np.linspace(0, T_duracao-dt, N_amostras)
+    """
+    Funcao para criar um sinal tipo impulso atrasado com amplitude unitaria e 
+    atraso 'T_atraso' (em segundos), e frequencia de amostragem 'fs'. O calculo
+    pode ser realizado no dominio do tempo ou da frequencia.
 	
+    Parametros
+    ----------
+    T_atraso : float
+        Atraso do impulso, em segundos.
+	
+    T_duracao : float
+        Duracao do sinal, em segundos.
+	
+    fs : float
+        Frequencia de amostragem, em Hz.
+	
+    t_ou_f : {"t", "f"}
+        Flag indicando se o calculo sera realizado no dominio do tempo ("t") 
+        usando uma funcao sinc, ou da frequencia ("f") usando atraso de fase.
+        O valor padrao eh "f".
+	
+    Retorna
+    -------
+    t : (N,)-array
+        Vetor de amostras no tempo, em segundos
+	
+    impulso : (N,)-array
+        Sinal tipo impulso atrasado, em amostras
+    """
+	
+    # intervalo de amostragem (segundos)
+    dt = 1/fs
+	
+    # numero total de amostras no sinal - 2x a duracao desejada
+    N_amostras  = int(T_duracao*fs)
+	
+    # vetor de amostras no tempo
+    t = np.linspace(0, T_duracao-dt, N_amostras)
+    
     if t_ou_f == "t":
-        # encontra a amostra temporal mais proxima a "T_atraso"
-        n_impulso = np.argmin(np.abs(t - T_atraso))
-        IR_atraso = np.zeros(N_amostras)
-        IR_atraso[n_impulso] = 1
+
+        # a resposta ao impulso ideal eh uma funcao sinc centrado em 'n_atraso'
+        nt = np.arange(N_amostras)
+        n_atraso = T_atraso/dt
+        impulso = np.sinc(nt - n_atraso)
 	
     elif t_ou_f == "f":
-        # vetor de frequencias bilateral (positivas E negativas)
-        f = np.fft.fftfreq(N_amostras, dt)
-		
-        # atraso exato: termo de fase linear no dominio da frequencia
-        Xf = np.exp(-1j * 2*np.pi * f * T_atraso)
-        
-        # retorna ao dominio do tempo via IFFT
-        IR_atraso = np.fft.ifft(Xf, n=N_amostras)
 	
-    return t, IR_atraso.real
+        # cria vetor de frequencias com 'N_amostras', contendo frequencias
+        # positivas (0 a fs/2) e negativas (-fs/2 a 0)
+        f = np.fft.fftfreq(N_amostras, dt)
+	
+        # Calcula um atraso na frequencia
+        Xf = np.exp(-1j * 2*np.pi * f * T_atraso)
+	
+        # Usa a IFFT para calcular a Resposta ao Impulso do sinal atraso
+        impulso = np.fft.ifft(Xf, n=N_amostras)
+	
+    return t, impulso.real
 	\end{lstlisting}
 	
-	\textbf{Nota importante}: se um vetor de frequências estritamente positivas (\texttt{np.linspace(0, fs, N)}, por exemplo) for usado no lugar de \texttt{np.fft.fftfreq}, o termo de fase $e^{-j2\pi f T_0}$ deixa de representar corretamente um atraso real quando $T_0$ é fracionário, e a IFFT resultante apresenta artefatos (a RI deixa de ser real, ou apresenta oscilações espúrias). Isso ocorre porque a simetria conjugada do espectro de um sinal real ($X(-f) = X^*(f)$) só é respeitada quando as frequências negativas são explicitamente incluídas no cálculo.
+	\textbf{Nota importante}: se um vetor de frequências estritamente positivas (\texttt{np.linspace(0, fs, N)}, por exemplo) for usado no lugar de \texttt{np.fft.fftfreq}, o termo de fase $e^{-j2\pi f T_0}$ deixará de representar corretamente um atraso real quando $T_0$ é fracionário, e a IFFT resultante apresentará artefatos: a RI deixa de ser puramente real, ou apresenta oscilações espúrias. Isso ocorre porque a simetria conjugada do espectro de um sinal real ($X(-f) = X^*(f)$) só é respeitada quando as frequências negativas são explicitamente incluídas no cálculo.
 	
 	\subsubsection*{Tarefa 2}
 	

@@ -92,26 +92,17 @@ def cria_impulso_atrasado(T_atraso, T_duracao, fs, t_ou_f='f'):
 
     t_ou_f : {"t", "f"}
         Flag indicando se o calculo sera realizado no dominio do tempo ("t") 
-        ou da frequencia ("f"). O valor padrao eh "f".
+        usando uma funcao sinc, ou da frequencia ("f") usando atraso de fase.
+        O valor padrao eh "f".
 
     Retorna
     -------
     t : (N,)-array
         Vetor de amostras no tempo, em segundos
         
-    IR_atraso : (N,)-array
+    impulso : (N,)-array
         Sinal tipo impulso atrasado, em amostras
-    
-    Notas
-    -----
-    Para calculo no dominio do tempo, a localizacao do impulso atrasado eh
-    ajustada para a amostra mais proxima.
-    
-    Para calculos no dominio da frequencia, a localizacao do impulso atrasado
-    eh exata.
     """
-    
-    assert t_ou_f in ["t", "f"], "Opcao invalida - 't_ou_f' deve ser 't' ou 'f'!"
     
     # intervalo de amostragem (segundos)
     dt = 1/fs
@@ -124,29 +115,26 @@ def cria_impulso_atrasado(T_atraso, T_duracao, fs, t_ou_f='f'):
     
     if t_ou_f == "t":
         
-        # encontre a amostra temporal mais proxima a "T_atraso"
-        n_impulso = np.argmin( np.abs(t - T_atraso))
-        
-        # cria o sinal tipo impulso atrasado
-        IR_atraso = np.zeros(N_amostras)
-        IR_atraso[n_impulso] = 1
+        # a resposta ao impulso ideal eh uma funcao sinc centrado em 'n_atraso'
+        nt = np.arange(N_amostras)
+        n_atraso = T_atraso/dt
+        impulso = np.sinc(nt - n_atraso)
     
     elif t_ou_f == "f":
 
         # usa fftfreq e fftshift para calcular os atrasos
         
         # cria vetor de frequencias com 'N_amostras', contendo frequencias
-        # positivas (ate fs/2) e negativas (apos fs/2)
+        # positivas (0 a fs/2) e negativas (-fs/2 a 0)
         f = np.fft.fftfreq(N_amostras, dt)
         
-        # Calcula um atraso na frequencia, e tira a Transformada Inversa para
-        # retornar ao dominio do tempo
+        # Calcula um atraso na frequencia
         Xf = np.exp(-1j * 2*np.pi * f * T_atraso)
         
         # # Usa a IFFT para calcular a Resposta ao Impulso do sinal atraso
-        IR_atraso = np.fft.ifft(Xf, n=N_amostras)
+        impulso = np.fft.ifft(Xf, n=N_amostras)
         
-    return t, IR_atraso.real
+    return t, impulso.real
 
 
 
@@ -158,45 +146,34 @@ fs = 48000
 # intervalo de amostragem no tempo, em segundos
 dt = 1/fs
 
-# T_atraso = 1253*dt         # atraso com numero inteiro de amostras
-T_atraso = 1253.45*dt       # atraso com numero fracional de amostras
-
-T_duracao = 0.1
-
-t, xt = cria_impulso_atrasado(T_atraso, T_duracao, fs, 't')
-t, xf = cria_impulso_atrasado(T_atraso, T_duracao, fs, 'f')
-
-N_amostras = t.shape[0]
-
-
-plt.figure()
-plt.stem(t, xt, 'o-', label='Calc. tempo')
-plt.stem(t, xf, 'x--', label='Calc. freq')
-plt.grid()
-plt.legend()
-plt.ylabel("Amplitude")
-plt.xlabel("Tempo [s]")
-
-plt.title("RIs calculadas no tempo e na frequencia")
-
-# %% Compara as RIs com a Resposta ao Impulso analitica ideal (funcao sinc
-#   atrasada)
-
-nt = np.arange(N_amostras)
-n_atraso = T_atraso/dt
-
-xf_analitico = np.sinc(nt - n_atraso)
-
-nt2 = np.arange(100*N_amostras)/100
-xf_analitico2 = np.sinc(nt2 - n_atraso)
-
-plt.figure()
-plt.plot(t, xf, 'o', color='C0', markersize=10, label='Freq')
-plt.plot(t, xf_analitico, 's', color='C1', label='Freq. analitico')
-plt.plot(nt2*dt, xf_analitico2, ':', color='C1', label="Freq interp")
-plt.grid()
-plt.legend()
-plt.title("RIs calculada e analitica (sinc)")
+for n0 in [1253, 1253.45]:
+    
+    T_atraso = n0*dt
+    T_duracao = 0.1
+    
+    # cria as RIs
+    t, xt = cria_impulso_atrasado(T_atraso, T_duracao, fs, 't')
+    t, xf = cria_impulso_atrasado(T_atraso, T_duracao, fs, 'f')
+    
+    N_amostras = t.shape[0]
+        
+    # Compara as RIs com a Resposta ao Impulso analitica ideal (superamostrada)
+    fs2 = 10*fs
+    N_amostras2 = int(T_duracao*fs2)
+    nt2 = np.arange(N_amostras2)/10
+    x_continuo = np.sinc(nt2 - n0)
+    
+    plt.figure(figsize=(8,6))
+    plt.plot(t, xt, 'o', color='C0', markersize=10, label='Tempo')
+    plt.plot(t, xf, 's', color='C1', label='Freq')
+    plt.plot(nt2*dt, x_continuo, ':', color='C1', label="Sinc (alta resolucao)")
+    plt.grid()
+    plt.legend()
+    plt.xlabel("Tempo [s]")
+    plt.ylabel("Amplitude")
+    plt.xlim([0.99*T_atraso, 1.01*T_atraso])
+    
+    plt.title("RIs calculada e analitica (sinc)")
 
 
 # %% Exercicio 2d:
@@ -275,10 +252,6 @@ ruidobranco = rng.normal(loc=0, scale=0.15, size=5*fs)
 
 # convolucao entre sinal gravado e RI do sistema
 ruido_eco = np.convolve(ruidobranco, RI_eco)
-
-plt.figure()
-plt.plot(ruidobranco)
-plt.plot(ruido_eco)
 
 # sd.play(ruido_eco, fs, blocking=True)
 

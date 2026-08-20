@@ -44,7 +44,7 @@
 	showstringspaces=false}			% mostrar espaços como sublinhados apenas dentro de strings
 
 
-\title{\vspace{-2cm} Processamento Digital de Sinais\\ Tutorial 14 - Resposta ao Impulso de uma Sala}
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Tutorial 14 - Sistemas tipo Atraso e Reflexões Acústicas}
 \author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
 
 \begin{document}
@@ -54,11 +54,9 @@
 	\section*{Objetivo de Aprendizagem}
 	Ao final desta sessão, você será capaz de:
 	\begin{itemize}
-		\item Implementar um sistema tipo atraso ideal (\emph{ideal delay system}) no domínio do tempo e no domínio da frequência, e reconhecer as limitações e vantagens de cada abordagem;
-		\item Reconhecer a função $\mathrm{sinc}(\cdot)$ como a resposta ao impulso exata de um atraso ideal, e utilizá-la para validar implementações numéricas;
-		\item Utilizar o método das imagens (\emph{image-source method}) para obter a resposta ao impulso e a resposta em frequência analíticas de um sistema acústico simples composto por uma fonte, uma parede refletora e um receptor;
-		\item Explicar a origem física do fenômeno de \emph{comb filtering} (filtro-pente), relacionando a periodicidade das oscilações em frequência com a diferença de caminho entre o som direto e o som refletido;
-		\item Simular, no domínio digital, o efeito acústico de uma reflexão simples sobre um sinal de banda larga (ruído branco ou voz).
+		\item Implementar um sistema tipo atraso ideal no domínio do tempo e no domínio da frequência, e reconhecer as limitações e vantagens de cada abordagem, especialmente no caso de atrasos fracionários;
+		\item Reconhecer a função sinc como a resposta ao impulso exata de um sistema tipo atraso ideal, e utilizá-la como referência para avaliar as implementações numéricas;
+		\item Aplicar o método das imagens para modelar uma reflexão acústica simples (fonte, parede, receptor), obtendo sua resposta ao impulso e resposta em frequência tanto analítica quanto numericamente, e explicar como esse modelo dá origem ao fenômeno de \emph{comb filtering} (``filtro pente'').
 	\end{itemize}
 	
 	\begingroup
@@ -72,12 +70,12 @@
 	
 	\subsection{Sistema tipo Atraso Ideal}
 	
-	Um sistema tipo \textbf{atraso ideal} (\emph{ideal delay}) é um sistema Linear e Invariante no Tempo (LIT) que reproduz o sinal de entrada $x(t)$ na saída, deslocado no tempo por um atraso $T_0$, sem qualquer distorção de amplitude ou de fase:
+	Um sistema tipo \emph{atraso ideal} é um sistema Linear e Invariante no Tempo (LIT) que reproduz o sinal de entrada $x(t)$ na saída, deslocado no tempo por um atraso $T_0$, sem qualquer distorção de amplitude ou de fase:
 	\begin{equation}
 		y(t) = x(t - T_0).
 	\end{equation}
 	
-	A resposta ao impulso deste sistema é um impulso (delta de Dirac, no tempo contínuo) localizado em $t=T_0$:
+	A Resposta ao Impulso deste sistema é uma  função delta de Dirac no tempo contínuo, localizado em $t=T_0$:
 	\begin{equation}
 		h(t) = \delta(t - T_0),
 	\end{equation}
@@ -89,80 +87,59 @@
 	Ao discretizar este sistema com um período de amostragem $T_s = 1/f_s$, dois casos podem ocorrer:
 	
 	\begin{itemize}
-		\item Se o atraso $T_0$ corresponde a um \textbf{número inteiro de amostras} ($T_0 = n_0 T_s$, com $n_0 \in \mathbb{Z}$), a resposta ao impulso discreta é exatamente $h[n] = \delta[n-n_0]$, e o atraso pode ser implementado de forma exata simplesmente deslocando as amostras do sinal.
+		\item Se o atraso $T_0$ corresponde a um \emph{número inteiro de amostras} ($T_0 = n_0 T_s$, com $n_0 \in \mathbb{Z}$), a resposta ao impulso discretizada é exatamente $h[n] = \delta[n-n_0]$, e o atraso pode ser implementado de forma exata simplesmente deslocando o sinal de entrada por um número inteiro $n_0$ de amostras.
 		
-		\item Se o atraso $T_0$ corresponde a um \textbf{número fracionário de amostras} ($T_0 = (n_0 + \epsilon) T_s$, com $0 < \epsilon < 1$), não existe nenhum deslocamento de amostras inteiras que reproduza exatamente este atraso. Neste caso, o atraso ideal só pode ser obtido de forma exata através de uma operação de \emph{interpolação}, cuja resposta ao impulso é dada pela função $\mathrm{sinc}(\cdot)$ (ver Seção \ref{sec:sinc} abaixo).
+		\item Se o atraso $T_0$ corresponde a um \emph{número fracionário de amostras} ($T_0 = n_0 T_s$, com $n_0 \in \mathbb{R}$), não existe nenhum deslocamento de amostras inteiras que reproduza exatamente este atraso. Neste caso, o atraso ideal pode ser arrendondado para o atraso inteiro mais próximo, ou obtido de forma exata através de uma operação de \emph{interpolação}, cuja resposta ao impulso é dada pela função $\mathrm{sinc}$.
 	\end{itemize}
 	
 	\subsubsection{Implementação no domínio do tempo}
+	\label{sec:tempo}
 	
-	A forma mais simples (e mais grosseira) de implementar um atraso fracionário é \textbf{aproximá-lo para a amostra inteira mais próxima}: constrói-se um vetor de zeros e posiciona-se um valor unitário na amostra $n \approx T_0/T_s$ mais próxima do atraso desejado. Esta abordagem é simples e computacionalmente barata, mas introduz um \textbf{erro de quantização temporal} de até $\pm T_s/2$, o que pode ser perceptualmente relevante em aplicações de áudio (por exemplo, ao simular atrasos ou reflexões com alta precisão espacial).
+	A forma mais simples (e mais grosseira) de implementar um atraso fracionário é \emph{aproximá-lo para a amostra inteira mais próxima}. Esta abordagem é simples e computacionalmente barata, mas introduz um \emph{erro de quantização temporal} de até $\pm T_s/2$, o que pode ser perceptualmente relevante em aplicações de áudio (por exemplo, ao simular efeitos de interferências advindos de ecos ou reverberação), e não será tratada em detalhes aqui.
 	
-	\subsubsection{Implementação no domínio da frequência}
-	
-	Uma implementação \textbf{exata} de um atraso fracionário pode ser obtida no domínio da frequência, através da propriedade de deslocamento no tempo da Transformada de Fourier:
-	\begin{equation}
-		x(t - T_0) \; \overset{\mathcal{F}}{\longleftrightarrow} \; X(\Omega) \, e^{-j \Omega T_0}.
-	\end{equation}
-	
-	Ou seja, para atrasar um sinal por $T_0$, basta multiplicar seu espectro por um termo de fase linear $e^{-j \Omega T_0}$ e, em seguida, retornar ao domínio do tempo através da Transformada Inversa. Para simular a resposta ao impulso de um atraso ideal, aplica-se esta operação a um impulso unitário (cujo espectro é $X(\Omega)=1$ para todo $\Omega$):
-	\begin{equation}
-		H(\Omega) = e^{-j \Omega T_0} \quad \Longrightarrow \quad h[n] = \mathcal{F}^{-1}\left\{ e^{-j \Omega T_0} \right\}.
-	\end{equation}
-	
-	\textbf{Atenção:} ao implementar esta operação numericamente usando a DFT, é fundamental utilizar um vetor de frequências \textbf{bilateral} -- isto é, contendo tanto frequências positivas ($0$ a $f_s/2$) quanto negativas ($-f_s/2$ a $0$), como o retornado pela função \texttt{numpy.fft.fftfreq}. O uso de um vetor de frequências estritamente positivas (de $0$ a $f_s$) para calcular a fase $e^{-j\Omega T_0}$ introduz artefatos numéricos (descontinuidades de fase) que corrompem o atraso fracionário simulado.
-	
-	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-	\subsection{A função $\mathrm{sinc}$ como resposta ao impulso exata}
-	\label{sec:sinc}
-	
-	Pode-se demonstrar que a resposta ao impulso discreta e \textbf{exata} de um atraso ideal fracionário de $n_0$ amostras (com $n_0$ não necessariamente inteiro) é dada pela função $\mathrm{sinc}$ normalizada, centrada em $n_0$:
+	Alternativamente, pode-se demonstrar que a resposta ao impulso discreta \emph{exata} de um atraso ideal de $n_0$ amostras (com $n_0$ não necessariamente inteiro) é dada pela função $\mathrm{sinc}$ normalizada, centrada em $n_0$:
 	\begin{equation}
 		h[n] = \mathrm{sinc}(n - n_0) = \frac{\sin\left[\pi (n-n_0)\right]}{\pi (n-n_0)}.
 	\end{equation}
 	
-	Esta função possui valor unitário em $n=n_0$ e é nula em todos os demais valores \emph{inteiros} de $n$ quando $n_0$ é inteiro (recuperando o impulso discreto ideal); quando $n_0$ é fracionário, a função $\mathrm{sinc}$ se espalha por \emph{todas} as amostras do sinal -- este espalhamento é o preço pago para obter um atraso fracionário exato usando um sinal discreto de banda limitada.
+	Quando $n_0$ é inteiro, esta função possui valor unitário em $n=n_0$ e é nula em todos os demais valores \emph{inteiros} de $n$, recuperando o impulso discreto ideal. Quando $n_0$ é fracionário, a função $\mathrm{sinc}$ se espalha por \emph{todas} as amostras do sinal, de $n=-\infty$ a $+\infty$. Este espalhamento no tempo é o preço pago para obter um atraso fracionário exato usando um sinal discreto de banda limitada.
 	
-	Esta relação fornece uma forma independente de \textbf{validar} a implementação do atraso ideal no domínio da frequência.
+	\subsubsection{Implementação no domínio da frequência}
+	\label{sec:freq}
+	
+	Uma implementação \emph{exata} de um atraso inteiro ou fracionário pode ser obtida no domínio da frequência, através da propriedade de deslocamento no tempo da Transformada de Fourier:
+	\begin{equation}
+		x(t - T_0) \; \overset{\mathcal{F}}{\longleftrightarrow} \; X(\Omega) \, e^{-j \Omega T_0}.
+	\end{equation}
+	
+	Ou seja, para atrasar um sinal por $T_0$, basta multiplicar seu espectro por um atraso de fase linear $e^{-j \Omega T_0}$ e, em seguida, retornar ao domínio do tempo através da Transformada Inversa. Note que o atraso de fase não está restrito a valores inteiros, e pode assumir qualquer valor real sem nenhum custo computacional adicional. Para simular a resposta ao impulso de um atraso ideal, aplica-se esta operação a um impulso unitário (cujo espectro é $X(\Omega)=1$ para todo $\Omega$):
+	\begin{equation}
+		H(\Omega) = e^{-j \Omega T_0} \quad \Longrightarrow \quad h[n] = \mathcal{F}^{-1}\left\{ e^{-j \Omega T_0} \right\}.
+	\end{equation}
+	
+	\noindent \textbf{Atenção:} ao implementar esta operação numericamente usando a DFT, é fundamental utilizar um vetor de frequências \emph{bilateral} -- isto é, contendo frequências negativas ($-f_s/2$ a $0$) e positivas ($0$ a $f_s/2$), como o retornado pela função \texttt{numpy.fft.fftfreq}. O uso de um vetor de frequências estritamente positivas (de $0$ a $f_s$) para calcular a fase $e^{-j\Omega T_0}$ introduz artefatos numéricos na interpolação no tempo que corrompem o atraso fracionário simulado (Bailey e Swarztrauber, 1991).
+	
 	
 	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	\subsection{Método das Imagens: fonte, parede e receptor}
 	\label{sec:imagens}
 	
-	Considere um sistema acústico simples, em campo livre, composto por uma fonte sonora tipo monopolo omnidirecional, um receptor omnidirecional, e uma parede refletora (superfície plana, rígida e infinita), conforme a geometria abaixo:
+	Considere um sistema acústico simples, em campo livre, composto por uma fonte sonora tipo monopolo omnidirecional, um receptor omnidirecional, e uma parede refletora (superfície plana, rígida e infinita), conforme a Figura \ref{fig:Diagrama}.
 	
-	\begin{center}
-		\begin{verbatim}
-			Parede
-			---------------------------------      ---
-			| Dfp
-			o))                 x              ---
-			Fonte               Receptor
-			
-			|-------------------|
-			Dfr
-		\end{verbatim}
-	\end{center}
-	
-	onde $D_{fr}$ é a distância horizontal entre fonte e receptor, e $D_{fp}$ é a distância perpendicular entre a linha fonte-receptor e a parede.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.8\textwidth]{Diagrama.png}
+		\caption{Diagrama do sistema fonte-parede-receptor: $D_{FR}$ é a distância horizontal entre fonte e receptor, e $D_{FP}$ é a distância perpendicular entre a linha fonte-receptor e a parede}
+		\label{fig:Diagrama}
+	\end{figure}
 	
 	A pressão sonora radiada por uma fonte monopolo, em campo livre, se propaga como uma onda esférica cuja amplitude decai com o inverso da distância $r$ percorrida, e chega ao receptor após um atraso $T = r/c_0$, onde $c_0$ é a velocidade do som:
 	\begin{equation}
 		h_{monopolo}(t) = \frac{1}{r} \, \delta(t - r/c_0).
 	\end{equation}
 	
-	O efeito da parede refletora pode ser modelado, de forma exata (para paredes planas e rígidas), pelo \textbf{método das imagens}: substitui-se a parede por uma \emph{fonte imagem} -- uma cópia da fonte original, espelhada em relação ao plano da parede -- e calcula-se a superposição do som direto (da fonte real) com o som ``refletido'' (da fonte imagem), ambos se propagando em campo livre.
+	O efeito da parede refletora pode ser modelado de forma exata (para paredes planas e rígidas) pelo \emph{método das imagens}: substitui-se a parede por uma \emph{fonte imagem} -- uma cópia da fonte original, espelhada em relação ao plano da parede -- e calcula-se a superposição do som direto da fonte real com o som da fonte imagem, ambos se propagando em campo livre.
 	
-	Assim, o receptor recebe dois sinais:
-	\begin{itemize}
-		\item o \textbf{som direto}, vindo da fonte real, percorrendo a distância $D_{fr}$;
-		\item o \textbf{som refletido}, que pode ser calculado como se viesse da fonte imagem (posicionada a uma distância $2 D_{fp}$ acima da fonte real, do outro lado da parede), percorrendo a distância
-		\begin{equation}
-			D_{eco} = \sqrt{D_{fr}^2 + (2 D_{fp})^2} = 2\sqrt{\left(\frac{D_{fr}}{2}\right)^2 + D_{fp}^2}.
-		\end{equation}
-	\end{itemize}
-	
-	Este princípio será utilizado nas Tarefas da Seção \ref{sec:tarefas2} para obter a resposta ao impulso e a resposta em frequência analíticas deste sistema.
 	
 	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -173,18 +150,21 @@
 	
 	\begin{enumerate}
 		\item Escreva uma função Python \texttt{cria\_impulso\_atrasado(T\_atraso, T\_duracao, fs, t\_ou\_f)} que calcule a resposta ao impulso de um sistema tipo atraso ideal, com atraso \texttt{T\_atraso} (em segundos), duração total do sinal \texttt{T\_duracao} (em segundos) e frequência de amostragem \texttt{fs} (em Hz). O parâmetro \texttt{t\_ou\_f} deve selecionar entre duas implementações:
-		\begin{enumerate}
-			\item[\texttt{'t'}:] cálculo no \textbf{domínio do tempo}, aproximando o atraso para a amostra inteira mais próxima;
-			\item[\texttt{'f'}:] cálculo no \textbf{domínio da frequência}, usando a propriedade de deslocamento no tempo da Transformada de Fourier (atraso exato, incluindo atrasos fracionários).
-		\end{enumerate}
+		\begin{itemize}
+			\item \texttt{'t'}: cálculo no \emph{domínio do tempo}, usando a função sinc;
+			\item \texttt{'f'}: cálculo no \emph{domínio da frequência}, usando a propriedade de atraso de fase da Transformada de Fourier.
+		\end{itemize}
 		
-		\emph{Dica}: para a implementação no domínio da frequência, use a função \texttt{numpy.fft.fftfreq} para criar o vetor de frequências -- lembre-se de utilizar frequências positivas e negativas, e não apenas frequências estritamente positivas (ver discussão na Seção \ref{sec:sinc} da Revisão).
+		\textbf{Dica:} para a implementação no domínio da frequência, use a função \texttt{numpy.fft.fftfreq} para criar o vetor de frequências positivas e negativas!
 		
-		\item Usando a função criada, calcule a resposta ao impulso de um atraso \textbf{fracionário} (por exemplo, $T_{atraso} = 1253.45/f_s$, com $f_s = 48\,000$ Hz), usando as duas implementações (tempo e frequência). Plote as duas RIs sobrepostas (dê um ``zoom'' na região próxima ao atraso) e comente as diferenças observadas entre elas.
+		\item Usando a função criada, calcule a resposta ao impulso de um atraso \emph{inteiro} (por exemplo, $T_{atraso} = 1253 / f_s$, com $f_s=48000$ Hz) usando as duas implementações (tempo e frequência). Plote as duas RIs sobrepostas, com um ``zoom'' na região em torno do atraso.
 		
-		\item Compare a resposta ao impulso calculada no domínio da frequência com a resposta analítica exata de um atraso ideal, dada pela função $\mathrm{sinc}(n-n_0)$ (ver Seção \ref{sec:sinc}), onde $n_0 = T_{atraso} \cdot f_s$ é o atraso em número (possivelmente fracionário) de amostras. Plote as duas curvas sobrepostas e comente o resultado.
+		\item Sobreponha ao gráfico anterior uma nova função sinc, dessa vez amostrada a $100 f_s$ para aproximar uma função sinc ideal (``contínua''), e comente o resultado.
+		% ambas as funcoes apresentam valores identicos: um pico exatamente na amostra do atraso, e zeros em todas as outras amostras. A \funcao sinc "continua" tambem possui pico no valor exato do atraso, e todas as outras amostras se alinham com os cruzamentos de zero da funcao sinc "continua". Dessa forma, apesar da funcao sinc continua possuir valores nao-nulos de n=-inf ate n=+inf, todos os valores amostrados (exceto o pico) sao zero, fazendo com que a funcao seja limitada no tempo - e nao apenas isso, mas seja um delta de Dirac no tempo.
 		
-		\item Repita a Tarefa 2 para um atraso que corresponda a um número \textbf{inteiro} de amostras (por exemplo, $T_{atraso} = 1253/f_s$). O que muda em relação ao caso fracionário? A implementação no domínio do tempo ainda apresenta erro nesse caso?
+		\item Repita os dois itens anteriores para um atraso \emph{fracionário} (por exemplo, $T_{atraso} = 1253.45/f_s$, com $f_s = 48000$ Hz), e comente o resultado.
+		% ambas as funcoes apresentam valores identicos, mas desta vez todas as amostras possuem valores nao-zero e a funcao nao eh mais limitada no tempo. A funcao sinc "continua" ainda possui pico no valor exato do atraso, mas este valor agora se encontra entre duas amostras discretas - os sinais discretizados nao estao mais alinhados com os cruzamentos de zero da funcao ideal, fazendo com que as RIs agora estejam "espalhadas" por todas as amostras n=-inf ate n=+inf. Claramente as RIs nao sao mais funcoes delta de Dirac.
+		
 	\end{enumerate}
 	
 	\subsection{Sistema Fonte-Parede-Receptor}
@@ -193,26 +173,24 @@
 	Considere o sistema acústico fonte-parede-receptor descrito na Seção \ref{sec:imagens}, composto por uma fonte monopolo, uma parede refletora (plana, rígida, infinita) e um receptor omnidirecional.
 	
 	\begin{enumerate}
-		\item Usando o método das imagens, escreva a expressão analítica da \textbf{resposta ao impulso} $h(t)$ deste sistema, em função das distâncias $D_{fr}$ (fonte-receptor) e $D_{fp}$ (perpendicular até a parede) e da velocidade do som $c_0$.
+		\item Usando o método das imagens, escreva a expressão analítica da \emph{resposta ao impulso} $h(t)$ deste sistema, em função das distâncias $D_{FR}$ e $D_{FP}$ (perpendicular até a parede).
 		
-		\item A partir da resposta ao impulso obtida no item anterior, escreva a expressão analítica da \textbf{resposta em frequência} $H(f)$ deste sistema.
+		\item A partir da resposta ao impulso obtida no item anterior, escreva a expressão analítica da \emph{resposta em frequência} $H(f)$ deste sistema.
 		
-		\item Demonstre que a magnitude ao quadrado da resposta em frequência, $|H(f)|^2$, varia de forma \textbf{senoidal} com a frequência $f$, e determine a expressão para a ``frequência de oscilação'' $\Delta f$ deste padrão (isto é, a distância, em Hz, entre picos -- ou entre vales -- consecutivos de $|H(f)|^2$). Expresse $\Delta f$ em função de $D_{fr}$, $D_{fp}$ e $c_0$.
+		\item Demonstre que a magnitude ao quadrado da resposta em frequência, $|H(f)|^2$, varia de forma \emph{senoidal} com a frequência $f$, e determine a expressão para a ``frequência de oscilação'' $\Delta f$ deste padrão (isto é, a distância, em Hz, entre picos consecutivos de $|H(f)|^2$).
 		
-		\emph{Dica}: escreva $H(f)$ como a soma de dois fasores complexos, e desenvolva $|H(f)|^2 = H(f) H^*(f)$ usando a identidade de Euler.
+		\item Usando a função \texttt{cria\_impulso\_atrasado} (implementação no domínio da frequência) escrita na Tarefa 1.1, calcule numericamente a resposta ao impulso $h[n]$ e a resposta em frequência $H(f)$ deste sistema para $D_{FR} = 2$ m e $D_{FP} = 1$ m, considerando $c_0 = 340$ m/s. Plote as duas curvas e verifique se a periodicidade observada em $|H(f)|^2$ corresponde ao valor de $\Delta f$ previsto no item anterior.
 		
-		\item Usando a função \texttt{cria\_impulso\_atrasado} (implementação no domínio da frequência) escrita na Tarefa 1.1, calcule numericamente a resposta ao impulso $h[n]$ e a resposta em frequência $H(f)$ deste sistema para $D_{fr} = 2$ m e $D_{fp} = 1$ m, considerando $c_0 = 340$ m/s. Plote as duas curvas e verifique se a periodicidade observada em $|H(f)|^2$ corresponde ao valor de $\Delta f$ previsto no item anterior.
-		
-		\item Calcule a resposta do sistema a um sinal de \textbf{ruído branco} (ou a uma gravação da sua própria voz), através da convolução do sinal de entrada com a resposta ao impulso $h[n]$ calculada no item anterior. Ouça o resultado (\emph{auralização}) e descreva, com suas palavras, o efeito perceptual causado pela reflexão sobre o som original.
+		\item Calcule a resposta do sistema a um sinal de \emph{ruído branco} (ou a uma gravação da sua própria voz), através da convolução do sinal de entrada com a resposta ao impulso $h[n]$ calculada no item anterior. Auralize o resultado e descreva, com suas palavras, o efeito perceptual causado pela reflexão sobre o som original.
 	\end{enumerate}
 	
 	% -----------------------------------------------------------------------
 	\section*{Referências}
 	
 	\begin{enumerate}
-		\item A. D. Pierce, \textit{Acoustics: An Introduction to Its Physical Principles and Applications}. Acoustical Society of America, 1989.
-		\item H. Kuttruff, \textit{Room Acoustics}, 6\textsuperscript{a} edição. CRC Press, 2016.
-		\item J. B. Allen e D. A. Berkley, \textit{Image method for efficiently simulating small-room acoustics}, Journal of the Acoustical Society of America, 65(4), 943-950, 1979.
+		\item K. Shin e J. Hammond, \textit{Fundamentals of Signal Processing for Sound and Vibration Engineers}. John Wiley and Sons, 2008.
+		\item D. Bailey e P. Swarztrauber, \textit{The Fractional Fourier Transform and Applications}, SIAM Review
+		Vol. 33, 1991. URL: \url{https://doi.org/10.1137/1033097}
 	\end{enumerate}
 	
 \end{document}
