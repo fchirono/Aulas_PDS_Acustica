@@ -204,7 +204,7 @@ t_eco, impulso_eco = cria_impulso_atrasado(T_eco, T_duracao, fs, 'f')
 
 RI_eco = impulso_direto/Dfr + impulso_eco/D_eco
 
-plt.figure()
+plt.figure(figsize=(8,6))
 plt.plot(t_eco, RI_eco)
 plt.xlabel("Tempo [s]")
 plt.ylabel("Amplitude")
@@ -216,7 +216,7 @@ RF_eco = np.fft.rfft(RI_eco)
 df_eco = fs/N_amostras_eco
 f_eco = np.linspace(0, fs-df_eco, N_amostras_eco)[:N_amostras_eco//2+1]
 
-plt.figure()
+plt.figure(figsize=(8,6))
 plt.plot(f_eco, np.abs(RF_eco)**2)
 plt.grid()
 plt.xlabel("Frequencia [Hz]")
@@ -232,21 +232,30 @@ plt.title("Resposta em Frequencia")
 # y_mic = sd.rec(5*fs, fs, channels=1, device=1, blocking=True)
 # print("Gravacao concluida!")
 
+# # auraliza o sinal recem gravado
+# print("Reproduzindo o sinal gravado...")
 # sd.play(y_mic, fs, blocking=True)
 
 # # convolucao entre sinal gravado e RI do sistema
 # y_eco = np.convolve(y_mic[:, 0], RI_eco)
 
+# # plota o sinal gravado e o sinal com eco
 # plt.figure()
-# plt.plot(y_mic)
-# plt.plot(y_eco)
+# plt.plot(np.arange(y_mic.shape[0])/fs, y_mic, label='Sinal gravado')
+# plt.plot(np.arange(y_eco.shape[0])/fs, y_eco, label="Sinal com eco")
+# plt.grid()
+# plt.ylabel("Amplitude")
+# plt.xlabel("Tempo [s]")
+# plt.legend()
 
+# # auraliza o sinal com eco
+# print("Reproduzindo o sinal com eco...")
 # sd.play(y_eco, fs, blocking=True)
 
 # %% Avalie o efeito do sistema a um sinal tipo ruido branco
 
 rng = np.random.default_rng()
-ruidobranco = rng.normal(loc=0, scale=0.15, size=5*fs)
+ruidobranco = rng.normal(loc=0, scale=0.15, size=3*fs)
 
 # sd.play(ruidobranco, fs, blocking=True)
 
