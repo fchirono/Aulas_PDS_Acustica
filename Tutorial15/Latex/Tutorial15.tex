@@ -1,0 +1,261 @@
+\documentclass[a4paper,twoside,12pt]{article}
+\usepackage[top=1.5cm,left=1.5cm,right=1.5cm,bottom=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[brazilian]{babel}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{psfrag}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{microtype}
+\usepackage{titling}
+\usepackage{courier}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue
+}
+
+% Use o pacote 'listings' para adicionar código e o pacote 'color' para gerar os destaques
+\usepackage{listings}
+\usepackage{color}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{language=Python,				% definir para destaque de linguagem Python
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\small,		% definir tamanho das fontes
+	breaklines=true,				% definir quebra de linha automática
+	linewidth=\textwidth,			% definir tamanho da caixa de código
+	showstringspaces=false}			% mostrar espaços como sublinhados apenas dentro de strings
+
+
+\title{\vspace{-2cm} Processamento Digital de Sinais\\ Tutorial 15 - Modulação AM/FM e Transformada de Hilbert}
+\author{\url{https://github.com/fchirono/Aulas_PDS_Acustica}}
+
+\begin{document}
+	\date{}
+	\maketitle
+	
+	\section*{Objetivo de Aprendizagem}
+	Ao final desta sessão, você será capaz de:
+	\begin{itemize}
+		\item Implementar sinais modulados em amplitude (AM) e em frequência (FM), com portadora senoidal e sinal modulador arbitrário, e relacionar seus parâmetros (índice de modulação, sensibilidade em frequência, desvio de frequência) com a forma de onda resultante;
+		\item Definir o sinal analítico de um sinal real através da Transformada de Hilbert, reconhecer sua propriedade de espectro unilateral, e implementá-lo numericamente via DFT;
+		\item Utilizar o sinal analítico para demodular sinais AM (por envelope) e FM (por frequência instantânea), e comparar o sinal modulador recuperado com o original.
+	\end{itemize}
+	
+	\begingroup
+	\let\clearpage\relax
+	\tableofcontents
+	\endgroup
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Revisão}
+	
+	\subsection{Modulação em Amplitude (AM)}
+	\label{sec:AM}
+	
+	Considere uma portadora senoidal de amplitude unitária e frequência $f_c$,
+	\begin{equation}
+		x_c(t) = \sin(2\pi f_c t),
+	\end{equation}
+	e um sinal modulador $x_{mod}(t)$, de largura de banda $BW_{mod}$ limitada e amplitude normalizada ($|x_{mod}| \leq 1$). Um sinal modulado em amplitude (AM) é obtido multiplicando-se a portadora $x_c(t)$ pela envoltória $\left[1 + x_{mod}(t)\right]$:
+	\begin{equation}
+		y_{AM}(t) = \left[1 + x_{mod}(t)\right] x_c(t).
+		\label{eq:AM}
+	\end{equation}
+	
+	O \emph{índice de modulação} $m$ é definido como o valor de pico do sinal modulador,
+	\begin{equation}
+		m = \max_t \left| x_{mod}(t) \right|.
+	\end{equation}
+	Para $m<1$, a envoltória de $y_{AM}(t)$ nunca atinge zero. Para $m=1$, a envoltória toca zero nos instantes de pico negativo do modulador (modulação 100\%). Para $m>1$, diz-se que o sinal está \emph{sobremodulado}: a envoltória se torna negativa e a informação do sinal modulador não pode mais ser recuperada corretamente por um detector de envoltória simples, pois a envoltória (que é sempre $\geq 0$) deixa de reproduzir fielmente o formato de $x_{mod}(t)$.
+	
+	
+	\subsection{Modulação em Frequência (FM)}
+	\label{sec:FM}
+	
+	Em um sinal modulado em frequência (FM), é a \emph{frequência instantânea} da portadora que varia proporcionalmente ao sinal modulador, em vez de sua amplitude:
+	\begin{equation}
+		f_{inst}(t) = f_c + k \cdot x_{mod}(t),
+		\label{eq:finst}
+	\end{equation}
+	onde $k$ é a \emph{sensibilidade em frequência} do modulador (em Hz por unidade de amplitude de $x_{mod}$). A fase instantânea $\phi(t)$ é obtida integrando-se a frequência instantânea:
+	
+	\begin{equation}
+		\phi(t) = \int_0^t f_{inst}(\tau)\, d\tau = f_c t + 2\pi k \int_0^t x_{mod}(\tau)\, d\tau,
+	\end{equation}
+	
+	O sinal FM resultante, de amplitude unitária, é obtido por:
+	\begin{equation}
+		y_{FM}(t) = \sin\left[2\pi \phi(t) \right].
+		\label{eq:FM}
+	\end{equation}
+	
+	Dois parâmetros costumam caracterizar um sinal FM:
+	\begin{itemize}
+		\item O \emph{desvio máximo de frequência}, $\Delta f = k \max_t |x_{mod}(t)|$, isto é, o quanto a frequência instantânea se afasta de $f_c$ no pico do sinal modulador;
+		\item O \emph{índice de modulação FM}, $\beta$, definido como o desvio de \emph{fase} máximo introduzido pelo termo de modulação,
+		\begin{equation}
+			\beta = \max_t \left| 2\pi k \int_0^t x_{mod}(\tau)\, d\tau \right|.
+		\end{equation}
+	\end{itemize}
+	
+	
+	\subsection{Sinal Analítico e Transformada de Hilbert}
+	\label{sec:Hilbert}
+	
+	Dado um sinal real $x(t)$ com Transformada de Fourier $X(\Omega)$, sua \emph{Transformada de Hilbert} $\hat{x}(t)$ é obtida deslocando a fase de \emph{todas} as componentes espectrais de $x(t)$ em $-90^\circ$, sem alterar suas magnitudes. Isso equivale a filtrar $x(t)$ por um sistema cuja resposta em frequência é
+	\begin{equation}
+		H(\Omega) = -j\, \mathrm{sgn}(\Omega) = 
+		\begin{cases}
+			-j, & \Omega > 0\\
+			\phantom{-}0, & \Omega = 0\\
+			\phantom{-}j, & \Omega < 0
+		\end{cases}.
+	\end{equation}
+	
+	A partir de $x(t)$ e de sua Transformada de Hilbert $\hat{x}(t)$, define-se o \emph{sinal analítico}
+	\begin{equation}
+		z(t) = x(t) + j\, \hat{x}(t),
+	\end{equation}
+	cuja principal propriedade é possuir um espectro \emph{unilateral} -- isto é, contendo apenas frequências positivas (e a componente DC, quando existente):
+	\begin{equation}
+		Z(\Omega) = X(\Omega)\left[1 + \mathrm{sgn}(\Omega)\right] = 
+		\begin{cases}
+			2 X(\Omega), & \Omega > 0\\
+			X(\Omega), & \Omega = 0\\
+			0, & \Omega < 0
+		\end{cases}.
+		\label{eq:Zomega}
+	\end{equation}
+	
+	Numericamente, o sinal analítico de uma sequência real $x[n]$ de comprimento par $N$ pode ser calculado diretamente no domínio da frequência: calcula-se a DFT $X[k]$ de $x[n]$, multiplica-se $X[k]$ por um vetor $h[k]$ que implementa \eqref{eq:Zomega} para frequências discretas,
+	\begin{equation}
+		h[k] = 
+		\begin{cases}
+			1, & k = 0 \text{ ou } k = N/2 \quad \text{(DC e Nyquist)}\\
+			2, & k = 1, \ldots, N/2 - 1 \quad \text{(frequências positivas)}\\
+			0, & k = N/2+1, \ldots, N-1 \quad \text{(frequências negativas)}
+		\end{cases},
+	\end{equation}
+	e retorna-se ao domínio do tempo através da IDFT: $z[n] = \mathrm{IDFT}\left\{X[k]\, h[k]\right\}$. Note que as componentes DC e Nyquist \emph{não} são dobradas, pois são as únicas frequências que não possuem uma componente ``espelhada'' (negativa) distinta a ser descartada.
+	
+	
+	\subsection{Demodulação via Sinal Analítico}
+	\label{sec:demod}
+	
+	O sinal analítico fornece uma via direta para demodular tanto sinais AM quanto FM, pois sua magnitude e sua fase têm interpretação física direta em termos de envoltória e fase instantânea do sinal original.
+	
+	\subsubsection{Demodulação AM: detecção de envoltória}
+	
+	Seja $z_{AM}(t) = y_{AM}(t) + j\, \hat{y}_{AM}(t)$ o sinal analítico do sinal AM. Sua magnitude é a \emph{envoltória} do sinal,
+	\begin{equation}
+		e(t) = \left| z_{AM}(t) \right| = \sqrt{y_{AM}^2(t) + \hat{y}_{AM}^2(t)}.
+	\end{equation}
+	Comparando com \eqref{eq:AM}, e sabendo que a portadora tem amplitude unitária, tem-se $e(t) \approx 1 + x_{mod}(t)$ (a aproximação é exata quando a banda do modulador está bem afastada de $f_c$). O sinal modulador pode então ser recuperado subtraindo-se o nível DC unitário da portadora:
+	\begin{equation}
+		\hat{x}_{mod}(t) = e(t) - 1.
+	\end{equation}
+	
+	\subsubsection{Demodulação FM: frequência instantânea}
+	
+	Seja $z_{FM}(t) = y_{FM}(t) + j\, \hat{y}_{FM}(t)$ o sinal analítico do sinal FM. Sua fase instantânea é
+	\begin{equation}
+		\varphi(t) = \angle z_{FM}(t) = \arctan\left[\frac{\hat{y}_{FM}(t)}{y_{FM}(t)}\right],
+	\end{equation}
+	que, após ser \emph{desembrulhada} (\emph{unwrap}, para remover as descontinuidades de $2\pi$ introduzidas pelo $\arctan$), corresponde exatamente ao argumento de $\sin(\cdot)$ em \eqref{eq:FM}. A frequência instantânea é obtida pela derivada da fase:
+	\begin{equation}
+		f_{inst}(t) = \frac{1}{2\pi} \frac{d\varphi(t)}{dt} \quad \Longrightarrow \quad f_{inst}[n] \approx \frac{\varphi[n+1] - \varphi[n]}{2\pi\, \Delta t},
+	\end{equation}
+	onde a derivada é aproximada numericamente por diferenças finitas. Comparando com \eqref{eq:finst}, o sinal modulador é recuperado através de
+	\begin{equation}
+		\hat{x}_{mod}[n] = \frac{f_{inst}[n] - f_c}{k}.
+	\end{equation}
+	
+	
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	% *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+	\section{Tarefas}
+	\label{sec:tarefas}
+	
+	\subsection{Geração dos Sinais Moduladores e Modulados}
+	\label{sec:tarefas1}
+	
+	\begin{enumerate}
+		\item Escreva uma função Python que gere um \emph{sinal modulador} de banda limitada, a partir de ruído branco filtrado por um filtro passa-baixas. Sugestão: use um filtro Butterworth de $4^a$ ordem (\texttt{scipy.signal.butter}, \texttt{output='sos'}) com frequência de corte de poucos Hz, aplique-o ao ruído com \texttt{scipy.signal.sosfilt}, normalize a amplitude de pico para um valor conhecido (por exemplo, 0.5) e aplique uma janela de \emph{fade-in}/\emph{fade-out} (por exemplo, meia-janela de Hann) nas bordas do sinal para evitar transientes abruptos no início e no fim.
+		
+		\item Escreva uma função \texttt{am\_sine\_generator(xmod, fs, fc)} que implemente a Equação \eqref{eq:AM}, retornando o sinal AM e o índice de modulação $m$. A função deve emitir um aviso caso o sinal esteja sobremodulado ($m>1$).
+		
+		\item Escreva uma função \texttt{fm\_sine\_generator(xmod, fs, fc, k)} que implemente a Equação \eqref{eq:FM}, retornando o sinal FM, a frequência instantânea $f_{inst}[n]$, o desvio máximo de frequência $\Delta f$ e o índice de modulação FM $\beta$.
+		
+		\textbf{Dica:} a integral em \eqref{eq:FM} pode ser aproximada numericamente por uma soma acumulada (\texttt{numpy.cumsum}) multiplicada pelo intervalo de amostragem $\Delta t$.
+		
+		\item Usando as funções acima, gere um sinal modulador de banda limitada e crie os sinais AM e FM correspondentes, com portadora de $f_c = 1000$ Hz e sensibilidade em frequência $k=50$ Hz por unidade de amplitude do modulador. Plote, para cada caso, o sinal modulador, o sinal modulado e (no caso FM) a frequência instantânea, de forma similar à Figura de um sistema de comunicações analógico. Verifique se o índice de modulação obtido está de acordo com o esperado, e comente se algum dos dois sinais está sobremodulado.
+		
+		\item Calcule e plote a densidade espectral (ou o módulo da FFT, em dB) dos sinais AM e FM gerados no item anterior, com um ``zoom'' em torno da frequência da portadora $f_c$. Compare a largura de banda observada em cada caso com as estimativas teóricas da Seção \ref{sec:AM} (para AM) e da Regra de Carson (para FM), e comente as diferenças entre os dois esquemas de modulação.
+	\end{enumerate}
+	
+	
+	\subsection{Sinal Analítico via Transformada de Hilbert}
+	\label{sec:tarefas2}
+	
+	\begin{enumerate}
+		\item Escreva uma função Python \texttt{calc\_sinal\_analitico(x)} que calcule o sinal analítico de um sinal real $x[n]$ de comprimento par $N$, utilizando a abordagem descrita na Seção \ref{sec:Hilbert}: calcule a DFT de $x[n]$, construa o vetor $h[k]$, multiplique os espectros e retorne ao domínio do tempo pela IDFT.
+		
+		\textbf{Dica:} utilize \texttt{numpy.fft.fft} e \texttt{numpy.fft.ifft}. Lembre-se de que o resultado da IDFT será, em geral, complexo -- não descarte a parte imaginária!
+		
+		\item Teste sua função com um sinal simples e conhecido (por exemplo, um tom puro $x[n] = \cos(2\pi f_0 n / f_s)$) e compare o resultado com o obtido pela função \texttt{scipy.signal.hilbert}. Plote as partes real e imaginária de ambos os sinais analíticos sobrepostas, e comente se e onde elas coincidem.
+	\end{enumerate}
+	
+	
+	\subsection{Demodulação do Sinal AM}
+	\label{sec:tarefas3}
+	
+	\begin{enumerate}
+		\item Utilizando a função \texttt{calc\_sinal\_analitico} escrita na Tarefa \ref{sec:tarefas2}, calcule o sinal analítico do sinal AM gerado na Tarefa \ref{sec:tarefas1}. A partir dele, calcule a envoltória do sinal e recupere o sinal modulador conforme descrito na Seção \ref{sec:demod}.
+		
+		\item Plote o sinal AM original sobreposto à envoltória calculada, e, em um segundo gráfico, o sinal modulador recuperado sobreposto ao sinal modulador original utilizado na geração do sinal AM. Comente a qualidade da demodulação obtida, prestando atenção especial ao comportamento nas bordas do sinal (início e fim) -- por que ocorrem eventuais discrepâncias ali?
+	\end{enumerate}
+	
+	
+	\subsection{Demodulação do Sinal FM}
+	\label{sec:tarefas4}
+	
+	\begin{enumerate}
+		\item Utilizando a função \texttt{calc\_sinal\_analitico}, calcule o sinal analítico do sinal FM gerado na Tarefa \ref{sec:tarefas1}. A partir dele, obtenha a fase instantânea (lembre-se de usar \texttt{numpy.unwrap}!) e, por diferenciação numérica, a frequência instantânea do sinal.
+		
+		\item Plote a frequência instantânea recuperada sobreposta à frequência instantânea original (calculada pela Equação \eqref{eq:finst} na geração do sinal), e recupere o sinal modulador conforme a Seção \ref{sec:demod}. Plote o sinal modulador recuperado sobreposto ao original e comente a qualidade da demodulação.
+		
+		\textbf{Atenção:} o vetor de frequência instantânea obtido por diferenças finitas possui um elemento a menos que o sinal original -- por quê?
+		
+		\item Repita a demodulação FM para diferentes valores de sensibilidade $k$ (por exemplo, $k = 10$, $50$ e $200$ Hz por unidade de amplitude), mantendo os demais parâmetros fixos. Discuta como a escolha de $k$ afeta (a) a largura de banda do sinal FM (Regra de Carson) frente à frequência de amostragem $f_s$ disponível, e (b) a qualidade da demodulação obtida.
+	\end{enumerate}
+	
+	
+	% -----------------------------------------------------------------------
+	\section*{Referências}
+	
+	\begin{enumerate}
+		\item A. V. Oppenheim e R. W. Schafer, \textit{Discrete-Time Signal Processing}, 3a ed. Prentice Hall, 2009. (Transformada de Hilbert e sinal analítico)
+		\item J. G. Proakis e D. G. Manolakis, \textit{Digital Signal Processing: Principles, Algorithms, and Applications}, 4a ed. Prentice Hall, 2006. (Modulação AM/FM)
+		\item Pacote MOSQITO (código de referência para geração dos sinais AM/FM): \url{https://github.com/Eomys/MoSQITo}
+	\end{enumerate}
+	
+\end{document}
