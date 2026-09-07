@@ -42,11 +42,14 @@ def gerador_seno_am(xmod, fs, fc, print_m=False):
     senoidal de frequência 'fc', e sinal modulante arbitrário 'xmod'.
     O comprimento do sinal AM é igual ao comprimento de 'xmod'. 
     O sinal portador tem amplitude de pico unitária.
+    
+    Esta funcao foi adaptada de 'mosqito.utils.am_sine_generation', do pacote
+    Mosqito: https://github.com/Eomys/MoSQITo
 
     Parâmetros
     ----------
-    xmod: array
-        Sinal modulante, dim(N).
+    xmod: (N,) numpy.array
+        Sinal modulante.
     
     fs: float
         Frequência de amostragem, em Hz.
@@ -60,15 +63,11 @@ def gerador_seno_am(xmod, fs, fc, print_m=False):
     
     Retorna
     -------
-    y: numpy.array
+    y: (N,) numpy.array
         Sinal modulado em amplitude com portadora senoidal, em Pascals, dim(N).
     
     m: float
         Índice de modulação    
-        
-    Aviso
-    -----
-    spl_level deve ser fornecido em dB, ref=2e-5 Pa.
         
     Notas
     -----
@@ -117,10 +116,13 @@ def gerador_seno_fm(xmod, fs, fc, k, print_info=False):
     'xm', sensibilidade de frequência 'k', e frequência de amostragem 'fs'. 
     O comprimento do sinal FM é igual ao comprimento de 'xm'. 
     
+    Esta funcao foi adaptada de 'mosqito.utils.fm_sine_generation', do pacote
+    Mosqito: https://github.com/Eomys/MoSQITo
+    
     Parâmetros
     ----------
-    xmod: array
-        Sinal modulante, dim(N)
+    xmod: (N,) numpy.array
+        Sinal modulante.
     
     fs: float
         Frequência de amostragem, em [Hz].
@@ -137,11 +139,11 @@ def gerador_seno_fm(xmod, fs, fc, k, print_info=False):
     
     Retorna
     -------
-    y_fm: numpy.array
-        Sinal modulado em frequência com portadora senoidal, dim(N) em [Pa].
+    y_fm: (N,) numpy.array
+        Sinal modulado em frequência com portadora senoidal.
 
-    inst_freq: numpy.array
-        Frequência instantânea, dim(N)
+    inst_freq:(N,) numpy.array
+        Frequência instantânea [Hz].
 
     max_freq_deviation: float
         Desvio máximo de frequência [Hz]   
@@ -231,15 +233,11 @@ ruido_pb = ss.sosfilt(filtro, ruidobranco)
 # normaliza sinal passa-baixas para amplitude maxima de 0.5
 ruido_pb *= 0.5/np.max(np.abs(ruido_pb))
 
-# adiciona meia-janela Hann de fade-in e fade-out para suavizar o inicio e fim
-janela = ss.windows.hann(1024)
-ruido_pb[:512] *= janela[:512]
-ruido_pb[-512:] *= janela[512:]
 
 # %% cria o sinal AM
 
-# f_portadora = 30        # para visualizar os graficos
-f_portadora = 1000      # para auralizar o sinal atraves de falantes/fones de ouvido
+f_portadora = 30        # para visualizar os graficos
+# f_portadora = 1000      # para auralizar o sinal atraves de falantes/fones de ouvido
 
 # cria o sinal AM
 sinal_AM, _ = gerador_seno_am(ruido_pb, fs, fc=f_portadora)
@@ -248,7 +246,7 @@ sinal_AM, _ = gerador_seno_am(ruido_pb, fs, fc=f_portadora)
 # sd.play(0.1*sinal_AM, samplerate=fs)
 
 
-fig_AM, axs_AM = plt.subplots(nrows=2, ncols=1, sharex=True)
+fig_AM, axs_AM = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(12, 8))
 axs_AM[0].plot(t, ruido_pb)
 axs_AM[0].grid()
 axs_AM[0].set_ylabel("Sinal modulador")
@@ -275,7 +273,7 @@ sinal_FM, freq_inst, _, _ = gerador_seno_fm(ruido_pb, fs, fc=f_portadora,
 # sd.play(0.1*sinal_FM, samplerate=fs)
 
 
-fig_FM, axs_FM = plt.subplots(nrows=3, ncols=1, sharex=True)
+fig_FM, axs_FM = plt.subplots(nrows=3, ncols=1, sharex=True, figsize=(12, 8))
 axs_FM[0].plot(t, ruido_pb)
 axs_FM[0].grid()
 axs_FM[0].set_ylabel("Sinal modulador")
@@ -304,7 +302,7 @@ envelope_AM = np.abs(analitico_AM)
 
 modulador_AM = envelope_AM - 1
 
-plt.figure()
+plt.figure(figsize=(12, 8))
 plt.subplot(211)
 plt.plot(t, sinal_AM, label='Sinal AM')
 plt.plot(t, envelope_AM, '--', label='Envelope')
@@ -332,7 +330,7 @@ freq_instantanea_FM = np.diff(fase_instantanea_FM) / (2.0*np.pi) * fs
 
 modulador_FM = (freq_instantanea_FM - f_portadora)/sens_freq
 
-plt.figure()
+plt.figure(figsize=(12, 8))
 
 plt.plot(t[:-1], modulador_FM, label='Sinal demodulado')
 plt.plot(t, ruido_pb, '--', label='Sinal modulador original')
