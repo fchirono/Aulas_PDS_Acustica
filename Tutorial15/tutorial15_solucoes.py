@@ -62,6 +62,7 @@ def gerador_seno_am(xmod, fs, fc, print_m=False):
     -------
     y: numpy.array
         Sinal modulado em amplitude com portadora senoidal, em Pascals, dim(N).
+    
     m: float
         Índice de modulação    
         
@@ -120,12 +121,16 @@ def gerador_seno_fm(xmod, fs, fc, k, print_info=False):
     ----------
     xmod: array
         Sinal modulante, dim(N)
+    
     fs: float
         Frequência de amostragem, em [Hz].
+
     fc: float
         Frequência da portadora, em [Hz]. Deve ser menor que 'fs/2'.
+
     k: float
         Sensibilidade de frequência do modulador. 
+
     print_info: bool, opcional
         Se True, o desvio máximo de frequência e o índice de modulação 
         são impressos. Padrão é False
@@ -134,10 +139,13 @@ def gerador_seno_fm(xmod, fs, fc, k, print_info=False):
     -------
     y_fm: numpy.array
         Sinal modulado em frequência com portadora senoidal, dim(N) em [Pa].
+
     inst_freq: numpy.array
         Frequência instantânea, dim(N)
+
     max_freq_deviation: float
         Desvio máximo de frequência [Hz]   
+
     FM_modulation_index: float
         Índice de modulação 
         
@@ -146,7 +154,6 @@ def gerador_seno_fm(xmod, fs, fc, k, print_info=False):
     -----
     A sensibilidade de frequência 'k' é igual ao desvio de frequência em Hz 
     em relação a 'fc' por unidade de amplitude do sinal modulante 'xmod'.
-           
     """
     
     assert fc < fs/2, "A frequência da portadora 'fc' deve ser menor que 'fs/2'!"
@@ -334,38 +341,3 @@ plt.ylabel("Amplitude")
 plt.xlabel("Tempo [s]")
 plt.grid()
 plt.legend()
-
-
-# # %% compara a transformada de Hilbert implementada aqui com a ss.hilbert
-
-# analitico_AM1 = ss.hilbert(sinal_AM)
-# analitico_FM1 = ss.hilbert(sinal_FM)
-
-# plt.figure()
-# plt.subplot(211)
-# plt.plot(analitico_AM1.real[:1000], label='Real (scipy.signal)')
-# plt.plot(analitico_AM.real[:1000], '--', label='Real (calc_sinal_analitico)')
-# plt.grid()
-# plt.legend()
-# plt.title('Sinal AM (scipy.signal vs calc_sinal_analitico)')
-
-# plt.subplot(212)
-# plt.plot(analitico_AM1.imag[:1000], label='Imag (scipy.signal)')
-# plt.plot(analitico_AM.imag[:1000], '--', label='Imag (calc_sinal_analitico)')
-# plt.grid()
-# plt.legend()
-
-
-# plt.figure()
-# plt.subplot(211)
-# plt.plot(analitico_FM1.real[:1000], label='Real (scipy.signal)')
-# plt.plot(analitico_FM.real[:1000], '--', label='Real (calc_sinal_analitico)')
-# plt.grid()
-# plt.legend()
-# plt.title('Sinal FM (scipy.signal vs calc_sinal_analitico)')
-
-# plt.subplot(212)
-# plt.plot(analitico_FM1.imag[:1000], label='Imag (scipy.signal)')
-# plt.plot(analitico_FM.imag[:1000], '--', label='Imag (calc_sinal_analitico)')
-# plt.grid()
-# plt.legend()
