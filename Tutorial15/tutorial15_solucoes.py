@@ -35,144 +35,142 @@ import sounddevice as sd
 
 #%% funcoes para criar sinais AM/FM - adaptadas de https://github.com/Eomys/MoSQITo
 
-
-def am_sine_generator(xmod, fs, fc, print_m=False):
-    """ Amplitude-modulated sine wave generation
+def gerador_seno_am(xmod, fs, fc, print_m=False):
+    """ Geração de onda senoidal modulada em amplitude (AM)
     
-    This function creates an amplitude-modulated (AM) signal with sinusoidal 
-    carrier of frequency 'fc', and arbitrary modulating signal 'xmod'.
-    The AM signal length is the same as the length of 'xmod'. 
-    The carrier signal has unitary peak amplitude.
+    Esta função cria um sinal modulado em amplitude (AM) com portadora 
+    senoidal de frequência 'fc', e sinal modulante arbitrário 'xmod'.
+    O comprimento do sinal AM é igual ao comprimento de 'xmod'. 
+    O sinal portador tem amplitude de pico unitária.
 
-    Parameters
+    Parâmetros
     ----------
     xmod: array
-        Modulating signal, dim(N).
+        Sinal modulante, dim(N).
     
     fs: float
-        Sampling frequency, in Hz.
+        Frequência de amostragem, em Hz.
     
     fc: float
-        Carrier frequency, in Hz. Must be less than 'fs/2'.
+        Frequência da portadora, em Hz. Deve ser menor que 'fs/2'.
     
-    print_m: bool, optional
-        Flag declaring whether to print the calculated modulation index.
-        Default is False.
+    print_m: bool, opcional
+        Flag que indica se o índice de modulação calculado deve ser impresso.
+        Padrão é False.
     
-    Returns
+    Retorna
     -------
     y: numpy.array
-        Amplitude-modulated signal with sine carrier in Pascals, dim(N).
+        Sinal modulado em amplitude com portadora senoidal, em Pascals, dim(N).
     m: float
-        Modulation index    
+        Índice de modulação    
         
-    Warning
-    -------
-    spl_level must be provided in dB, ref=2e-5 Pa.
-        
-    Notes
+    Aviso
     -----
-    The modulation index 'm' will be equal to the peak value of the modulating
-    signal 'xmod'. Its value can be printed by setting the optional flag
-    'print_m' to True.
+    spl_level deve ser fornecido em dB, ref=2e-5 Pa.
+        
+    Notas
+    -----
+    O índice de modulação 'm' será igual ao valor de pico do sinal 
+    modulante 'xmod'. Seu valor pode ser impresso definindo a flag 
+    opcional 'print_m' como True.
     
-    For 'm' = 0.5, the carrier amplitude varies by 50% above and below its
-    unmodulated level. For 'm' = 1.0, it varies by 100%. With 100% modulation 
-    the wave amplitude sometimes reaches zero, and this represents full
-    modulation. Increasing the modulating signal beyond that point is known as
-    overmodulation.
+    Para 'm' = 0,5, a amplitude da portadora varia 50% acima e abaixo do 
+    seu nível não modulado. Para 'm' = 1,0, ela varia 100%. Com 100% de 
+    modulação, a amplitude da onda às vezes chega a zero, o que representa 
+    modulação total. Aumentar o sinal modulante além desse ponto é 
+    conhecido como sobremodulação.
     """
     
-    assert fc < fs/2, "Carrier frequency 'fc' must be less than 'fs/2'!"
+    assert fc < fs/2, "A frequência da portadora 'fc' deve ser menor que 'fs/2'!"
     
-    Nt = xmod.shape[0]        # signal length in samples
-    T = Nt/fs               # signal length in seconds
-    dt = 1/fs               # sampling interval in seconds
+    Nt = xmod.shape[0]        # comprimento do sinal em amostras
+    T = Nt/fs               # comprimento do sinal em segundos
+    dt = 1/fs               # intervalo de amostragem em segundos
 
-    # vector of time samples
+    # vetor de amostras temporais
     t = np.linspace(0, T-dt, int(T*fs))
     
-    # unit-amplitude sinusoidal carrier with frequency 'fc' [Hz]
+    # portadora senoidal de amplitude unitária com frequência 'fc' [Hz]
     xc = np.sin(2*np.pi*fc*t)
 
-    # AM signal
+    # sinal AM
     y_am = (1 + xmod)*xc
 
-    # modulation index
+    # índice de modulação
     m = np.max(np.abs(xmod))
 
     if print_m:
-        print(f"AM Modulation index = {m}")
+        print(f"Índice de modulação AM = {m}")
     
     if m > 1:
-        print("Warning ['am_sine_generator']: modulation index m > 1\n\tSignal is overmodulated!")
+        print("Aviso ['gerador_seno_am']: índice de modulação m > 1\n\tO sinal está sobremodulado!")
 
     return y_am, m
 
 
-def fm_sine_generator(xmod, fs, fc, k, print_info=False):
+def gerador_seno_fm(xmod, fs, fc, k, print_info=False):
     """
-    Creates a frequency-modulated (FM) signal of level 'spl_level' (in dB SPL)
-    with sinusoidal carrier of frequency 'fc', arbitrary modulating signal
-    'xm', frequency sensitivity 'k', and sampling frequency 'fs'. The FM signal
-    length is the same as the length of 'xm'. 
+    Cria um sinal modulado em frequência (FM) de nível 'spl_level' (em dB SPL)
+    com portadora senoidal de frequência 'fc', sinal modulante arbitrário
+    'xm', sensibilidade de frequência 'k', e frequência de amostragem 'fs'. 
+    O comprimento do sinal FM é igual ao comprimento de 'xm'. 
     
-    Parameters
+    Parâmetros
     ----------
     xmod: array
-        Modulating signal, dim(N)
+        Sinal modulante, dim(N)
     fs: float
-        Sampling frequency, in [Hz].
+        Frequência de amostragem, em [Hz].
     fc: float
-        Carrier frequency, in [Hz]. Must be less than 'fs/2'.
+        Frequência da portadora, em [Hz]. Deve ser menor que 'fs/2'.
     k: float
-        Frequency sensitivity of the modulator. 
-    print_info: bool, optional
-        If True, the maximum frequency deviation and modulation index are printed. 
-        Default is False
+        Sensibilidade de frequência do modulador. 
+    print_info: bool, opcional
+        Se True, o desvio máximo de frequência e o índice de modulação 
+        são impressos. Padrão é False
     
-    Returns
+    Retorna
     -------
     y_fm: numpy.array
-        Frequency-modulated signal with sine carrier, dim(N) in [Pa].
+        Sinal modulado em frequência com portadora senoidal, dim(N) em [Pa].
     inst_freq: numpy.array
-        Instantaneaous frequency, dim(N)
+        Frequência instantânea, dim(N)
     max_freq_deviation: float
-        Maximum frequency deviation [Hz]   
+        Desvio máximo de frequência [Hz]   
     FM_modulation_index: float
-        Modulation index 
+        Índice de modulação 
         
     
-    Notes
+    Notas
     -----
-    The frequency sensitivity 'k' is equal to the frequency deviation in Hz 
-    away from 'fc' per unit amplitude of the modulating signal 'xmod'.
+    A sensibilidade de frequência 'k' é igual ao desvio de frequência em Hz 
+    em relação a 'fc' por unidade de amplitude do sinal modulante 'xmod'.
            
     """
     
-    assert fc < fs/2, "Carrier frequency 'fc' must be less than 'fs/2'!"
+    assert fc < fs/2, "A frequência da portadora 'fc' deve ser menor que 'fs/2'!"
     
-     # sampling interval in seconds
+     # intervalo de amostragem em segundos
     dt = 1/fs
 
-    # instantaneous frequency of FM signal
+    # frequência instantânea do sinal FM
     inst_freq = fc + k*xmod
     
-    # unit-amplitude FM signal
+    # sinal FM de amplitude unitária
     y_fm = np.sin(2*np.pi * np.cumsum(inst_freq)*dt)
     
-    # max frequency deviation
+    # desvio máximo de frequência
     f_delta = k * np.max(np.abs(xmod))
     
-    # FM modulation index
+    # índice de modulação FM
     m = np.max(np.abs(2*np.pi * k * np.cumsum(xmod)*dt))
 
     if print_info:
-        print(f'\tMax freq deviation: {f_delta} Hz')
-        print(f'\tFM modulation index: {m:.2f}')
+        print(f'\tDesvio máximo de frequência: {f_delta} Hz')
+        print(f'\tÍndice de modulação FM: {m:.2f}')
 
     return y_fm, inst_freq, f_delta, m
-
 
 
 #%% transformada de Hilbert
@@ -237,7 +235,7 @@ ruido_pb[-512:] *= janela[512:]
 f_portadora = 1000      # para auralizar o sinal atraves de falantes/fones de ouvido
 
 # cria o sinal AM
-sinal_AM, _ = am_sine_generator(ruido_pb, fs, fc=f_portadora)
+sinal_AM, _ = gerador_seno_am(ruido_pb, fs, fc=f_portadora)
 
 # # auralizar o sinal AM
 # sd.play(0.1*sinal_AM, samplerate=fs)
@@ -263,7 +261,7 @@ axs_AM[0].set_title("Sinal modulado em amplitude (AM)")
 sens_freq = 50
 
 # cria o sinal FM
-sinal_FM, freq_inst, _, _ = fm_sine_generator(ruido_pb, fs, fc=f_portadora,
+sinal_FM, freq_inst, _, _ = gerador_seno_fm(ruido_pb, fs, fc=f_portadora,
                                               k=sens_freq)
 
 # # auralizar o sinal FM
@@ -328,17 +326,7 @@ freq_instantanea_FM = np.diff(fase_instantanea_FM) / (2.0*np.pi) * fs
 modulador_FM = (freq_instantanea_FM - f_portadora)/sens_freq
 
 plt.figure()
-plt.subplot(211)
-plt.plot(t[:-1], freq_instantanea_FM, label='Freq inst demodulada')
-plt.plot(t, freq_inst, '--', label='Freq inst original')
-plt.ylim([f_portadora - sens_freq,
-          f_portadora + sens_freq])
-plt.grid()
-plt.legend()
-plt.ylabel('Freq [Hz]')
-plt.title("Sinal FM demodulado")
 
-plt.subplot(212)
 plt.plot(t[:-1], modulador_FM, label='Sinal demodulado')
 plt.plot(t, ruido_pb, '--', label='Sinal modulador original')
 plt.ylim([-1, 1])
