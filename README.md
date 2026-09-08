@@ -31,7 +31,7 @@ Os temas abordados nestes Tutoriais são:
 12. Filtros de Resposta ao Impulso Finita (FIR)
 13. Filtros de Resposta ao Impulso Infinita (IIR)
 14. Resposta ao Impulso de uma Sala
-15. Sinais Modulados e Transformada de Hilbert *(em andamento)*
+15. Sinais Modulados e Transformada de Hilbert
 
 ## Licença
 
