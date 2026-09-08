@@ -1,5 +1,9 @@
 # Processamento Digital de Sinais e Aplicações em Acústica - Teoria e Exemplos Computacionais
 
+<img src="https://github.com/fchirono/Aulas_PDS_Acustica/blob/main/Tutorial08/Latex/caso1_x1_freq.png" height="200"> <img src="https://github.com/fchirono/Aulas_PDS_Acustica/blob/main/Tutorial05/scripts/PadraoRad2_edit.png" height="200"> <img src="https://github.com/fchirono/Aulas_PDS_Acustica/blob/main/Tutorial15/Latex/sinal_AM_demodulado.png" height="200"> 
+<img src="https://github.com/fchirono/Aulas_PDS_Acustica/blob/main/Tutorial03/script/Ex3_reconstrucao.png" height="200">  <img src="https://github.com/fchirono/Aulas_PDS_Acustica/blob/main/Tutorial09/Latex/RespImpulso.png" height="200"> <img src="https://github.com/fchirono/Aulas_PDS_Acustica/blob/main/Tutorial11/Latex/PS_Welch_Ndft_T5.png" height="200"> 
+
+
 https://github.com/fchirono/Aulas_PDS_Acustica
 
 **Autor**: Fabio Casagrande Hirono, 2026
