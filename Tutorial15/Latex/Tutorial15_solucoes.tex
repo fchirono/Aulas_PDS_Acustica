@@ -60,59 +60,60 @@
 	\label{sec:tarefas1}
 	
 	\subsubsection*{Tarefa 1}
-	-
+	Veja o script \texttt{tutorial15\_solucoes.py} para um exemplo de como esta Tarefa pode ser solucionada.
 	
 	\subsubsection*{Tarefa 2}
 	
-	A função \texttt{gerador\_seno\_am} (no script \texttt{tutorial15\_solucoes.py}) implementa diretamente a Equação (2) do enunciado, com a portadora $x_c(t) = \sin(2\pi f_c t)$ construída sobre um vetor de tempo de mesmo comprimento que \texttt{xmod}. O índice de modulação $m$ é o valor de pico de \texttt{xmod}, e um aviso é emitido sempre que $m>1$ (sobremodulação).
+	A função \texttt{gerador\_seno\_am} (no script \texttt{tutorial15\_solucoes.py}) implementa diretamente a Equação (2) do enunciado, com a portadora $x_c(t) = \sin(2\pi f_c t)$ construída sobre um vetor de tempo de mesmo comprimento que \texttt{xmod}. O índice de modulação $m$ é o valor de pico de \texttt{xmod}, e um aviso é emitido sempre que o índice de modulação $m>1$ (sobremodulação).
+	
+	Esta implementação foi adaptada da função \texttt{mosqito.utils.am\_sine\_generation} do pacote \texttt{MoSQITo}, disponível em \url{https://github.com/Eomys/MoSQITo}.
 	
 	
 	\subsubsection*{Tarefa 3}
 	
 	A função \texttt{gerador\_seno\_fm} (no script \texttt{tutorial15\_solucoes.py}) implementa a Equação (5), integrando numericamente a frequência instantânea $f_{inst}(t) = f_c + k\, x_{mod}(t)$ por soma acumulada (\texttt{numpy.cumsum}) para obter a fase $\phi(t)$. O desvio máximo de frequência $\Delta f$ e o índice de modulação $\beta$ são calculados diretamente das definições da Seção 1.2 do enunciado.
+	
+	Esta implementação foi adaptada da função \texttt{mosqito.utils.fm\_sine\_generation} do pacote \texttt{MoSQITo}, disponível em \url{https://github.com/Eomys/MoSQITo}.
+	
 	\subsubsection*{Tarefa 4}
 	
-	Utilizando um sinal modulador de banda limitada (Tarefa 1), com portadora $f_c=1000$ Hz e sensibilidade em frequência $k=50$ Hz, obtêm-se os sinais AM e FM das Figuras \ref{fig:AM_geracao} e \ref{fig:FM_geracao}. Para o sinal modulador utilizado (amplitude de pico normalizada para $0.5$), obtém-se:
-	\begin{equation}
-		m = 0.50 \qquad \text{(AM)}, \qquad\qquad \Delta f = 25.0 \text{ Hz}, \quad \beta \approx 41.2 \qquad \text{(FM)}.
-	\end{equation}
-	
-	Como $m=0.5<1$, o sinal AM \textbf{não} está sobremodulado: sua envoltória permanece sempre positiva, oscilando entre $0.5$ e $1.5$, conforme visto no painel de zoom da Figura \ref{fig:AM_geracao}. Já no caso FM, o desvio máximo de frequência $\Delta f = 25$ Hz é pequeno frente à portadora ($2.5\%$ de $f_c$), de modo que a frequência instantânea (painel central da Figura \ref{fig:FM_geracao}) permanece sempre positiva e próxima de $f_c$ -- não há, portanto, um equivalente à sobremodulação AM neste caso. O índice de modulação FM $\beta\approx41$, por sua vez, é elevado porque resulta da integral (acumulada ao longo de todo o sinal) do modulador, que possui um pequeno viés de baixa frequência; ainda assim, isso não compromete a demodulação, pois toda a informação relevante está codificada na \emph{frequência} instantânea (Equação 4 do enunciado), e não diretamente na fase acumulada.
+	Utilizando um sinal modulador de banda limitada (Tarefa 1), com portadora $f_c=30$ Hz (para melhor visualização dos resultados neste documento) e sensibilidade em frequência $k=50$ Hz, obtêm-se os sinais AM e FM das Figuras \ref{fig:AM_geracao} e \ref{fig:FM_geracao}. Nota-se claramente a amplitude do sinal AM e a frequência instantânea do sinal FM variando de acordo com o sinal modulador, conforme esperado. 
 	
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.85\textwidth]{fig_AM_geracao.png}
-		\caption{Sinal modulador de banda limitada (topo), sinal AM completo (meio, $f_c=1000$ Hz, $m=0.50$) e zoom nos primeiros 20 ms (embaixo), evidenciando a envoltória $1+x_{mod}(t)$.}
+		\includegraphics[width=0.85\textwidth]{sinal_AM.png}
+		\caption{Sinal modulador de banda limitada (topo), sinal AM completo ($f_c=30$ Hz).}
 		\label{fig:AM_geracao}
 	\end{figure}
 	
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.85\textwidth]{fig_FM_geracao.png}
-		\caption{Sinal modulador de banda limitada (topo), frequência instantânea $f_{inst}(t)$ (meio, $\Delta f=25$ Hz) e zoom do sinal FM nos primeiros 20 ms (embaixo).}
+		\includegraphics[width=0.85\textwidth]{sinal_FM.png}
+		\caption{Sinal modulador de banda limitada (topo), sinal FM ($f_c=30$ Hz), e frequência instantânea $f_{inst}(t)$.}
 		\label{fig:FM_geracao}
 	\end{figure}
 	
+	\clearpage
 	\newpage
 	\subsection{Sinal Analítico via Transformada de Hilbert}
 	\label{sec:tarefas2}
 	
 	\subsubsection*{Tarefa 1}
 	
-	A principal propriedade do sinal analítico é possuir um espectro \emph{unilateral} -- isto é, contendo apenas frequências positivas (e a componente DC, quando existente). Partindo de $z(t) = x(t) + j\tilde{x}(t)$ e de $H(\Omega) = -j\,\mathrm{sgn}(\Omega)$ (resposta em frequência da Transformada de Hilbert, Equação 6), tem-se $\tilde{X}(\Omega) = H(\Omega)X(\Omega)$, e portanto:
+	Uma das principais propriedades do sinal analítico é possuir um espectro \emph{unilateral} -- isto é, contendo apenas frequências positivas (e a componente DC, quando existente). Partindo de $z(t) = x(t) + j\tilde{x}(t)$ e de $H(f) = -j\,\mathrm{sgn}(f)$ (resposta em frequência da Transformada de Hilbert, Equação 6), tem-se $\tilde{X}(f) = H(f)X(f)$, e portanto:
 	\begin{align}
-		Z(\Omega) &= X(\Omega) + j\, H(\Omega)\, X(\Omega) \nonumber \\
-		&= X(\Omega)\left[1 + j\left(-j\,\mathrm{sgn}(\Omega)\right)\right] \nonumber \\
-		&= X(\Omega)\left[1 + \mathrm{sgn}(\Omega)\right] \nonumber \\[4pt]
+		Z(f) &= X(f) + j\, H(f)\, X(f) \nonumber \\
+		&= X(f)\left[1 + j\left(-j\,\mathrm{sgn}(f)\right)\right] \nonumber \\
+		&= X(f)\left[1 + \mathrm{sgn}(f)\right] \nonumber \\[4pt]
 		&= \begin{cases}
-			2\, X(\Omega), & \Omega > 0\\
-			X(\Omega), & \Omega = 0\\
-			0, & \Omega < 0
+			2\, X(f), & f > 0\\
+			X(f), & f = 0 \ \mathrm{ou} \ f = f_s/2\\
+			0, & f < 0
 		\end{cases}.
 		\label{eq:Zomega}
 	\end{align}
 	
-	\noindent Ou seja, as componentes de frequência negativa de $X(\Omega)$ são canceladas, as de frequência positiva são dobradas em amplitude, e a componente DC (quando existente) permanece inalterada -- resultando em um espectro estritamente unilateral $\boxed{Z(\Omega) = X(\Omega)\left[1+\mathrm{sgn}(\Omega)\right]}$.
+	\noindent Ou seja, as componentes de frequência negativa de $X(\Omega)$ são canceladas, as de frequência positiva são dobradas em amplitude, e a componente DC e a frequência de Nyquist $f_s/2$ permanecem inalteradas.
 	
 	\subsubsection*{Tarefa 2}
 	
@@ -166,52 +167,33 @@ def calc_sinal_analitico(x):
 	
 	\subsubsection*{Tarefas 1 e 2 -- Demodulação AM}
 	
-	O sinal analítico do sinal AM é calculado por \texttt{calc\_sinal\_analitico(sinal\_AM)}. Sua magnitude fornece a envoltória, da qual se subtrai o nível DC unitário da portadora para recuperar o sinal modulador (Seção 1.4.1 do enunciado):
+	O sinal analítico do sinal AM é calculado por \texttt{calc\_sinal\_analitico(sinal\_AM)}. Sua magnitude fornece a envoltória, da qual se subtrai o nível DC unitário da portadora para recuperar o sinal modulador (Seção 1.4.1 do enunciado).
 	
-	\begin{lstlisting}[frame=single]
-		analitico_AM = calc_sinal_analitico(sinal_AM)
-		
-		envelope_AM = np.abs(analitico_AM)
-		
-		modulador_AM = envelope_AM - 1
-	\end{lstlisting}
-	
-	A Figura \ref{fig:demod_AM} mostra, no painel superior, o sinal AM sobreposto à envoltória calculada (zoom de 20 ms), e, no painel inferior, o sinal modulador recuperado sobreposto ao original, ao longo de todo o sinal de 5 s. A concordância é excelente: o erro RMS entre o sinal recuperado e o original, excluindo-se uma faixa de $50$ ms em cada borda, é da ordem de $10^{-5}$ (praticamente ruído numérico). As únicas discrepâncias visíveis ocorrem nas \textbf{bordas} do sinal ($t\approx0$ e $t\approx5$ s), onde aparecem picos espúrios no sinal recuperado.
+	A Figura \ref{fig:demod_AM} mostra, no painel superior, o sinal AM (linha sólida azul) sobreposto à envoltória calculada (linha tracejada laranja), e, no painel inferior, o sinal modulador original (linha sólida azul) sobreposto ao sinal modulador recuperado (linha tracejada laranja). A concordância é excelente, e as únicas discrepâncias visíveis ocorrem nas \textbf{bordas} do sinal ($t\approx0$ e $t\approx5$ s), onde aparecem picos espúrios no sinal recuperado.
 	
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.85\textwidth]{fig_demod_AM.png}
+		\includegraphics[width=0.85\textwidth]{sinal_AM_demodulado.png}
 		\caption{Demodulação AM: sinal AM e envoltória calculada (topo, zoom de 20 ms) e sinal modulador recuperado vs. original (embaixo, sinal completo).}
 		\label{fig:demod_AM}
 	\end{figure}
 	
-	Essas discrepâncias nas bordas ocorrem porque \texttt{calc\_sinal\_analitico} é calculado via DFT, que assume implicitamente que o sinal de entrada é \emph{periódico} com período $N$ (o comprimento do sinal). Como o sinal AM real não é periódico -- em geral, sua primeira e última amostras não se conectam suavemente --, a DFT ``enxerga'' uma descontinuidade artificial na fronteira circular entre o fim e o início do sinal. Essa descontinuidade se manifesta como conteúdo espectral espúrio (efeito de borda, análogo ao \emph{leakage} espectral), que corrompe a estimativa da envoltória justamente nas amostras mais próximas das extremidades do sinal.
+	Essas discrepâncias nas bordas ocorrem porque \texttt{calc\_sinal\_analitico} é calculado via DFT, que assume implicitamente que o sinal de entrada é \emph{periódico} com período $N$ (o comprimento do sinal). Como o sinal AM real não é periódico -- e portanto, sua primeira e última amostras não se conectam suavemente --, a DFT ``enxerga'' uma descontinuidade artificial na fronteira circular entre o fim e o início do sinal. Essa descontinuidade se manifesta como conteúdo espectral espúrio (efeito de borda, análogo ao \emph{leakage} espectral), que corrompe a estimativa da envoltória justamente nas amostras mais próximas das extremidades do sinal. 
 	
 	\subsubsection*{Tarefas 3 e 4 -- Demodulação FM}
 	
-	De forma análoga, o sinal analítico do sinal FM é calculado por \texttt{calc\_sinal\_analitico(sinal\_FM)}. Sua fase, desembrulhada com \texttt{numpy.unwrap}, é diferenciada numericamente para obter a frequência instantânea, da qual se recupera o sinal modulador (Seção 1.4.2 do enunciado):
-	
-	\begin{lstlisting}[frame=single]
-		analitico_FM = calc_sinal_analitico(sinal_FM)
+	De forma análoga, o sinal analítico do sinal FM é calculado por \texttt{calc\_sinal\_analitico(sinal\_FM)}. Sua fase, desembrulhada com \texttt{numpy.unwrap}, é diferenciada numericamente para obter a frequência instantânea, da qual se recupera o sinal modulador (Seção 1.4.2 do enunciado). 
 		
-		fase_instantanea_FM = np.unwrap(np.angle(analitico_FM))
-		
-		# diferenciacao numerica (diferencas finitas) -> f_inst tem N-1 amostras
-		freq_instantanea_FM = np.diff(fase_instantanea_FM) / (2.0*np.pi) * fs
-		
-		modulador_FM = (freq_instantanea_FM - f_portadora) / sens_freq
-	\end{lstlisting}
-	
-	A Figura \ref{fig:demod_FM} mostra, no painel superior, a frequência instantânea recuperada sobreposta à original (sinal completo); no painel do meio, um zoom longe das bordas (entre $2.00$ e $2.05$ s), onde as duas curvas coincidem quase perfeitamente; e, no painel inferior, o sinal modulador recuperado sobreposto ao original. Assim como no caso AM, o erro RMS de demodulação (excluindo-se as bordas) é muito pequeno ($\approx 1.6\times10^{-3}$ em amplitude do modulador), e a única discrepância visível ocorre novamente nas \textbf{bordas} do sinal, pelo mesmo motivo discutido na demodulação AM: a suposição implícita de periodicidade da DFT usada em \texttt{calc\_sinal\_analitico} introduz uma descontinuidade espúria na fronteira circular do sinal, degradando a estimativa da fase (e, por consequência, da frequência instantânea) nas amostras próximas às extremidades.
+	A Figura \ref{fig:demod_FM} mostra a frequência instantânea original (linha sólida azul) sobreposta à frequência instantânea recuperada (linha tracejada laranja). Assim como no caso AM, ambos os sinais apresentam excelente concordância, e a única discrepância visível ocorre novamente nas \textbf{bordas} do sinal, pelo mesmo motivo discutido na demodulação AM: a suposição implícita de periodicidade da DFT usada em \texttt{calc\_sinal\_analitico} introduz uma descontinuidade espúria na fronteira circular do sinal, degradando a estimativa da fase (e, por consequência, da frequência instantânea) nas amostras próximas às extremidades.
 	
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.85\textwidth]{fig_demod_FM.png}
+		\includegraphics[width=0.85\textwidth]{sinal_FM_demodulado.png}
 		\caption{Demodulação FM: frequência instantânea recuperada vs. original, sinal completo (topo) e zoom longe das bordas (meio); sinal modulador recuperado vs. original, sinal completo (embaixo).}
 		\label{fig:demod_FM}
 	\end{figure}
 	
-	\textbf{Sobre o comprimento do vetor de frequência instantânea:} a frequência instantânea é obtida por diferenciação numérica (diferenças finitas) da fase desembrulhada, $f_{inst}[n] \approx \left(\varphi[n+1]-\varphi[n]\right)/(2\pi\Delta t)$. Como essa operação (\texttt{numpy.diff}) calcula a diferença entre pares de amostras \emph{consecutivas}, um vetor de fase com $N$ amostras produz um vetor de diferenças com apenas $N-1$ amostras -- não existe uma amostra ``seguinte'' à última amostra do sinal para calcular a última diferença. Por isso, o vetor \texttt{modulador\_FM} (e o eixo de tempo correspondente, \texttt{t[:-1]}) possui um elemento a menos que o sinal modulador original.
+	\noindent \textbf{Sobre o comprimento do vetor de frequência instantânea:} a frequência instantânea é obtida por diferenciação numérica (diferenças finitas) da fase desembrulhada, $f_{inst}[n] \approx \left(\varphi[n+1]-\varphi[n]\right)/(2\pi\Delta t)$. Como essa operação (\texttt{numpy.diff}) calcula a diferença entre pares de amostras \emph{consecutivas}, um vetor de fase com $N$ amostras produz um vetor de diferenças com apenas $N-1$ amostras -- não existe uma amostra ``seguinte'' à última amostra do sinal para calcular a última diferença. Por isso, o vetor \texttt{modulador\_FM} (e o eixo de tempo correspondente, \texttt{t[:-1]}) possui um elemento a menos que o sinal modulador original.
 	
 	
 	% -----------------------------------------------------------------------

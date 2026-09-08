@@ -250,7 +250,7 @@ fig_AM, axs_AM = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(12, 8))
 axs_AM[0].plot(t, ruido_pb)
 axs_AM[0].grid()
 axs_AM[0].set_ylabel("Sinal modulador")
-axs_AM[0].set_ylim([-0.5, 0.5])
+axs_AM[0].set_ylim([-0.6, 0.6])
 
 axs_AM[1].plot(t, sinal_AM)
 axs_AM[1].grid()
@@ -259,6 +259,7 @@ axs_AM[1].set_xlabel("Tempo [s]")
 
 axs_AM[0].set_title("Sinal modulado em amplitude (AM)")
 
+fig_AM.set_tight_layout(True)
 
 # %% cria o sinal FM
 
@@ -277,7 +278,7 @@ fig_FM, axs_FM = plt.subplots(nrows=3, ncols=1, sharex=True, figsize=(12, 8))
 axs_FM[0].plot(t, ruido_pb)
 axs_FM[0].grid()
 axs_FM[0].set_ylabel("Sinal modulador")
-axs_FM[0].set_ylim([-0.5, 0.5])
+axs_FM[0].set_ylim([-0.6, 0.6])
 
 axs_FM[1].plot(t, sinal_FM)
 axs_FM[1].grid()
@@ -292,6 +293,8 @@ axs_FM[2].set_ylim([f_portadora - sens_freq,
                     f_portadora + sens_freq])
 
 axs_FM[0].set_title("Sinal modulado em frequencia (FM)")
+
+fig_FM.set_tight_layout(True)
 
 # %% criar script separado para demodular os sinais AM usando transformada de Hilbert
 
@@ -319,6 +322,8 @@ plt.legend()
 plt.ylabel("Amplitude")
 plt.xlabel("Tempo [s]")
 
+plt.tight_layout()
+
 # %% criar script separado para demodular os sinais FM usando transformada de Hilbert
 
 # analitico_FM = ss.hilbert(sinal_FM)
@@ -339,3 +344,5 @@ plt.ylabel("Amplitude")
 plt.xlabel("Tempo [s]")
 plt.grid()
 plt.legend()
+
+plt.tight_layout()

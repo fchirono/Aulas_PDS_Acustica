@@ -165,9 +165,9 @@
 	
 	Seja $z_{FM}(t) = y_{FM}(t) + j\, \hat{y}_{FM}(t)$ o sinal analítico do sinal FM. Sua fase instantânea é
 	\begin{equation}
-		\theta(t) = \angle z_{FM}(t) = \arctan\left[\frac{\hat{y}_{FM}(t)}{y_{FM}(t)}\right],
+		\theta(t) = \angle z_{FM}(t) = \arctan\left[\frac{\tilde{x}_{FM}(t)}{x_{FM}(t)}\right],
 	\end{equation}
-	que, após ser \emph{desembrulhada} (\emph{unwrapped}, para remover as descontinuidades de $2\pi$ introduzidas pela função $\arctan$ numérica), corresponde exatamente ao argumento de $\sin(\cdot)$ em \eqref{eq:FM}. A frequência instantânea é obtida pela derivada da fase:
+	que, após ser \emph{desembrulhada} (\emph{unwrapped}, para remover as descontinuidades múltiplas de $2\pi$ introduzidas pela função $\arctan$ numérica), corresponde exatamente ao argumento de $\sin(\cdot)$ em \eqref{eq:FM}. A frequência instantânea é obtida pela derivada da fase:
 	\begin{equation}
 		f_{inst}(t) = \frac{1}{2\pi} \frac{d\varphi(t)}{dt} \quad \Longrightarrow \quad f_{inst}[n] \approx \frac{\varphi[n+1] - \varphi[n]}{2\pi\, \Delta t},
 	\end{equation}
@@ -195,7 +195,7 @@
 		
 		\item Escreva uma função \texttt{gerador\_seno\_fm(xmod, fs, fc, k)} que implemente a Equação \eqref{eq:FM}, retornando o sinal FM, a frequência instantânea $f_{inst}[n]$, o desvio máximo de frequência $\Delta f$ e o índice de modulação FM $\beta$.
 		
-		\textbf{Dica:} a integral em \eqref{eq:FM} pode ser aproximada numericamente por uma soma acumulada (\texttt{numpy.cumsum}) multiplicada pelo intervalo de amostragem $\Delta t$.
+		\textbf{Dica:} a integral em \eqref{eq:FM} pode ser aproximada numericamente por uma soma cumulativa (\texttt{numpy.cumsum}) multiplicada pelo intervalo de amostragem $\Delta t$.
 		
 		\item Usando as funções acima, gere um sinal modulador de banda limitada e crie os sinais AM e FM correspondentes, com portadora de $f_c = 1000$ Hz e sensibilidade em frequência $k=50$ Hz. Plote, para cada caso, o sinal modulador, o sinal modulado, e (no caso FM) a frequência instantânea.
 		
